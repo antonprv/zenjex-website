@@ -1,9 +1,9 @@
 # Zenjex — Changelog
 
 A standalone changelog site for the [Zenjex](https://github.com/antonprv/zenjex) DI framework.
-Same visual style as in the [portfolio](https://github.com/antonprv/portfolio-website) — shared accent colours, font, noise texture, light/dark theme, RU/EN language switcher.
+Same visual style as [portfolio-website](https://github.com/antonprv/portfolio-website) — shared accent colours, font, noise texture, light/dark theme, RU/EN language switcher.
 
-The site is [currently live](https://antonprv.github.io/zenjex-site).
+The site is [currently live](https://antonprv.github.io/zenjex-changelog/).
 
 ---
 

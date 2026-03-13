@@ -1,0 +1,36 @@
+{
+  "_doc": "Wiki articles index. Each entry defines an article shown in the sidebar.",
+  "articles": [
+    {
+      "id": "home",
+      "titleRu": "Главная",
+      "titleEn": "Home",
+      "icon": "home"
+    },
+    {
+      "id": "quick-start",
+      "titleRu": "Быстрый старт",
+      "titleEn": "Quick Start",
+      "icon": "rocket",
+      "fileRu": "quick-start.md",
+      "fileEn": "quick-start.md",
+      "splitLang": true
+    },
+    {
+      "id": "zenjex-internals",
+      "titleRu": "Zenjex: устройство",
+      "titleEn": "Zenjex Internals",
+      "icon": "layers",
+      "fileRu": "zenjex-internals.ru.md",
+      "fileEn": "zenjex-internals.md"
+    },
+    {
+      "id": "reflex-internals",
+      "titleRu": "Reflex: устройство",
+      "titleEn": "Reflex Internals",
+      "icon": "cpu",
+      "fileRu": "reflex-internals.ru.md",
+      "fileEn": "reflex-internals.md"
+    }
+  ]
+}

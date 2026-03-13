@@ -1,5 +1,5 @@
 {
-  "_doc": "Changelog config. Releases are stored in versioned subfolders under releasesDir.",
+  "_doc": "Changelog + Wiki config.",
 
   "site": {
     "project":    "Zenjex",
@@ -30,5 +30,6 @@
     ]
   },
 
-  "releasesDir": "releases"
+  "releasesDir": "releases",
+  "wikiDir":     "wiki"
 }
