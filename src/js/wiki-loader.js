@@ -29,24 +29,24 @@
   if (cfg.font?.files?.length || cfg.font?.path) injectFont(cfg.font);
   patchMeta(cfg.site);
 
-  /* ── 2. Load wiki index ── */
+  /* Set __cfg immediately so wiki.js waitForCfg unblocks even if wiki/index.json is slow */
   const wikiDir = cfg.wikiDir || 'wiki';
-  let articles = [];
+  cfg.wikiDir  = wikiDir;
+  cfg.articles = [];
+  window.__cfg = cfg;
 
+  /* ── 2. Load wiki index ── */
   try {
     const res = await fetch(`${wikiDir}/index.json`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const idx = await res.json();
-    articles = Array.isArray(idx.articles) ? idx.articles : [];
+    cfg.articles = Array.isArray(idx.articles) ? idx.articles : [];
+    window.__cfg = cfg; /* re-signal with articles populated */
   } catch (err) {
     console.error('[wiki-loader] Failed to load wiki/index.json:', err);
   }
 
-  cfg.wikiDir  = wikiDir;
-  cfg.articles = articles;
-  window.__cfg = cfg;
-
-  renderSidebar(articles);
+  renderSidebar(cfg.articles);
 
 })();
 

@@ -5,13 +5,23 @@
 let _currentArticle = null;
 let _rendering = false;
 
-/* ── Wait for config then render first article ── */
+/* ── Wait for config AND articles, then render first article ── */
+let _waitStart = Date.now();
 (function waitForCfg() {
   const cfg = window.__cfg;
   if (!cfg) { setTimeout(waitForCfg, 30); return; }
 
   const articles = cfg.articles || [];
-  if (!articles.length) return;
+  /* Wait up to 5s for articles to be populated from wiki/index.json */
+  if (!articles.length && Date.now() - _waitStart < 5000) {
+    setTimeout(waitForCfg, 30);
+    return;
+  }
+  if (!articles.length) {
+    document.getElementById('article-content').innerHTML =
+      '<div class="wiki-error">Failed to load wiki/index.json. Check the console for errors.</div>';
+    return;
+  }
 
   syncLangButtons(window.getCurrentLang?.() || 'ru');
 
