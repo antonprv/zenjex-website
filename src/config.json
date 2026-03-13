@@ -1,26 +1,22 @@
 {
   "_doc": "Changelog + Wiki config.",
-
   "site": {
-    "project":    "Zenjex",
-    "descRu":     "Changelog",
-    "descEn":     "Changelog",
-    "repoUrl":    "https://github.com/antonprv/Zenjex",
+    "project": "Zenjex",
+    "descRu": "Changelog",
+    "descEn": "Changelog",
+    "repoUrl": "https://github.com/antonprv/Zenjex",
     "portfolioUrl": "../"
   },
-
   "theme": {
-    "accentDark":  "#4ccbad",
+    "accentDark": "#4ccbad",
     "accentLight": "#4c3eaf"
   },
-
   "noise": {
     "frequency": 0.65,
-    "octaves":   1
+    "octaves": 1
   },
-
   "font": {
-    "family":   "TikTokSans",
+    "family": "TikTokSans",
     "fallback": "system-ui, sans-serif",
     "files": [
       {
@@ -29,7 +25,6 @@
       }
     ]
   },
-
   "releasesDir": "releases",
-  "wikiDir":     "wiki"
+  "docsDir": "docs"
 }

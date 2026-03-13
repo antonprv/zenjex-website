@@ -1,0 +1,5 @@
+{
+  "titleRu": "Внутреннее устройство",
+  "titleEn": "Internals",
+  "pages": ["01-zenjex.json", "02-reflex.json"]
+}

@@ -369,3 +369,78 @@
   .topbar-nav-link span { display: none; }
   .topbar-nav-link { padding: 0.34rem 0.6rem; }
 }
+
+
+/* ════════════════════════════════════════════════════════════
+   marked.js output — style standard HTML elements inside .wiki-body
+   ════════════════════════════════════════════════════════════ */
+
+/* marked wraps code blocks in <pre><code> */
+.wiki-body pre {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  overflow-x: auto;
+  margin: 0.8rem 0 1.2rem;
+}
+.wiki-body pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.8rem;
+  color: var(--text);
+  white-space: pre;
+  display: block;
+  line-height: 1.65;
+  font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', monospace;
+}
+
+/* marked wraps inline code in <code> only */
+.wiki-body :not(pre) > code {
+  font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', monospace;
+  font-size: 0.82em;
+  color: var(--accent2);
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.05em 0.35em;
+  white-space: nowrap;
+}
+
+/* marked generates <blockquote> */
+.wiki-body blockquote {
+  border-left: 3px solid var(--accent);
+  margin: 1rem 0;
+  padding: 0.6rem 1rem;
+  background: color-mix(in srgb, var(--accent) 5%, var(--surface));
+  border-radius: 0 6px 6px 0;
+  color: var(--muted);
+  font-size: 0.83rem;
+}
+.wiki-body blockquote p { margin: 0; color: var(--muted); }
+
+/* marked generates <table> */
+.wiki-body table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.81rem;
+  margin: 0.8rem 0 1.2rem;
+  display: block;
+  overflow-x: auto;
+}
+.wiki-body th {
+  padding: 0.6rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  border: 1px solid var(--border);
+}
+.wiki-body td {
+  padding: 0.5rem 1rem;
+  color: var(--muted);
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+}
+.wiki-body tr:hover td { background: color-mix(in srgb, var(--accent) 4%, transparent); }

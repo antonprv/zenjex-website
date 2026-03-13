@@ -1,0 +1,4 @@
+{
+  "_doc": "Docs root index. Add category folder names here in display order.",
+  "categories": ["getting-started", "internals"]
+}

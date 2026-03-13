@@ -1,0 +1,5 @@
+{
+  "titleRu": "Начало работы",
+  "titleEn": "Getting Started",
+  "pages": ["01-overview.json", "02-quick-start.json", "03-bindings.json", "04-injection.json"]
+}
