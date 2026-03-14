@@ -1,5 +1,7 @@
 /* ============================================================
-   docs.css — Documentation page styles
+   docs.css — Documentation page styles.
+   Uses only CSS variables from variables.css — same system
+   as changelog.css. No hardcoded colours anywhere.
    ============================================================ */
 
 /* ── Page header ── */
@@ -20,33 +22,47 @@
   max-width: 720px;
 }
 
-/* ── Headings ── */
-.doc-heading--2 {
-  font-size: 1.25rem;
+/* ════════════════════════════════════════════════════════════
+   HEADINGS
+   ════════════════════════════════════════════════════════════ */
+.doc-heading--1 {
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--text);
-  margin: 2.4rem 0 0.7rem;
+  margin: 2.4rem 0 0.8rem;
   padding-top: 2rem;
+  border-top: 1px solid var(--border);
+}
+.doc-heading--1:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+
+.doc-heading--2 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 2.2rem 0 0.7rem;
+  padding-top: 1.8rem;
   border-top: 1px solid var(--border);
 }
 .doc-heading--2:first-child { border-top: none; padding-top: 0; margin-top: 0; }
 
 .doc-heading--3 {
-  font-size: 1rem;
+  font-size: 0.97rem;
   font-weight: 700;
   color: var(--text);
-  margin: 1.8rem 0 0.5rem;
+  margin: 1.6rem 0 0.5rem;
 }
 
 .doc-heading--4 {
   font-size: 0.88rem;
   font-weight: 700;
   color: var(--accent2);
-  margin: 1.4rem 0 0.4rem;
+  margin: 1.2rem 0 0.4rem;
   letter-spacing: 0.02em;
 }
 
-/* ── Paragraph ── */
+/* ════════════════════════════════════════════════════════════
+   PARAGRAPH
+   ════════════════════════════════════════════════════════════ */
 .doc-paragraph {
   font-size: 0.88rem;
   line-height: 1.75;
@@ -54,17 +70,22 @@
   margin: 0 0 0.9rem;
 }
 
-/* Inline code */
+/* ════════════════════════════════════════════════════════════
+   INLINE ELEMENTS  (code, bold, links)
+   Same rules as changelog — uses var(--accent2), var(--surface)
+   ════════════════════════════════════════════════════════════ */
 .doc-paragraph code,
 .doc-list-item code,
 .doc-note-text code,
 .doc-table th code,
 .doc-table td code,
+.doc-heading--1 code,
 .doc-heading--2 code,
 .doc-heading--3 code,
 .doc-heading--4 code {
   font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', monospace;
   font-size: 0.82em;
+  font-weight: 500;
   color: var(--accent2);
   background: color-mix(in srgb, var(--accent) 10%, var(--surface));
   border: 1px solid var(--border);
@@ -76,7 +97,13 @@
   line-height: 1.5;
 }
 
-/* Links */
+[data-theme="light"] .doc-paragraph code,
+[data-theme="light"] .doc-list-item code,
+[data-theme="light"] .doc-note-text code,
+[data-theme="light"] .doc-table td code {
+  background: color-mix(in srgb, var(--accent) 10%, var(--card));
+}
+
 .doc-paragraph a,
 .doc-list-item a,
 .doc-note-text a {
@@ -86,9 +113,15 @@
   transition: border-color 0.18s, color 0.18s;
 }
 .doc-paragraph a:hover,
-.doc-list-item a:hover { color: var(--accent2); border-bottom-color: var(--accent2); }
+.doc-list-item a:hover,
+.doc-note-text a:hover {
+  color: var(--accent2);
+  border-bottom-color: var(--accent2);
+}
 
-/* ── Lists ── */
+/* ════════════════════════════════════════════════════════════
+   LIST
+   ════════════════════════════════════════════════════════════ */
 .doc-list {
   list-style: none;
   padding: 0;
@@ -98,66 +131,77 @@
 .doc-list-item {
   display: block;
   position: relative;
-  padding: 0.3rem 1rem 0.3rem 2rem;
+  padding: 0.35rem 1rem 0.35rem 2.2rem;
   font-size: 0.88rem;
   line-height: 1.65;
   color: var(--muted);
   transition: background 0.15s;
 }
 .doc-list-item:hover {
-  background: color-mix(in srgb, var(--accent) 4%, transparent);
-  border-radius: 4px;
+  background: color-mix(in srgb, var(--accent) 5%, transparent);
 }
+
+/* Bullet — accent colour, same as changelog section items */
 .doc-list-item::before {
   content: '';
   position: absolute;
-  left: 0.7rem;
+  left: 0.85rem;
   top: 0.72em;
   width: 5px;
   height: 5px;
   border-radius: 50%;
   background: var(--accent);
-  opacity: 0.6;
+  opacity: 0.7;
+  transition: opacity 0.2s;
 }
+.doc-list-item:hover::before { opacity: 1; }
 
 .doc-list-item-text { display: inline; }
 
+/* Ordered list */
 .doc-list--ordered {
   counter-reset: ol-counter;
 }
 .doc-list--ordered .doc-list-item {
   counter-increment: ol-counter;
+  padding-left: 2.4rem;
 }
 .doc-list--ordered .doc-list-item::before {
   content: counter(ol-counter);
-  background: none;
+  background: transparent;
   border-radius: 0;
   width: auto;
   height: auto;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
   color: var(--accent);
-  top: 0.4em;
-  left: 0.5rem;
   opacity: 1;
+  top: 0.42em;
+  left: 0.6rem;
 }
 
-/* ── Code block ── */
+/* ════════════════════════════════════════════════════════════
+   CODE BLOCK
+   ════════════════════════════════════════════════════════════ */
 .doc-code-wrap {
   position: relative;
   margin: 0.8rem 0 1.2rem;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid var(--border);
-  background: var(--surface);
+  background: var(--card);
   overflow: hidden;
+  transition: border-color 0.22s;
+}
+.doc-code-wrap:hover {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
 }
 
 .doc-code-lang {
   display: block;
-  padding: 0.35rem 1rem;
-  font-size: 0.65rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
+  padding: 0.32rem 1rem;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--accent);
   opacity: 0.7;
@@ -169,6 +213,7 @@
   margin: 0;
   padding: 1rem 1.2rem;
   overflow-x: auto;
+  background: transparent;
 }
 
 .doc-code-wrap pre code {
@@ -184,7 +229,9 @@
   border-radius: 0;
 }
 
-/* ── Note / callout ── */
+/* ════════════════════════════════════════════════════════════
+   NOTE / CALLOUT
+   ════════════════════════════════════════════════════════════ */
 .doc-note {
   display: flex;
   align-items: flex-start;
@@ -193,8 +240,8 @@
   padding: 0.75rem 1rem;
   background: color-mix(in srgb, var(--accent) 6%, var(--surface));
   border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--border));
-  border-radius: 6px;
   border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0;
   font-size: 0.83rem;
   line-height: 1.6;
   color: var(--muted);
@@ -209,12 +256,18 @@
 
 .doc-note-text { flex: 1; }
 
-/* ── Table ── */
+/* ════════════════════════════════════════════════════════════
+   TABLE
+   ════════════════════════════════════════════════════════════ */
 .doc-table-wrap {
   margin: 0.8rem 0 1.2rem;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid var(--border);
   overflow-x: auto;
+  transition: border-color 0.22s;
+}
+.doc-table-wrap:hover {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
 }
 
 .doc-table {
@@ -226,7 +279,7 @@
 .doc-table th {
   padding: 0.6rem 1rem;
   text-align: left;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
@@ -237,15 +290,17 @@
   padding: 0.5rem 1rem;
   color: var(--muted);
   border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 .doc-table tr:last-child td { border-bottom: none; }
 .doc-table tr:hover td {
-  background: color-mix(in srgb, var(--accent) 4%, transparent);
+  background: color-mix(in srgb, var(--accent) 5%, transparent);
 }
 
-/* ── Rule ── */
+/* ════════════════════════════════════════════════════════════
+   RULE
+   ════════════════════════════════════════════════════════════ */
 .doc-rule {
   height: 1px;
   background: var(--border);
@@ -257,145 +312,11 @@
    ════════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
   .doc-body { max-width: 100%; }
-  .doc-heading--2 { font-size: 1.1rem; }
-  .doc-list-item { padding: 0.3rem 0.8rem 0.3rem 1.6rem; }
-  .doc-list-item::before { left: 0.45rem; }
-  .doc-code-wrap pre { padding: 0.8rem 1rem; }
-}
-
-/* ════════════════════════════════════════════════════════════
-   DOCS INDEX PAGE
-   ════════════════════════════════════════════════════════════ */
-.doc-index-main {
-  padding: 3rem 3rem 6rem;
-  max-width: 900px;
-  margin: 0 auto;
-  padding-top: calc(52px + 3rem);
-}
-
-.doc-index-hero {
-  text-align: center;
-  padding-bottom: 3rem;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 3rem;
-}
-
-.doc-index-title {
-  font-size: clamp(2rem, 5vw, 3rem);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  margin-bottom: 0.8rem;
-  color: var(--text);
-}
-.doc-index-title span:first-child { color: var(--accent); }
-
-.doc-index-hero p {
-  color: var(--muted);
-  font-size: 0.95rem;
-}
-
-.doc-index-groups {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
-}
-
-.doc-index-group {}
-
-.doc-index-group-title {
-  font-size: 0.6rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--accent);
-  opacity: 0.7;
-  margin-bottom: 0.8rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--border);
-}
-
-.doc-index-group ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.doc-index-group a {
-  display: block;
-  padding: 0.55rem 0.8rem;
-  border-radius: 6px;
-  font-size: 0.88rem;
-  color: var(--muted);
-  text-decoration: none;
-  transition: background 0.15s, color 0.15s;
-  border: 1px solid transparent;
-}
-.doc-index-group a:hover {
-  background: color-mix(in srgb, var(--accent) 8%, var(--card));
-  border-color: var(--border);
-  color: var(--text);
-}
-
-/* ── Prev / Next navigation ── */
-.doc-page-nav {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-top: 3rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--border);
-}
-
-.doc-nav-link {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  padding: 0.8rem 1.1rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  text-decoration: none;
-  font-size: 0.72rem;
-  color: var(--muted);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  transition: border-color 0.2s, background 0.2s;
-  max-width: 48%;
-}
-.doc-nav-link:hover {
-  border-color: var(--accent);
-  background: var(--glow);
-}
-.doc-nav-link:last-child { margin-left: auto; text-align: right; }
-
-.doc-nav-title {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text);
-  text-transform: none;
-  letter-spacing: 0;
-}
-
-/* Sidebar links (override button style for <a> tags) */
-.version-btn[href] {
-  display: flex;
-  flex-direction: column;
-  text-decoration: none;
-  padding: 0.55rem 1.3rem;
-  width: 100%;
-  text-align: left;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.18s;
-}
-.version-btn[href]:hover { background: var(--glow); }
-
-@media (max-width: 768px) {
-  .doc-index-main { padding: 1.6rem 1.2rem 4rem; padding-top: calc(52px + 1.6rem); }
-  .doc-page-nav { flex-direction: column; }
-  .doc-nav-link { max-width: 100%; }
-  .doc-nav-link:last-child { margin-left: 0; }
+  .doc-heading--2 { font-size: 1.05rem; }
+  .doc-heading--3 { font-size: 0.92rem; }
+  .doc-list-item  { padding: 0.3rem 0.8rem 0.3rem 1.8rem; }
+  .doc-list-item::before { left: 0.55rem; }
+  .doc-code-wrap pre { padding: 0.75rem 0.9rem; }
+  .doc-table th,
+  .doc-table td  { padding: 0.45rem 0.75rem; }
 }
