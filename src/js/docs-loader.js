@@ -1,165 +1,146 @@
 /* ============================================================
-   docs-loader.js — Loads config.json + docs category folders.
-
-   Structure mirrors releases/:
-     docs/
-       index.json              ← { "categories": ["getting-started", "internals"] }
-       getting-started/
-         index.json            ← { "titleRu", "titleEn", "pages": ["01-overview.json", ...] }
-         01-overview.json      ← { "id", "titleRu", "titleEn", "contentEn", "contentRu" }
-         ...
-       internals/
-         index.json
-         01-zenjex.json
-         ...
-
-   To add a new page: create a .json file in the category folder
-   and add its filename to the category's index.json "pages" array.
-   To add a new category: create a folder with index.json and add
-   the folder name to docs/index.json "categories" array.
+   docs-loader.js
+   1. Loads config.json
+   2. Loads docs/index.json -> category index files -> page files
+   3. Populates window.__cfg with all data
+   4. Calls renderSidebar() and renderFirstPage()
    ============================================================ */
 
-(async function bootstrap() {
+(async function () {
 
   /* ── 1. config.json ── */
-  let cfg;
+  var cfg;
   try {
-    const r = await fetch('config.json');
-    if (!r.ok) throw new Error('HTTP ' + r.status);
+    var r = await fetch('config.json');
+    if (!r.ok) throw new Error('config.json HTTP ' + r.status);
     cfg = await r.json();
   } catch (e) {
-    console.error('[docs-loader] config.json failed:', e);
+    console.error('[docs] config failed:', e);
+    var el = document.getElementById('doc-content');
+    if (el) el.innerHTML = '<div class="wiki-error">Could not load config.json: ' + e.message + '</div>';
     return;
   }
 
-  applyAccentColors(cfg.theme);
-  applyNoise(cfg.noise);
-  if (cfg.font?.files?.length || cfg.font?.path) injectFont(cfg.font);
-  patchMeta(cfg.site);
+  applyTheme(cfg);
 
-  /* ── 2. Load all doc categories and their pages ── */
-  const docsDir = cfg.docsDir || 'docs';
-  let docGroups = [];
+  /* ── 2. docs ── */
+  var docsDir = cfg.docsDir || 'docs';
+  var docGroups = [];
 
   try {
-    docGroups = await loadDocGroups(docsDir);
+    var ri = await fetch(docsDir + '/index.json');
+    if (!ri.ok) throw new Error(docsDir + '/index.json HTTP ' + ri.status);
+    var rootIdx = await ri.json();
+    var cats = Array.isArray(rootIdx.categories) ? rootIdx.categories : [];
+
+    for (var ci = 0; ci < cats.length; ci++) {
+      var cat = cats[ci];
+      try {
+        var rc = await fetch(docsDir + '/' + cat + '/index.json');
+        if (!rc.ok) throw new Error(cat + '/index.json HTTP ' + rc.status);
+        var catIdx = await rc.json();
+        var pageFiles = Array.isArray(catIdx.pages) ? catIdx.pages : [];
+        var pages = [];
+
+        for (var pi = 0; pi < pageFiles.length; pi++) {
+          try {
+            var rp = await fetch(docsDir + '/' + cat + '/' + pageFiles[pi]);
+            if (!rp.ok) throw new Error(pageFiles[pi] + ' HTTP ' + rp.status);
+            var page = await rp.json();
+            pages.push(page);
+          } catch (e) {
+            console.warn('[docs] skipped page', pageFiles[pi], e.message);
+          }
+        }
+
+        docGroups.push({
+          folder: cat,
+          titleRu: catIdx.titleRu || cat,
+          titleEn: catIdx.titleEn || cat,
+          pages: pages
+        });
+      } catch (e) {
+        console.warn('[docs] skipped category', cat, e.message);
+      }
+    }
   } catch (e) {
-    console.error('[docs-loader] Failed to load docs:', e);
-    document.getElementById('doc-content').innerHTML =
-      '<div class="wiki-error">Failed to load docs/index.json: ' + e.message + '</div>';
+    console.error('[docs] failed to load docs index:', e);
+    var el2 = document.getElementById('doc-content');
+    if (el2) el2.innerHTML = '<div class="wiki-error">Could not load docs: ' + e.message + '</div>';
+    return;
   }
 
+  /* ── 3. Build flat page map ── */
+  var docPages = {};
+  docGroups.forEach(function (g) {
+    g.pages.forEach(function (p) { docPages[p.id] = p; });
+  });
+
+  /* ── 4. Store on window.__cfg ── */
   cfg.docsDir   = docsDir;
   cfg.docGroups = docGroups;
+  cfg.docPages  = docPages;
+  window.__cfg  = cfg;
 
-  /* Flat page map for quick lookup by id */
-  cfg.docPages = {};
-  docGroups.forEach(g => g.pages.forEach(p => { cfg.docPages[p.id] = p; }));
-
-  window.__cfg = cfg;
-
+  /* ── 5. Render sidebar ── */
   renderSidebar(docGroups);
+
+  /* ── 6. Render first page (from hash or first available) ── */
+  var hashId = decodeURIComponent(location.hash.slice(1));
+  var firstPage = docGroups.length && docGroups[0].pages.length ? docGroups[0].pages[0] : null;
+  var target = (hashId && docPages[hashId]) || firstPage;
+  if (target && typeof renderDocPage === 'function') {
+    renderDocPage(target);
+  }
 
 })();
 
 
-/* ════════════════════════════════════════════════════════════
-   LOADER
-   ════════════════════════════════════════════════════════════ */
-async function loadDocGroups(dir) {
-  const r = await fetch(dir + '/index.json');
-  if (!r.ok) throw new Error(dir + '/index.json HTTP ' + r.status);
-  const root = await r.json();
-  const cats = Array.isArray(root.categories) ? root.categories : [];
-
-  const results = await Promise.allSettled(cats.map(cat => loadCategory(dir, cat)));
-
-  const groups = [];
-  results.forEach((res, i) => {
-    if (res.status === 'fulfilled') groups.push(res.value);
-    else console.warn('[docs-loader] Skipped category', cats[i], res.reason);
-  });
-
-  return groups;
-}
-
-async function loadCategory(dir, folder) {
-  const r = await fetch(dir + '/' + folder + '/index.json');
-  if (!r.ok) throw new Error(folder + '/index.json HTTP ' + r.status);
-  const idx = await r.json();
-
-  const files = Array.isArray(idx.pages) ? idx.pages : [];
-
-  const results = await Promise.allSettled(
-    files.map(async filename => {
-      const pr = await fetch(dir + '/' + folder + '/' + filename);
-      if (!pr.ok) throw new Error(filename + ' HTTP ' + pr.status);
-      return pr.json();
-    })
-  );
-
-  const pages = [];
-  results.forEach((res, i) => {
-    if (res.status === 'fulfilled') pages.push(res.value);
-    else console.warn('[docs-loader] Skipped page', files[i], res.reason);
-  });
-
-  return { folder, titleRu: idx.titleRu, titleEn: idx.titleEn, pages };
-}
-
-
-/* ════════════════════════════════════════════════════════════
-   SIDEBAR
-   ════════════════════════════════════════════════════════════ */
+/* ── Sidebar ── */
 function renderSidebar(groups) {
-  const list = document.getElementById('doc-list');
+  var list = document.getElementById('doc-list');
   if (!list) return;
   list.innerHTML = '';
 
-  const hashId = decodeURIComponent(location.hash.slice(1));
-  let firstPage = true;
+  var hashId = decodeURIComponent(location.hash.slice(1));
+  var firstPage = true;
 
-  groups.forEach(group => {
-    /* Category label */
-    const groupEl = document.createElement('li');
+  groups.forEach(function (group) {
+    var groupEl = document.createElement('li');
     groupEl.className = 'version-group';
 
-    const label = document.createElement('div');
+    var label = document.createElement('div');
     label.className = 'version-group-label';
-    label.innerHTML = `<span class="t" data-ru="${esc(group.titleRu)}" data-en="${esc(group.titleEn)}">${esc(group.titleRu)}</span>`;
+    label.innerHTML = '<span class="t" data-ru="' + esc(group.titleRu) + '" data-en="' + esc(group.titleEn) + '">' + esc(group.titleRu) + '</span>';
     groupEl.appendChild(label);
 
-    /* Pages within category */
-    const subList = document.createElement('ul');
+    var subList = document.createElement('ul');
     subList.className = 'version-sublist';
 
-    group.pages.forEach(page => {
-      const isActive = hashId ? page.id === hashId : firstPage;
+    group.pages.forEach(function (page) {
+      var isActive = hashId ? page.id === hashId : firstPage;
+      firstPage = false;
 
-      const li = document.createElement('li');
+      var li = document.createElement('li');
       li.className = 'version-item doc-page-item' + (isActive ? ' active' : '');
       li.dataset.pageId = page.id;
 
-      const btn = document.createElement('button');
+      var btn = document.createElement('button');
       btn.className = 'version-btn';
-      btn.innerHTML = `
-        <span class="version-btn-tag">
-          <span class="t" data-ru="${esc(page.titleRu)}" data-en="${esc(page.titleEn)}">${esc(page.titleRu)}</span>
-        </span>`;
+      btn.innerHTML = '<span class="version-btn-tag"><span class="t" data-ru="' + esc(page.titleRu) + '" data-en="' + esc(page.titleEn) + '">' + esc(page.titleRu) + '</span></span>';
 
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.doc-page-item').forEach(el => el.classList.remove('active'));
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.doc-page-item').forEach(function (el) { el.classList.remove('active'); });
         li.classList.add('active');
-        const enc = encodeURIComponent(page.id);
+        var enc = encodeURIComponent(page.id);
         if (location.hash !== '#' + enc) history.pushState(null, '', '#' + enc);
         if (typeof renderDocPage === 'function') renderDocPage(page);
-        document.getElementById('sidebar')?.classList.remove('open');
-        document.getElementById('sidebar-backdrop')?.classList.remove('open');
+        document.getElementById('sidebar') && document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebar-backdrop') && document.getElementById('sidebar-backdrop').classList.remove('open');
       });
 
       li.appendChild(btn);
       subList.appendChild(li);
-      firstPage = false;
     });
 
     groupEl.appendChild(subList);
@@ -168,15 +149,14 @@ function renderSidebar(groups) {
 }
 
 
-/* ════════════════════════════════════════════════════════════
-   THEME / NOISE / FONT / META  (identical to config-loader.js)
-   ════════════════════════════════════════════════════════════ */
-function applyAccentColors({ accentDark, accentLight } = {}) {
-  const root = document.documentElement.style;
-  if (accentDark)  root.setProperty('--accent-dark',  accentDark);
-  if (accentLight) root.setProperty('--accent-light', accentLight);
-  const dark  = accentDark  || getComputedStyle(document.documentElement).getPropertyValue('--accent-dark').trim();
-  const light = accentLight || getComputedStyle(document.documentElement).getPropertyValue('--accent-light').trim();
+/* ── Theme/noise/font/meta ── */
+function applyTheme(cfg) {
+  var t = cfg.theme || {};
+  var root = document.documentElement.style;
+  if (t.accentDark)  root.setProperty('--accent-dark',  t.accentDark);
+  if (t.accentLight) root.setProperty('--accent-light', t.accentLight);
+  var dark  = t.accentDark  || getComputedStyle(document.documentElement).getPropertyValue('--accent-dark').trim();
+  var light = t.accentLight || getComputedStyle(document.documentElement).getPropertyValue('--accent-light').trim();
   if (dark) {
     root.setProperty('--border-dark',       rgba(dark,  0.18));
     root.setProperty('--glow-dark',         rgba(dark,  0.12));
@@ -189,33 +169,37 @@ function applyAccentColors({ accentDark, accentLight } = {}) {
     root.setProperty('--gradient-top-light', rgba(light, 0.18));
     root.setProperty('--gradient-bot-light', rgba(light, 0.10));
   }
+
+  var noise = cfg.noise || {};
+  var freq = noise.frequency || 0.65, oct = noise.octaves || 1;
+  var svg = "<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n' color-interpolation-filters='linearRGB'><feTurbulence type='turbulence' baseFrequency='" + freq + "' numOctaves='" + oct + "' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(#n)' opacity='0.06'/></svg>";
+  document.documentElement.style.setProperty('--noise-svg', 'url("data:image/svg+xml,' + encodeURIComponent(svg) + '")');
+
+  var font = cfg.font;
+  if (font && (font.files || font.path)) {
+    var files = Array.isArray(font.files) ? font.files : [{ path: font.path, weight: font.weight, variable: font.variable }];
+    var rules = files.map(function (f) {
+      var isVar = f.variable !== undefined ? Boolean(f.variable) : false;
+      return "@font-face{font-family:'" + font.family + "';src:url('" + f.path + "') format('" + (isVar ? 'woff2-variations' : 'woff2') + "');font-weight:" + (isVar ? '100 900' : (f.weight || 'normal')) + ";font-style:normal;font-display:swap;}";
+    }).join('');
+    var s = document.createElement('style');
+    s.textContent = rules;
+    document.head.appendChild(s);
+    document.body.style.fontFamily = "'" + font.family + "'," + (font.fallback || 'sans-serif');
+  }
+
+  var site = cfg.site || {};
+  var nameEl = document.getElementById('topbar-project');
+  if (nameEl && site.project) nameEl.textContent = site.project;
+  var repoEl = document.getElementById('repo-link');
+  if (repoEl) { if (site.repoUrl) repoEl.href = site.repoUrl; else repoEl.style.display = 'none'; }
+  var backEl = document.getElementById('portfolio-link');
+  if (backEl) { if (site.portfolioUrl) backEl.href = site.portfolioUrl; else backEl.style.display = 'none'; }
 }
+
 function rgba(hex, a) {
-  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
-  return `rgba(${r},${g},${b},${a})`;
-}
-function applyNoise({ frequency=0.65, octaves=1 } = {}) {
-  const svg = `<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n' color-interpolation-filters='linearRGB'><feTurbulence type='turbulence' baseFrequency='${frequency}' numOctaves='${octaves}' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(#n)' opacity='0.06'/></svg>`;
-  document.documentElement.style.setProperty('--noise-svg', `url("data:image/svg+xml,${encodeURIComponent(svg)}")`);
-}
-function injectFont(f) {
-  const files = Array.isArray(f.files) ? f.files : [{ path: f.path, weight: f.weight, variable: f.variable }];
-  const rules = files.map(({ path, weight, variable }) => {
-    const isVar = variable !== undefined ? Boolean(variable) : false;
-    return `@font-face{font-family:'${f.family}';src:url('${path}') format('${isVar ? 'woff2-variations' : 'woff2'}');font-weight:${isVar ? '100 900' : (weight||'normal')};font-style:normal;font-display:swap;}`;
-  }).join('');
-  const s = document.createElement('style');
-  s.textContent = rules;
-  document.head.appendChild(s);
-  document.body.style.fontFamily = `'${f.family}',${f.fallback||'sans-serif'}`;
-}
-function patchMeta(site = {}) {
-  const n = document.getElementById('topbar-project');
-  if (n && site.project) n.textContent = site.project;
-  const repo = document.getElementById('repo-link');
-  if (repo) { site.repoUrl ? (repo.href = site.repoUrl) : (repo.style.display = 'none'); }
-  const back = document.getElementById('portfolio-link');
-  if (back) { site.portfolioUrl ? (back.href = site.portfolioUrl) : (back.style.display = 'none'); }
+  var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
 }
 function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');

@@ -1,85 +1,68 @@
 /* ============================================================
-   docs.js — renders documentation pages using marked.js
-   Content comes from window.__cfg.docPages (no extra fetches)
+   docs.js — defines renderDocPage() and rerenderCurrentLang()
+   These are called by docs-loader.js after data is ready.
    ============================================================ */
 
-(function init() {
-  const cfg = window.__cfg;
-  if (!cfg || !cfg.docGroups) { setTimeout(init, 20); return; }
-  if (!cfg.docGroups.length)  { setTimeout(init, 20); return; }
-  start(cfg);
-})();
+window.addEventListener('popstate', function () {
+  var id = decodeURIComponent(location.hash.slice(1));
+  var cfg = window.__cfg;
+  if (!cfg || !cfg.docPages) return;
+  var page = cfg.docPages[id];
+  if (page) { renderDocPage(page); activateSidebarItem(id); }
+});
 
-function start(cfg) {
-  syncLangButtons(window.getCurrentLang?.() || 'ru');
-
-  window.addEventListener('popstate', () => {
-    const id = decodeURIComponent(location.hash.slice(1));
-    const page = window.__cfg?.docPages?.[id];
-    if (page) { renderDocPage(page); activateSidebarItem(id); }
-  });
-
-  const hashId = decodeURIComponent(location.hash.slice(1));
-  const firstPage = cfg.docGroups[0]?.pages[0];
-  const target = (hashId && cfg.docPages[hashId]) || firstPage;
-  if (target) renderDocPage(target);
-}
-
-
-/* ════════════════════════════════════════════════════════════
-   RENDER
-   ════════════════════════════════════════════════════════════ */
 function renderDocPage(page) {
-  const content = document.getElementById('doc-content');
-  if (!content) return;
+  var content = document.getElementById('doc-content');
+  if (!content) { console.error('[docs] #doc-content not found'); return; }
 
-  const lang = window.getCurrentLang?.() || 'ru';
-  const enc  = encodeURIComponent(page.id);
+  var lang = (window.getCurrentLang && window.getCurrentLang()) || 'ru';
+  var enc  = encodeURIComponent(page.id);
   if (location.hash !== '#' + enc) history.pushState(null, '', '#' + enc);
 
-  const title = lang === 'ru' ? page.titleRu : page.titleEn;
-  document.title = title + ' — ' + (window.__cfg?.site?.project || 'Docs');
+  var title = lang === 'ru' ? page.titleRu : page.titleEn;
+  document.title = title + ' \u2014 ' + (window.__cfg && window.__cfg.site && window.__cfg.site.project || 'Docs');
 
-  const md = (lang === 'ru' ? page.contentRu : page.contentEn) || page.contentEn || page.contentRu || '';
+  var md = '';
+  if (lang === 'ru' && page.contentRu) md = page.contentRu;
+  else if (page.contentEn) md = page.contentEn;
+  else if (page.contentRu) md = page.contentRu;
 
-  if (!md.trim()) {
-    content.innerHTML = '<div class="wiki-error">No content for this page.</div>';
+  if (!md || !md.trim()) {
+    content.innerHTML = '<div class="wiki-error">No content.</div>';
     return;
   }
 
   if (typeof marked === 'undefined') {
-    content.innerHTML = '<div class="wiki-error">marked.js not loaded.</div>';
+    content.innerHTML = '<div class="wiki-error">marked.js not loaded. Check network.</div>';
     return;
   }
 
-  content.innerHTML = '<div class="wiki-body reveal">' + marked.parse(md) + '</div>';
-  content.scrollTo({ top: 0, behavior: 'smooth' });
+  try {
+    var html = marked.parse(md);
+    content.innerHTML = '<div class="wiki-body reveal">' + html + '</div>';
+    content.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (e) {
+    console.error('[docs] marked.parse error:', e);
+    content.innerHTML = '<div class="wiki-error">Parse error: ' + e.message + '</div>';
+  }
 }
 
-/* ── Language switch (called by lang.js) ── */
 function rerenderCurrentLang(lang) {
-  syncLangButtons(lang);
-
   /* Update sidebar labels */
-  document.querySelectorAll('#doc-list .t').forEach(el => {
-    const v = el.getAttribute('data-' + lang);
+  document.querySelectorAll('#doc-list .t').forEach(function (el) {
+    var v = el.getAttribute('data-' + lang);
     if (v !== null) el.textContent = v;
   });
-
   /* Re-render current page */
-  const id   = decodeURIComponent(location.hash.slice(1));
-  const page = window.__cfg?.docPages?.[id];
+  var id = decodeURIComponent(location.hash.slice(1));
+  var cfg = window.__cfg;
+  if (!cfg || !cfg.docPages) return;
+  var page = cfg.docPages[id];
   if (page) renderDocPage(page);
 }
 
-
-/* ── helpers ── */
 function activateSidebarItem(id) {
-  document.querySelectorAll('.doc-page-item').forEach(el => {
+  document.querySelectorAll('.doc-page-item').forEach(function (el) {
     el.classList.toggle('active', el.dataset.pageId === id);
   });
-}
-function syncLangButtons(lang) {
-  document.getElementById('btn-ru')?.classList.toggle('active', lang === 'ru');
-  document.getElementById('btn-en')?.classList.toggle('active', lang === 'en');
 }
