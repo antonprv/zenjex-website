@@ -23,7 +23,7 @@ var _currentPage = null;
 (function waitForCfg() {
   var cfg = window.__cfg;
   if (!cfg || !cfg.docGroups || !cfg.docGroups.length) {
-    requestAnimationFrame(waitForCfg);
+    setTimeout(waitForCfg, 50);
     return;
   }
 
