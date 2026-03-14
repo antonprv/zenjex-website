@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Инъекции — Zenjex</title>
+  <link rel="stylesheet" href="../../css/variables.css"/>
+  <link rel="stylesheet" href="../../css/animations.css"/>
+  <link rel="stylesheet" href="../../css/layout.css"/>
+  <link rel="stylesheet" href="../../css/wiki.css"/>
+  <link rel="stylesheet" href="../../css/docs.css"/>
+</head>
+<body>
+
+<div class="app">
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()" aria-label="Menu">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      </button>
+      <a class="topbar-logo" href="../../index.html">
+        <span class="topbar-logo-name">Zenjex</span>
+      </a>
+      <div class="topbar-sep"></div>
+      <span class="topbar-label t" data-ru="Документация" data-en="Documentation">Документация</span>
+    </div>
+    <div class="topbar-right">
+      <nav class="topbar-nav">
+        <a class="topbar-nav-link" href="../../index.html">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <span class="t" data-ru="Changelog" data-en="Changelog">Changelog</span>
+        </a>
+        <a class="topbar-nav-link topbar-nav-link--active" href="../../docs.html">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+          <span class="t" data-ru="Документация" data-en="Docs">Документация</span>
+        </a>
+      </nav>
+      <a class="repo-link" href="https://github.com/antonprv/Zenjex" target="_blank" rel="noopener">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.1 3.3 9.4 7.9 10.9.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.54-3.88-1.54-.52-1.34-1.28-1.7-1.28-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.2 1.77 1.2 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.55-.29-5.23-1.28-5.23-5.68 0-1.25.45-2.28 1.18-3.08-.12-.29-.51-1.46.11-3.04 0 0 .96-.31 3.15 1.18a10.9 10.9 0 015.74 0C17.3 5.37 18.26 5.68 18.26 5.68c.62 1.58.23 2.75.11 3.04.74.8 1.18 1.83 1.18 3.08 0 4.41-2.69 5.38-5.25 5.67.41.35.78 1.05.78 2.12v3.15c0 .31.21.67.8.56C20.2 21.4 23.5 17.1 23.5 12 23.5 5.65 18.35.5 12 .5z"/></svg>
+        GitHub
+      </a>
+      <div class="lang-switcher" role="group">
+        <button class="lang-btn active" id="btn-ru" onclick="setLang('ru')">RU</button>
+        <button class="lang-btn"        id="btn-en" onclick="setLang('en')">EN</button>
+      </div>
+      <button class="theme-switcher" onclick="toggleTheme()" aria-label="Toggle theme">
+        <svg class="theme-icon sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <svg class="theme-icon moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="main">
+    <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="toggleSidebar()"></div>
+    <nav class="sidebar" id="sidebar">
+      <p class="sidebar-section-label t" data-ru="Разделы" data-en="Sections">Разделы</p>
+      <ul class="version-list" id="doc-list">
+<li class="version-group">
+  <div class="version-group-label"><span class="t" data-ru="Начало работы" data-en="Getting Started">Начало работы</span></div>
+  <ul class="version-sublist">
+    <li class="version-item doc-page-item" data-page-id="overview">
+      <a class="version-btn" href="../../docs/getting-started/overview.html">
+        <span class="version-btn-tag"><span class="t" data-ru="Обзор" data-en="Overview">Обзор</span></span>
+      </a>
+    </li>
+    <li class="version-item doc-page-item" data-page-id="quick-start">
+      <a class="version-btn" href="../../docs/getting-started/quick-start.html">
+        <span class="version-btn-tag"><span class="t" data-ru="Быстрый старт" data-en="Quick Start">Быстрый старт</span></span>
+      </a>
+    </li>
+    <li class="version-item doc-page-item" data-page-id="bindings">
+      <a class="version-btn" href="../../docs/getting-started/bindings.html">
+        <span class="version-btn-tag"><span class="t" data-ru="Биндинги" data-en="Bindings">Биндинги</span></span>
+      </a>
+    </li>
+    <li class="version-item doc-page-item active" data-page-id="injection">
+      <a class="version-btn" href="../../docs/getting-started/injection.html">
+        <span class="version-btn-tag"><span class="t" data-ru="Инъекции" data-en="Injection">Инъекции</span></span>
+      </a>
+    </li>
+  </ul>
+</li>
+<li class="version-group">
+  <div class="version-group-label"><span class="t" data-ru="Внутреннее устройство" data-en="Internals">Внутреннее устройство</span></div>
+  <ul class="version-sublist">
+    <li class="version-item doc-page-item" data-page-id="zenjex-internals">
+      <a class="version-btn" href="../../docs/internals/zenjex-internals.html">
+        <span class="version-btn-tag"><span class="t" data-ru="Zenjex: устройство" data-en="Zenjex Internals">Zenjex: устройство</span></span>
+      </a>
+    </li>
+    <li class="version-item doc-page-item" data-page-id="reflex-internals">
+      <a class="version-btn" href="../../docs/internals/reflex-internals.html">
+        <span class="version-btn-tag"><span class="t" data-ru="Reflex: устройство" data-en="Reflex Internals">Reflex: устройство</span></span>
+      </a>
+    </li>
+  </ul>
+</li>
+</ul>
+    </nav>
+
+    <main class="content wiki-content" id="doc-content">
+
+      <div class="doc-page-header">
+        <h1 class="doc-page-title t" data-ru="Инъекции" data-en="Injection">Инъекции</h1>
+      </div>
+      <div class="release-rule"></div>
+
+      <div class="doc-body" id="doc-body-ru" lang="ru">
+<h3 id="жизненный-цикл" class="doc-heading doc-heading--3">Жизненный цикл</h3>
+<p class="doc-paragraph">При каждом старте <code>ProjectRootInstaller</code> проходит по этим шагам строго в таком порядке:</p>
+<ul class="doc-list">
+<li class="doc-list-item"><span class="doc-list-item-text"><strong><code>InstallBindings(builder)</code></strong> - регистрация всех глобальных сервисов. Выполняется синхронно внутри <code>Awake()</code> с порядком <code>-280</code>.</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><strong><code>OnContainerReady</code></strong> - первый проход инъекций <code>[Zenjex]</code> по всем загруженным сценам. Поскольку это происходит внутри <code>Awake()</code> с порядком <code>-280</code>, все последующие <code>Awake()</code> в сцене уже видят заполненные поля.</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><strong><code>InstallGameInstanceRoutine()</code></strong> - асинхронная настройка: загрузка Addressables, рантайм-биндинги и т.д.</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><strong><code>IInitializable.Initialize()</code></strong> - автоматически вызывается на каждом сервисе, реализующем <code>IInitializable</code> и зарегистрированном под этим интерфейсом. Выполняется после шага 3, до <code>LaunchGame()</code>.</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><strong><code>LaunchGame()</code></strong> - точка входа в игру.</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><strong><code>OnGameLaunched</code></strong> - второй проход инъекций <code>[Zenjex]</code>, покрывающий объекты, зависящие от биндингов, добавленных на шаге 3.</span></li>
+</ul>
+<h3 id="iinitializable" class="doc-heading doc-heading--3">IInitializable</h3>
+<p class="doc-paragraph">Если сервис реализует <code>IInitializable</code>, его <code>Initialize()</code> будет вызван автоматически - после того как контейнер собран и зависимости заинжекчены, но до <code>LaunchGame()</code>. Прямой аналог <code>IInitializable</code> из Zenject.</p>
+<p class="doc-paragraph">Важный момент: чтобы сервис вообще нашёлся, он должен быть зарегистрирован под контрактом <code>IInitializable</code> - то есть через <code>BindInterfaces()</code> или <code>BindInterfacesAndSelf()</code>.</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">using Zenjex.Extensions.Lifecycle;
+
+public class GameStateMachine : IInitializable
+{
+    private readonly StateFactory _stateFactory;
+
+    public GameStateMachine(StateFactory stateFactory) =&gt;
+        _stateFactory = stateFactory;
+
+    public void Initialize() =&gt; Enter&lt;BootstrapState&gt;();
+}
+
+// В инсталлере:
+builder.Bind&lt;GameStateMachine&gt;()
+       .BindInterfacesAndSelf()
+       .AsEagerSingleton();</code></pre></div>
+<p class="doc-paragraph"><code>IInitializable</code> работает и в глобальном контейнере (<code>ProjectRootInstaller</code>), и в контейнере сцены (<code>SceneInstaller</code>). В сцене - сразу после сборки контейнера, до <code>OnInstalled()</code>.</p>
+<h3 id="биндинг-после-инициализации" class="doc-heading doc-heading--3">Биндинг после инициализации</h3>
+<p class="doc-paragraph">Иногда нужно добавить что-то в контейнер уже после его сборки - скажем, конфиг, загруженный в рантайме, или сервис из <code>InstallGameInstanceRoutine</code>. Для этого есть <code>RootContext.Runtime</code>:</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">// Из любого места, после сборки контейнера:
+RootContext.Runtime
+    .Bind&lt;IRuntimeConfig&gt;()
+    .FromInstance(loadedConfig)
+    .AsSingle();</code></pre></div>
+<p class="doc-paragraph"><code>RootContext.Runtime</code> - прямой доступ к живому контейнеру. <code>RootContext.HasInstance</code> - проверить, что контейнер уже существует, прежде чем к нему лезть.</p>
+<h3 id="инъекции-зависимостей" class="doc-heading doc-heading--3">Инъекции зависимостей</h3>
+<p class="doc-paragraph">Три паттерна - выбирайте по ситуации.</p>
+<h4 id="1-прямой-резолв---rootcontextresolvet" class="doc-heading doc-heading--4">1. Прямой резолв - <code>RootContext.Resolve&lt;T&gt;()</code></h4>
+<p class="doc-paragraph">Работает в любом месте после сборки контейнера, без базового класса и без атрибутов.</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">private void Awake()
+{
+    var config = RootContext.Resolve&lt;IGameConfig&gt;();
+    var input  = RootContext.Resolve&lt;IInputService&gt;();
+}</code></pre></div>
+<p class="doc-paragraph">Хорошо подходит для контроллеров и менеджеров, где нужен явный и легко читаемый захват зависимостей.</p>
+<h4 id="2-инъекция-атрибутом-на-обычном-monobehaviour---zenjex" class="doc-heading doc-heading--4">2. Инъекция атрибутом на обычном <code>MonoBehaviour</code> - <code>[Zenjex]</code></h4>
+<p class="doc-paragraph">Пометьте поля, свойства или inject-методы атрибутом <code>[Zenjex]</code>. <strong>Объект должен уже быть в сцене</strong> на момент загрузки загрузочной сцены - инъекция происходит внутри <code>ProjectRootInstaller.Awake()</code>, раньше всех остальных. К тому моменту, как сработает ваш <code>Awake()</code>, поля уже заполнены.</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">using Zenjex.Extensions.Attribute;
+
+public class HUDController : MonoBehaviour
+{
+    [Zenjex] private IPlayerService _player;
+    [Zenjex] private IAudioService _audio;
+
+    private void Awake()
+    {
+        // _player и _audio уже заинжекчены
+        _player.OnHealthChanged += UpdateHealthBar;
+    }
+}</code></pre></div>
+<div class="doc-note"><svg class="doc-note-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span class="doc-note-text">Если объект в <strong>аддитивно загруженной сцене</strong> - инъекция придёт уже после того, как <code>Awake()</code> отработал. Поля будут <code>null</code>. Zenjex залогирует <code>ZNX-LATE</code>. Если нужна гарантированная инъекция до <code>Awake()</code> в динамически загружаемых объектах - используйте паттерн №3.</span></div>
+<h4 id="3-zenjexbehaviour---гарантированная-инъекция-до-awake-включая-рантайм-инстанциированные-объекты" class="doc-heading doc-heading--4">3. <code>ZenjexBehaviour</code> - гарантированная инъекция до <code>Awake()</code>, включая рантайм-инстанциированные объекты</h4>
+<p class="doc-paragraph">Унаследуйтесь от <code>ZenjexBehaviour</code> вместо <code>MonoBehaviour</code>. Базовый класс запускает собственный <code>Awake()</code> с порядком <code>-100</code> - раньше любого пользовательского. Работает в том числе для префабов, созданных через <code>Instantiate()</code> в рантайме.</p>
+<p class="doc-paragraph">Вместо <code>Awake()</code> переопределяйте <code>OnAwake()</code> - к его вызову поля уже заполнены.</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">using Zenjex.Extensions.Attribute;
+using Zenjex.Extensions.Injector;
+
+public class Enemy : ZenjexBehaviour
+{
+    [Zenjex] private IEnemyConfig _config;
+    [Zenjex] private IAudioService _audio;
+
+    protected override void OnAwake()
+    {
+        base.OnAwake(); // всегда вызывайте в первую очередь
+
+        // _config и _audio уже заинжекчены
+        _audio.Play(_config.SpawnSound);
+    }
+}</code></pre></div>
+<h4 id="4-ручная-инъекция---zenjexrunnerinjectgameobject" class="doc-heading doc-heading--4">4. Ручная инъекция - <code>ZenjexRunner.InjectGameObject()</code></h4>
+<p class="doc-paragraph">Для объектов, созданных через <code>Instantiate()</code>, которые не наследуются от <code>ZenjexBehaviour</code>, вызовите <code>InjectGameObject</code> сразу после создания. Метод обходит всю иерархию и инжектит все поля с <code>[Zenjex]</code>.</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">var enemy = Instantiate(enemyPrefab);
+ZenjexRunner.InjectGameObject(enemy);</code></pre></div>
+<div class="doc-note"><svg class="doc-note-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span class="doc-note-text">Нужно только для обычных <code>MonoBehaviour</code>-подклассов. <code>ZenjexBehaviour</code> делает это за себя сам.</span></div>
+<h3 id="порядок-и-гарантии-инъекций" class="doc-heading doc-heading--3">Порядок и гарантии инъекций</h3>
+<div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>Паттерн</th><th>Объект должен быть в сцене при загрузке?</th><th>Поля заполнены в <code>Awake()</code>?</th></tr></thead><tbody><tr><td><code>RootContext.Resolve&lt;T&gt;()</code></td><td>Нет</td><td>Да (контроль на вашей стороне)</td></tr><tr><td><code>[Zenjex]</code> на <code>MonoBehaviour</code> (загрузочная сцена)</td><td>Да</td><td>Да</td></tr><tr><td><code>[Zenjex]</code> на <code>MonoBehaviour</code> (аддитивная сцена)</td><td>Да</td><td><strong>Нет</strong> - предупреждение ZNX-LATE</td></tr><tr><td><code>ZenjexBehaviour</code> + <code>[Zenjex]</code></td><td>Нет</td><td>Да</td></tr><tr><td><code>ZenjexRunner.InjectGameObject()</code></td><td>Нет</td><td>После ручного вызова</td></tr><tr><td><code>SceneInstaller</code> (наследник <code>ZenjexBehaviour</code>)</td><td>Нет</td><td>Да</td></tr></tbody></table></div>
+
+      </div>
+      <div class="doc-body" id="doc-body-en" lang="en" style="display:none">
+<h3 id="lifecycle" class="doc-heading doc-heading--3">Lifecycle</h3>
+<p class="doc-paragraph"><code>ProjectRootInstaller</code> guarantees the following execution order every time the game starts:</p>
+<ul class="doc-list">
+<li class="doc-list-item"><span class="doc-list-item-text"><strong><code>InstallBindings(builder)</code></strong> - register all global services. Runs synchronously inside <code>Awake()</code> at execution order <code>-280</code>.</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><strong><code>OnContainerReady</code></strong> - first <code>[Zenjex]</code> injection pass across all loaded scenes. Because this fires inside <code>Awake()</code> at order <code>-280</code>, all subsequent <code>Awake()</code> calls in the scene already see injected fields.</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><strong><code>InstallGameInstanceRoutine()</code></strong> - async setup: load Addressables, register runtime-only bindings, etc.</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><strong><code>IInitializable.Initialize()</code></strong> - called automatically on every service that implements <code>IInitializable</code> and is registered under that interface. Fires after step 3, before <code>LaunchGame()</code>.</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><strong><code>LaunchGame()</code></strong> - your game&#x27;s entry point.</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><strong><code>OnGameLaunched</code></strong> - second <code>[Zenjex]</code> injection pass, covers objects that depend on bindings added in step 3.</span></li>
+</ul>
+<h3 id="iinitializable" class="doc-heading doc-heading--3">IInitializable</h3>
+<p class="doc-paragraph">Implement <code>IInitializable</code> on any service to receive a guaranteed <code>Initialize()</code> call after the container is fully built and all dependencies are injected - but before <code>LaunchGame()</code> runs. This is a drop-in replacement for Zenject&#x27;s <code>IInitializable</code>.</p>
+<p class="doc-paragraph">To be discovered, the service <strong>must</strong> expose <code>IInitializable</code> as a contract - use <code>BindInterfaces()</code> or <code>BindInterfacesAndSelf()</code> in the installer.</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">using Zenjex.Extensions.Lifecycle;
+
+public class GameStateMachine : IInitializable
+{
+    private readonly StateFactory _stateFactory;
+
+    public GameStateMachine(StateFactory stateFactory) =&gt;
+        _stateFactory = stateFactory;
+
+    public void Initialize() =&gt; Enter&lt;BootstrapState&gt;();
+}
+
+// In installer:
+builder.Bind&lt;GameStateMachine&gt;()
+       .BindInterfacesAndSelf()
+       .AsEagerSingleton();</code></pre></div>
+<p class="doc-paragraph"><code>IInitializable</code> works in both the global container (<code>ProjectRootInstaller</code>) and scene-scoped containers (<code>SceneInstaller</code>). Scene-local initializables are called right after the scene container is built, before <code>OnInstalled()</code>.</p>
+<h3 id="post-initialization-binding" class="doc-heading doc-heading--3">Post-initialization binding</h3>
+<p class="doc-paragraph">Sometimes you need to register something into the container after it&#x27;s already been built - for example, a runtime-loaded config or a service created during <code>InstallGameInstanceRoutine</code>. Use <code>RootContext.Runtime</code> for this:</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">// Anywhere, after the container is built:
+RootContext.Runtime
+    .Bind&lt;IRuntimeConfig&gt;()
+    .FromInstance(loadedConfig)
+    .AsSingle();</code></pre></div>
+<p class="doc-paragraph"><code>RootContext.Runtime</code> gives you direct access to the live container. <code>RootContext.HasInstance</code> lets you safely check whether it exists yet before calling it.</p>
+<h3 id="injecting-dependencies" class="doc-heading doc-heading--3">Injecting dependencies</h3>
+<p class="doc-paragraph">Zenjex supports three injection patterns. Pick the one that fits the situation.</p>
+<h4 id="1-direct-resolve---rootcontextresolvet" class="doc-heading doc-heading--4">1. Direct resolve - <code>RootContext.Resolve&lt;T&gt;()</code></h4>
+<p class="doc-paragraph">Works everywhere, at any time after the container is built. No base class required, no attribute needed. Just call it.</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">private void Awake()
+{
+    var config = RootContext.Resolve&lt;IGameConfig&gt;();
+    var input  = RootContext.Resolve&lt;IInputService&gt;();
+}</code></pre></div>
+<p class="doc-paragraph">Best for: controllers, managers, or any class where you want an explicit, traceable dependency grab.</p>
+<h4 id="2-attribute-injection-on-a-plain-monobehaviour---zenjex" class="doc-heading doc-heading--4">2. Attribute injection on a plain <code>MonoBehaviour</code> - <code>[Zenjex]</code></h4>
+<p class="doc-paragraph">Mark fields, properties, or inject-methods with <code>[Zenjex]</code>. <strong>The object must already be present in the scene</strong> when the bootstrap scene loads. Injection happens during <code>ProjectRootInstaller.Awake()</code>, before any other <code>Awake()</code> in the scene runs - so by the time your <code>Awake()</code> fires, the fields are already populated.</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">using Zenjex.Extensions.Attribute;
+
+public class HUDController : MonoBehaviour
+{
+    [Zenjex] private IPlayerService _player;
+    [Zenjex] private IAudioService _audio;
+
+    private void Awake()
+    {
+        // _player and _audio are already injected here
+        _player.OnHealthChanged += UpdateHealthBar;
+    }
+}</code></pre></div>
+<div class="doc-note"><svg class="doc-note-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span class="doc-note-text">If the object is in an <strong>additively loaded scene</strong>, injection happens after that scene loads - which means it arrives *after* <code>Awake()</code> has already run. In that case, the fields will be null inside <code>Awake()</code>. Zenjex will log a <code>ZNX-LATE</code> warning to make this visible. Use pattern #3 below if you need guaranteed pre-<code>Awake()</code> injection for dynamically loaded objects.</span></div>
+<h4 id="3-zenjexbehaviour---guaranteed-pre-awake-injection-works-for-runtime-instantiated-objects" class="doc-heading doc-heading--4">3. <code>ZenjexBehaviour</code> - guaranteed pre-<code>Awake()</code> injection, works for runtime-instantiated objects</h4>
+<p class="doc-paragraph">Inherit from <code>ZenjexBehaviour</code> instead of <code>MonoBehaviour</code>. This gives the object its own <code>Awake()</code> at execution order <code>-100</code>, which means injection is guaranteed to happen before any user-level <code>Awake()</code> - even for prefabs that are <code>Instantiate()</code>-d at runtime.</p>
+<p class="doc-paragraph">Instead of <code>Awake()</code>, override <code>OnAwake()</code>. The injected fields are already populated when it runs.</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">using Zenjex.Extensions.Attribute;
+using Zenjex.Extensions.Injector;
+
+public class Enemy : ZenjexBehaviour
+{
+    [Zenjex] private IEnemyConfig _config;
+    [Zenjex] private IAudioService _audio;
+
+    protected override void OnAwake()
+    {
+        base.OnAwake(); // always call this first
+
+        // _config and _audio are injected - safe to use
+        _audio.Play(_config.SpawnSound);
+    }
+}</code></pre></div>
+<h4 id="4-manual-injection---zenjexrunnerinjectgameobject" class="doc-heading doc-heading--4">4. Manual injection - <code>ZenjexRunner.InjectGameObject()</code></h4>
+<p class="doc-paragraph">For objects created at runtime via <code>Instantiate()</code> that do not inherit from <code>ZenjexBehaviour</code>, call <code>InjectGameObject</code> immediately after instantiation. It walks the full hierarchy and injects all <code>[Zenjex]</code>-marked members.</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">var enemy = Instantiate(enemyPrefab);
+ZenjexRunner.InjectGameObject(enemy);</code></pre></div>
+<div class="doc-note"><svg class="doc-note-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span class="doc-note-text">This is only needed for plain <code>MonoBehaviour</code> subclasses. <code>ZenjexBehaviour</code> handles itself automatically.</span></div>
+<h3 id="injection-timing-summary" class="doc-heading doc-heading--3">Injection timing summary</h3>
+<div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>Pattern</th><th>Object must be in scene at load?</th><th>Fields ready in <code>Awake()</code>?</th></tr></thead><tbody><tr><td><code>RootContext.Resolve&lt;T&gt;()</code></td><td>No</td><td>Yes (you control it)</td></tr><tr><td><code>[Zenjex]</code> on <code>MonoBehaviour</code> (bootstrap scene)</td><td>Yes</td><td>Yes</td></tr><tr><td><code>[Zenjex]</code> on <code>MonoBehaviour</code> (additive scene)</td><td>Yes</td><td><strong>No</strong> - ZNX-LATE warning</td></tr><tr><td><code>ZenjexBehaviour</code> + <code>[Zenjex]</code></td><td>No</td><td>Yes</td></tr><tr><td><code>ZenjexRunner.InjectGameObject()</code></td><td>No</td><td>After manual call</td></tr><tr><td><code>SceneInstaller</code> (inherits <code>ZenjexBehaviour</code>)</td><td>No</td><td>Yes</td></tr></tbody></table></div>
+
+      </div>
+
+      <div class="doc-page-nav"><a href="../../docs/getting-started/bindings.html" class="doc-nav-link">
+          <span class="t" data-ru="← Назад" data-en="← Previous">← Назад</span>
+          <span class="doc-nav-title t" data-ru="Биндинги" data-en="Bindings">Биндинги</span>
+        </a><a href="../../docs/internals/zenjex-internals.html" class="doc-nav-link">
+          <span class="t" data-ru="Далее →" data-en="Next →">Далее →</span>
+          <span class="doc-nav-title t" data-ru="Zenjex: устройство" data-en="Zenjex Internals">Zenjex: устройство</span>
+        </a></div>
+
+    </main>
+  </div>
+
+  <footer>
+    <span class="t" data-ru="© 2026 Zenjex — документация" data-en="© 2026 Zenjex — documentation">© 2026 Zenjex — документация</span>
+  </footer>
+
+</div>
+
+<script src="../../js/theme.js"></script>
+<script src="../../js/lang.js"></script>
+<script src="../../js/scroll.js"></script>
+<script>
+  // Sidebar toggle
+  function toggleSidebar() {
+    var s = document.getElementById('sidebar');
+    var b = document.getElementById('sidebar-backdrop');
+    var t = document.getElementById('sidebar-toggle');
+    var open = s.classList.toggle('open');
+    b.classList.toggle('open', open);
+    t.classList.toggle('open', open);
+  }
+
+  // Language switch: show/hide ru/en body blocks
+  var _origSetLang = window.setLang;
+  window.setLang = function(lang) {
+    if (_origSetLang) _origSetLang(lang);
+    var ru = document.getElementById('doc-body-ru');
+    var en = document.getElementById('doc-body-en');
+    if (ru) ru.style.display = lang === 'ru' ? '' : 'none';
+    if (en) en.style.display = lang === 'en' ? '' : 'none';
+  };
+
+  // Apply saved lang on load
+  (function() {
+    var lang = localStorage.getItem('cl-lang') || 'ru';
+    var ru = document.getElementById('doc-body-ru');
+    var en = document.getElementById('doc-body-en');
+    if (ru) ru.style.display = lang === 'ru' ? '' : 'none';
+    if (en) en.style.display = lang === 'en' ? '' : 'none';
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Биндинги — Zenjex</title>
+  <link rel="stylesheet" href="../../css/variables.css"/>
+  <link rel="stylesheet" href="../../css/animations.css"/>
+  <link rel="stylesheet" href="../../css/layout.css"/>
+  <link rel="stylesheet" href="../../css/wiki.css"/>
+  <link rel="stylesheet" href="../../css/docs.css"/>
+</head>
+<body>
+
+<div class="app">
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()" aria-label="Menu">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      </button>
+      <a class="topbar-logo" href="../../index.html">
+        <span class="topbar-logo-name">Zenjex</span>
+      </a>
+      <div class="topbar-sep"></div>
+      <span class="topbar-label t" data-ru="Документация" data-en="Documentation">Документация</span>
+    </div>
+    <div class="topbar-right">
+      <nav class="topbar-nav">
+        <a class="topbar-nav-link" href="../../index.html">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <span class="t" data-ru="Changelog" data-en="Changelog">Changelog</span>
+        </a>
+        <a class="topbar-nav-link topbar-nav-link--active" href="../../docs.html">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+          <span class="t" data-ru="Документация" data-en="Docs">Документация</span>
+        </a>
+      </nav>
+      <a class="repo-link" href="https://github.com/antonprv/Zenjex" target="_blank" rel="noopener">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.1 3.3 9.4 7.9 10.9.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.54-3.88-1.54-.52-1.34-1.28-1.7-1.28-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.2 1.77 1.2 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.55-.29-5.23-1.28-5.23-5.68 0-1.25.45-2.28 1.18-3.08-.12-.29-.51-1.46.11-3.04 0 0 .96-.31 3.15 1.18a10.9 10.9 0 015.74 0C17.3 5.37 18.26 5.68 18.26 5.68c.62 1.58.23 2.75.11 3.04.74.8 1.18 1.83 1.18 3.08 0 4.41-2.69 5.38-5.25 5.67.41.35.78 1.05.78 2.12v3.15c0 .31.21.67.8.56C20.2 21.4 23.5 17.1 23.5 12 23.5 5.65 18.35.5 12 .5z"/></svg>
+        GitHub
+      </a>
+      <div class="lang-switcher" role="group">
+        <button class="lang-btn active" id="btn-ru" onclick="setLang('ru')">RU</button>
+        <button class="lang-btn"        id="btn-en" onclick="setLang('en')">EN</button>
+      </div>
+      <button class="theme-switcher" onclick="toggleTheme()" aria-label="Toggle theme">
+        <svg class="theme-icon sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <svg class="theme-icon moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="main">
+    <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="toggleSidebar()"></div>
+    <nav class="sidebar" id="sidebar">
+      <p class="sidebar-section-label t" data-ru="Разделы" data-en="Sections">Разделы</p>
+      <ul class="version-list" id="doc-list">
+<li class="version-group">
+  <div class="version-group-label"><span class="t" data-ru="Начало работы" data-en="Getting Started">Начало работы</span></div>
+  <ul class="version-sublist">
+    <li class="version-item doc-page-item" data-page-id="overview">
+      <a class="version-btn" href="../../docs/getting-started/overview.html">
+        <span class="version-btn-tag"><span class="t" data-ru="Обзор" data-en="Overview">Обзор</span></span>
+      </a>
+    </li>
+    <li class="version-item doc-page-item" data-page-id="quick-start">
+      <a class="version-btn" href="../../docs/getting-started/quick-start.html">
+        <span class="version-btn-tag"><span class="t" data-ru="Быстрый старт" data-en="Quick Start">Быстрый старт</span></span>
+      </a>
+    </li>
+    <li class="version-item doc-page-item active" data-page-id="bindings">
+      <a class="version-btn" href="../../docs/getting-started/bindings.html">
+        <span class="version-btn-tag"><span class="t" data-ru="Биндинги" data-en="Bindings">Биндинги</span></span>
+      </a>
+    </li>
+    <li class="version-item doc-page-item" data-page-id="injection">
+      <a class="version-btn" href="../../docs/getting-started/injection.html">
+        <span class="version-btn-tag"><span class="t" data-ru="Инъекции" data-en="Injection">Инъекции</span></span>
+      </a>
+    </li>
+  </ul>
+</li>
+<li class="version-group">
+  <div class="version-group-label"><span class="t" data-ru="Внутреннее устройство" data-en="Internals">Внутреннее устройство</span></div>
+  <ul class="version-sublist">
+    <li class="version-item doc-page-item" data-page-id="zenjex-internals">
+      <a class="version-btn" href="../../docs/internals/zenjex-internals.html">
+        <span class="version-btn-tag"><span class="t" data-ru="Zenjex: устройство" data-en="Zenjex Internals">Zenjex: устройство</span></span>
+      </a>
+    </li>
+    <li class="version-item doc-page-item" data-page-id="reflex-internals">
+      <a class="version-btn" href="../../docs/internals/reflex-internals.html">
+        <span class="version-btn-tag"><span class="t" data-ru="Reflex: устройство" data-en="Reflex Internals">Reflex: устройство</span></span>
+      </a>
+    </li>
+  </ul>
+</li>
+</ul>
+    </nav>
+
+    <main class="content wiki-content" id="doc-content">
+
+      <div class="doc-page-header">
+        <h1 class="doc-page-title t" data-ru="Биндинги" data-en="Bindings">Биндинги</h1>
+      </div>
+      <div class="release-rule"></div>
+
+      <div class="doc-body" id="doc-body-ru" lang="ru">
+<h4 id="шаг-4---зарегистрируйте-зависимости-в-installbindings" class="doc-heading doc-heading--4">Шаг 4 - Зарегистрируйте зависимости в <code>InstallBindings</code></h4>
+<p class="doc-paragraph">Fluent API в стиле Zenject - синтаксис тот же, что раньше.</p>
+<p class="doc-paragraph"><strong>Базовые биндинги</strong></p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">public override void InstallBindings(ContainerBuilder builder)
+{
+    // Интерфейс к реализации, ленивый синглтон
+    builder.Bind&lt;IInputService&gt;().To&lt;InputService&gt;().AsSingle();
+
+    // Конкретный тип напрямую
+    builder.Bind&lt;AnalyticsManager&gt;().AsSingle();
+
+    // Готовый экземпляр (всегда регистрируется как синглтон)
+    builder.Bind&lt;IConfig&gt;().FromInstance(myConfigAsset).AsSingle();
+
+    // Сокращённая запись для того же самого
+    builder.BindInstance(myConfigAsset).AsSingle();
+
+    // Зарегистрировать под всеми интерфейсами и под самим типом
+    builder.Bind&lt;PlayerController&gt;().BindInterfacesAndSelf().AsSingle();
+
+    // Только под интерфейсами, без конкретного типа
+    builder.Bind&lt;AudioService&gt;().BindInterfaces().AsSingle();
+
+    // Transient - новый экземпляр на каждый резолв
+    builder.Bind&lt;IEnemyFactory&gt;().To&lt;EnemyFactory&gt;().AsTransient();
+
+    // Eager singleton - создаётся сразу при сборке контейнера
+    // В Zenject: .AsSingle().NonLazy()  -&gt;  в Zenjex: .NonLazy()
+    builder.Bind&lt;IGameStateMachine&gt;().To&lt;GameStateMachine&gt;().BindInterfacesAndSelf().NonLazy();
+}</code></pre></div>
+<p class="doc-paragraph"><strong>Биндинги на основе префаба</strong></p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">// Инстанциировать префаб при первом резолве и достать из него компонент.
+// Всегда singleton + lazy - префаб спавнится один раз, при первом обращении.
+builder.Bind&lt;ICurtainService&gt;()
+       .To&lt;CurtainService&gt;()
+       .FromComponentInNewPrefab(curtainPrefab)
+       .WithGameObjectName(&quot;Curtain&quot;)         // переименовывает корневой GameObject
+       .UnderTransformGroup(&quot;Infrastructure&quot;) // помещает под именованную группу в корне сцены
+       .BindInterfacesAndSelf()
+       .NonLazy();
+
+// Или разместить под конкретным Transform вместо именованной группы:
+builder.Bind&lt;IHUDService&gt;()
+       .To&lt;HUDService&gt;()
+       .FromComponentInNewPrefab(hudPrefab)
+       .UnderTransform(uiRootTransform)
+       .AsSingle();
+
+// Найти существующий компонент в иерархии сцены:
+builder.Bind&lt;IPlayerCamera&gt;()
+       .To&lt;PlayerCamera&gt;()
+       .FromComponentInHierarchy()  // includeInactive: true по умолчанию
+       .AsSingle();</code></pre></div>
+<p class="doc-paragraph"><strong>Аргументы конструктора</strong></p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">// Смешать рантайм-объекты с сервисами из контейнера.
+// Переданные значения сопоставляются с параметрами конструктора по типу.
+// Остальные параметры резолвятся из контейнера как обычно.
+var playerInput = Instantiate(playerInputPrefab).GetComponent&lt;PlayerInput&gt;();
+
+builder.Bind&lt;IInputService&gt;()
+       .To&lt;InputService&gt;()
+       .WithArguments(playerInput, cinemachineInputProvider)
+       .AsSingle();
+
+// Конструктор InputService:
+// public InputService(PlayerInput pi, CinemachineInputProvider cip, ILoggingService log)
+// pi, cip &lt;- WithArguments  |  log &lt;- контейнер</code></pre></div>
+<p class="doc-paragraph"><strong>Scoped-биндинги</strong></p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">// Scoped: новый экземпляр в каждом дочернем контейнере SceneInstaller&#x27;а.
+// Scoped-объект получает в конструкторе как глобальные, так и локальные зависимости.
+builder.Bind&lt;LevelProgressServiceResolver&gt;()
+       .BindInterfacesAndSelf()
+       .CopyIntoDirectSubContainers()
+       .NonLazy();
+
+// Эквивалентная сокращённая запись:
+builder.Bind&lt;LevelProgressServiceResolver&gt;()
+       .BindInterfacesAndSelf()
+       .AsScoped();</code></pre></div>
+
+      </div>
+      <div class="doc-body" id="doc-body-en" lang="en" style="display:none">
+<h4 id="step-4---bind-your-dependencies-inside-installbindings" class="doc-heading doc-heading--4">Step 4 - Bind your dependencies inside <code>InstallBindings</code></h4>
+<p class="doc-paragraph">Use the Zenject-style fluent API to register everything the container needs.</p>
+<p class="doc-paragraph"><strong>Basic bindings</strong></p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">public override void InstallBindings(ContainerBuilder builder)
+{
+    // Bind interface to implementation, lazy singleton
+    builder.Bind&lt;IInputService&gt;().To&lt;InputService&gt;().AsSingle();
+
+    // Bind concrete type directly
+    builder.Bind&lt;AnalyticsManager&gt;().AsSingle();
+
+    // Bind a pre-existing instance (always registers as singleton)
+    builder.Bind&lt;IConfig&gt;().FromInstance(myConfigAsset).AsSingle();
+
+    // Shorthand for the above - identical result
+    builder.BindInstance(myConfigAsset).AsSingle();
+
+    // Bind to all implemented interfaces at once
+    builder.Bind&lt;PlayerController&gt;().BindInterfacesAndSelf().AsSingle();
+
+    // Bind to interfaces only (without the concrete type)
+    builder.Bind&lt;AudioService&gt;().BindInterfaces().AsSingle();
+
+    // Transient - new instance on every resolve
+    builder.Bind&lt;IEnemyFactory&gt;().To&lt;EnemyFactory&gt;().AsTransient();
+
+    // Eager singleton - created immediately when the container is built
+    // Zenject: .AsSingle().NonLazy()  -&gt;  Zenjex: .NonLazy()
+    builder.Bind&lt;IGameStateMachine&gt;().To&lt;GameStateMachine&gt;().BindInterfacesAndSelf().NonLazy();
+}</code></pre></div>
+<p class="doc-paragraph"><strong>Prefab-based bindings</strong></p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">// Instantiate a prefab at resolve-time and extract a component from it.
+// Always singleton + lazy - prefab is spawned once, on first resolve.
+builder.Bind&lt;ICurtainService&gt;()
+       .To&lt;CurtainService&gt;()
+       .FromComponentInNewPrefab(curtainPrefab)
+       .WithGameObjectName(&quot;Curtain&quot;)         // renames the root GameObject
+       .UnderTransformGroup(&quot;Infrastructure&quot;) // places it under a named group at scene root
+       .BindInterfacesAndSelf()
+       .NonLazy();
+
+// Or place under a specific Transform instead of a named group:
+builder.Bind&lt;IHUDService&gt;()
+       .To&lt;HUDService&gt;()
+       .FromComponentInNewPrefab(hudPrefab)
+       .UnderTransform(uiRootTransform)
+       .AsSingle();
+
+// Find an existing component in the scene hierarchy:
+builder.Bind&lt;IPlayerCamera&gt;()
+       .To&lt;PlayerCamera&gt;()
+       .FromComponentInHierarchy()  // includeInactive: true by default
+       .AsSingle();</code></pre></div>
+<p class="doc-paragraph"><strong>Constructor arguments</strong></p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">// Mix runtime-created objects with container-managed services.
+// Provided values are matched to constructor parameters by type.
+// Unmatched parameters are resolved from the container as usual.
+var playerInput = Instantiate(playerInputPrefab).GetComponent&lt;PlayerInput&gt;();
+
+builder.Bind&lt;IInputService&gt;()
+       .To&lt;InputService&gt;()
+       .WithArguments(playerInput, cinemachineInputProvider)
+       .AsSingle();
+
+// InputService constructor:
+// public InputService(PlayerInput pi, CinemachineInputProvider cip, ILoggingService log)
+// pi, cip &lt;- WithArguments  |  log &lt;- container</code></pre></div>
+<p class="doc-paragraph"><strong>Scoped bindings</strong></p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">// Scoped: fresh instance per SceneInstaller sub-container.
+// The scoped object gets both global and scene-local dependencies in its constructor.
+builder.Bind&lt;LevelProgressServiceResolver&gt;()
+       .BindInterfacesAndSelf()
+       .CopyIntoDirectSubContainers()
+       .NonLazy();
+
+// Equivalent shorthand terminator:
+builder.Bind&lt;LevelProgressServiceResolver&gt;()
+       .BindInterfacesAndSelf()
+       .AsScoped();</code></pre></div>
+
+      </div>
+
+      <div class="doc-page-nav"><a href="../../docs/getting-started/quick-start.html" class="doc-nav-link">
+          <span class="t" data-ru="← Назад" data-en="← Previous">← Назад</span>
+          <span class="doc-nav-title t" data-ru="Быстрый старт" data-en="Quick Start">Быстрый старт</span>
+        </a><a href="../../docs/getting-started/injection.html" class="doc-nav-link">
+          <span class="t" data-ru="Далее →" data-en="Next →">Далее →</span>
+          <span class="doc-nav-title t" data-ru="Инъекции" data-en="Injection">Инъекции</span>
+        </a></div>
+
+    </main>
+  </div>
+
+  <footer>
+    <span class="t" data-ru="© 2026 Zenjex — документация" data-en="© 2026 Zenjex — documentation">© 2026 Zenjex — документация</span>
+  </footer>
+
+</div>
+
+<script src="../../js/theme.js"></script>
+<script src="../../js/lang.js"></script>
+<script src="../../js/scroll.js"></script>
+<script>
+  // Sidebar toggle
+  function toggleSidebar() {
+    var s = document.getElementById('sidebar');
+    var b = document.getElementById('sidebar-backdrop');
+    var t = document.getElementById('sidebar-toggle');
+    var open = s.classList.toggle('open');
+    b.classList.toggle('open', open);
+    t.classList.toggle('open', open);
+  }
+
+  // Language switch: show/hide ru/en body blocks
+  var _origSetLang = window.setLang;
+  window.setLang = function(lang) {
+    if (_origSetLang) _origSetLang(lang);
+    var ru = document.getElementById('doc-body-ru');
+    var en = document.getElementById('doc-body-en');
+    if (ru) ru.style.display = lang === 'ru' ? '' : 'none';
+    if (en) en.style.display = lang === 'en' ? '' : 'none';
+  };
+
+  // Apply saved lang on load
+  (function() {
+    var lang = localStorage.getItem('cl-lang') || 'ru';
+    var ru = document.getElementById('doc-body-ru');
+    var en = document.getElementById('doc-body-en');
+    if (ru) ru.style.display = lang === 'ru' ? '' : 'none';
+    if (en) en.style.display = lang === 'en' ? '' : 'none';
+  })();
+</script>
+
+</body>
+</html>

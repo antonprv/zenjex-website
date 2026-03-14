@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Zenjex: устройство — Zenjex</title>
+  <link rel="stylesheet" href="../../css/variables.css"/>
+  <link rel="stylesheet" href="../../css/animations.css"/>
+  <link rel="stylesheet" href="../../css/layout.css"/>
+  <link rel="stylesheet" href="../../css/wiki.css"/>
+  <link rel="stylesheet" href="../../css/docs.css"/>
+</head>
+<body>
+
+<div class="app">
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()" aria-label="Menu">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      </button>
+      <a class="topbar-logo" href="../../index.html">
+        <span class="topbar-logo-name">Zenjex</span>
+      </a>
+      <div class="topbar-sep"></div>
+      <span class="topbar-label t" data-ru="Документация" data-en="Documentation">Документация</span>
+    </div>
+    <div class="topbar-right">
+      <nav class="topbar-nav">
+        <a class="topbar-nav-link" href="../../index.html">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <span class="t" data-ru="Changelog" data-en="Changelog">Changelog</span>
+        </a>
+        <a class="topbar-nav-link topbar-nav-link--active" href="../../docs.html">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+          <span class="t" data-ru="Документация" data-en="Docs">Документация</span>
+        </a>
+      </nav>
+      <a class="repo-link" href="https://github.com/antonprv/Zenjex" target="_blank" rel="noopener">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.1 3.3 9.4 7.9 10.9.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.54-3.88-1.54-.52-1.34-1.28-1.7-1.28-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.2 1.77 1.2 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.55-.29-5.23-1.28-5.23-5.68 0-1.25.45-2.28 1.18-3.08-.12-.29-.51-1.46.11-3.04 0 0 .96-.31 3.15 1.18a10.9 10.9 0 015.74 0C17.3 5.37 18.26 5.68 18.26 5.68c.62 1.58.23 2.75.11 3.04.74.8 1.18 1.83 1.18 3.08 0 4.41-2.69 5.38-5.25 5.67.41.35.78 1.05.78 2.12v3.15c0 .31.21.67.8.56C20.2 21.4 23.5 17.1 23.5 12 23.5 5.65 18.35.5 12 .5z"/></svg>
+        GitHub
+      </a>
+      <div class="lang-switcher" role="group">
+        <button class="lang-btn active" id="btn-ru" onclick="setLang('ru')">RU</button>
+        <button class="lang-btn"        id="btn-en" onclick="setLang('en')">EN</button>
+      </div>
+      <button class="theme-switcher" onclick="toggleTheme()" aria-label="Toggle theme">
+        <svg class="theme-icon sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <svg class="theme-icon moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="main">
+    <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="toggleSidebar()"></div>
+    <nav class="sidebar" id="sidebar">
+      <p class="sidebar-section-label t" data-ru="Разделы" data-en="Sections">Разделы</p>
+      <ul class="version-list" id="doc-list">
+<li class="version-group">
+  <div class="version-group-label"><span class="t" data-ru="Начало работы" data-en="Getting Started">Начало работы</span></div>
+  <ul class="version-sublist">
+    <li class="version-item doc-page-item" data-page-id="overview">
+      <a class="version-btn" href="../../docs/getting-started/overview.html">
+        <span class="version-btn-tag"><span class="t" data-ru="Обзор" data-en="Overview">Обзор</span></span>
+      </a>
+    </li>
+    <li class="version-item doc-page-item" data-page-id="quick-start">
+      <a class="version-btn" href="../../docs/getting-started/quick-start.html">
+        <span class="version-btn-tag"><span class="t" data-ru="Быстрый старт" data-en="Quick Start">Быстрый старт</span></span>
+      </a>
+    </li>
+    <li class="version-item doc-page-item" data-page-id="bindings">
+      <a class="version-btn" href="../../docs/getting-started/bindings.html">
+        <span class="version-btn-tag"><span class="t" data-ru="Биндинги" data-en="Bindings">Биндинги</span></span>
+      </a>
+    </li>
+    <li class="version-item doc-page-item" data-page-id="injection">
+      <a class="version-btn" href="../../docs/getting-started/injection.html">
+        <span class="version-btn-tag"><span class="t" data-ru="Инъекции" data-en="Injection">Инъекции</span></span>
+      </a>
+    </li>
+  </ul>
+</li>
+<li class="version-group">
+  <div class="version-group-label"><span class="t" data-ru="Внутреннее устройство" data-en="Internals">Внутреннее устройство</span></div>
+  <ul class="version-sublist">
+    <li class="version-item doc-page-item active" data-page-id="zenjex-internals">
+      <a class="version-btn" href="../../docs/internals/zenjex-internals.html">
+        <span class="version-btn-tag"><span class="t" data-ru="Zenjex: устройство" data-en="Zenjex Internals">Zenjex: устройство</span></span>
+      </a>
+    </li>
+    <li class="version-item doc-page-item" data-page-id="reflex-internals">
+      <a class="version-btn" href="../../docs/internals/reflex-internals.html">
+        <span class="version-btn-tag"><span class="t" data-ru="Reflex: устройство" data-en="Reflex Internals">Reflex: устройство</span></span>
+      </a>
+    </li>
+  </ul>
+</li>
+</ul>
+    </nav>
+
+    <main class="content wiki-content" id="doc-content">
+
+      <div class="doc-page-header">
+        <h1 class="doc-page-title t" data-ru="Zenjex: устройство" data-en="Zenjex Internals">Zenjex: устройство</h1>
+      </div>
+      <div class="release-rule"></div>
+
+      <div class="doc-body" id="doc-body-ru" lang="ru">
+<h2 id="zenjex-внутреннее-устройство" class="doc-heading doc-heading--2">Zenjex: внутреннее устройство</h2>
+<h2 id="содержание" class="doc-heading doc-heading--2">Содержание</h2>
+<ul class="doc-list">
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#projectrootinstaller">ProjectRootInstaller</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#rootcontext">RootContext</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#bindingbuilder">BindingBuilder</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#containerbindingbuilder">ContainerBindingBuilder</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#iinitializable">IInitializable</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#zenjexinjector">ZenjexInjector</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#zenjexrunner">ZenjexRunner</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#zenjexbehaviour">ZenjexBehaviour</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#sceneinstaller">SceneInstaller</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#zenjexscenecontext">ZenjexSceneContext</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#хронология-выполнения">Хронология выполнения</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#сводная-таблица-проходов-инъекции">Сводная таблица проходов инъекции</a></span></li>
+</ul>
+<h2 id="projectrootinstaller" class="doc-heading doc-heading--2">ProjectRootInstaller</h2>
+<p class="doc-paragraph"><code>ProjectRootInstaller</code> - абстрактный <code>MonoBehaviour</code>, реализующий <code>IInstaller</code>. Это обязательная точка входа для всего слоя Zenjex. Запускается при <code>[DefaultExecutionOrder(-280)]</code>.</p>
+<p class="doc-paragraph">Нужно реализовать три абстрактных метода:</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">InstallBindings(ContainerBuilder)   - синхронный, заполняет глобальный контейнер
+InstallGameInstanceRoutine()        - опциональная корутина, запускается после сборки контейнера
+LaunchGame()                        - вызывается после инициализации IInitializable-сервисов</code></pre></div>
+<p class="doc-paragraph">Порядок выполнения внутри <code>Awake</code>:</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">ProjectRootInstaller.Awake()
+  ├─ new ContainerBuilder()
+  ├─ InstallBindings(builder)          &lt;- пользовательский код
+  ├─ RootContainer = builder.Build()
+  ├─ OnContainerReady?.Invoke()        &lt;- здесь срабатывает Pass 1 ZenjexRunner
+  └─ StartCoroutine(LateInitRoutine)
+       ├─ yield return InstallGameInstanceRoutine()  &lt;- опциональная асинхронная работа
+       ├─ CallInitializables(RootContainer)          &lt;- IInitializable.Initialize() для каждого зарегистрированного сервиса
+       ├─ LaunchGame()                               &lt;- пользовательский код
+       └─ OnGameLaunched?.Invoke()     &lt;- здесь срабатывает Pass 2 ZenjexRunner</code></pre></div>
+<p class="doc-paragraph"><code>RootContainer</code> хранится как статическое свойство <code>ProjectRootInstaller</code>. Повторный вызов <code>Awake()</code> защищён guard-проверкой - актуально при отключённом Reload Domain.</p>
+<p class="doc-paragraph"><code>OnContainerReady</code> и <code>OnGameLaunched</code> - две точки синхронизации, через которые <code>ZenjexRunner</code> управляет проходами инъекции.</p>
+<p class="doc-paragraph">На практике биндинги обычно разносятся по нескольким дочерним <code>MonoInstaller</code>-компонентам:</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">public class AppInstaller : ProjectRootInstaller
+{
+    [SerializeField] private InfrastructureInstaller _infra;
+    [SerializeField] private GameplayInstaller       _gameplay;
+
+    public override void InstallBindings(ContainerBuilder builder)
+    {
+        _infra.InstallBindings(builder);
+        _gameplay.InstallBindings(builder);
+    }
+
+    public override IEnumerator InstallGameInstanceRoutine()
+    {
+        yield return _infra.LoadAddressablesRoutine();
+    }
+
+    public override void LaunchGame() { /* GSM запустится через IInitializable */ }
+}</code></pre></div>
+<h2 id="rootcontext" class="doc-heading doc-heading--2">RootContext</h2>
+<p class="doc-paragraph"><code>RootContext</code> - тонкая статическая обёртка над <code>ProjectRootInstaller.RootContainer</code>. Нужна для того, чтобы пользовательский код не обращался к <code>ProjectRootInstaller</code> напрямую.</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">public static class RootContext
+{
+    public static Container Runtime =&gt; ProjectRootInstaller.RootContainer;
+    public static bool HasInstance   =&gt; ProjectRootInstaller.RootContainer != null;
+    public static T Resolve&lt;T&gt;()     { ... }
+    public static object Resolve(Type type) { ... }
+}</code></pre></div>
+<p class="doc-paragraph"><code>Runtime</code> открывает прямой доступ к контейнеру, что позволяет добавлять биндинги после инициализации через <code>RootContext.Runtime.Bind&lt;T&gt;()</code> - это extension-метод на <code>Container</code>, добавленный в <code>ContainerZenjectExtensions</code>. Оба перегруженных <code>Resolve</code> бросают <code>InvalidOperationException</code>, если контейнер ещё не был собран.</p>
+<h2 id="bindingbuilder" class="doc-heading doc-heading--2">BindingBuilder</h2>
+<p class="doc-paragraph"><code>BindingBuilder&lt;T&gt;</code> - основа fluent-API Zenjex, воспроизводящего стиль Zenject. Получить его можно вызовом <code>builder.Bind&lt;T&gt;()</code> или <code>builder.BindInstance&lt;T&gt;(instance)</code> - это extension-методы на <code>ContainerBuilder</code>, объявленные в <code>ReflexZenjectExtensions</code>.</p>
+<p class="doc-paragraph">Общий паттерн: сначала модификаторы источника, контрактов и аргументов в любом порядке, затем терминатор лайфтайма.</p>
+<h3 id="модификаторы-источника" class="doc-heading doc-heading--3">Модификаторы источника</h3>
+<div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>Метод</th><th>Описание</th></tr></thead><tbody><tr><td><code>.To&lt;TConcrete&gt;()</code></td><td>Привязать интерфейс/базовый тип T к конкретной реализации</td></tr><tr><td><code>.FromInstance(instance)</code></td><td>Обернуть уже существующий экземпляр; всегда регистрируется как Singleton</td></tr><tr><td><code>.FromComponentInNewPrefab(prefab)</code></td><td>Заинстанцировать префаб при резолве и извлечь компонент; всегда Singleton + Lazy</td></tr><tr><td><code>.FromComponentInHierarchy()</code></td><td>Найти существующий компонент в иерархии загруженной сцены; всегда Singleton + Lazy</td></tr></tbody></table></div>
+<p class="doc-paragraph">У <code>FromComponentInNewPrefab</code> есть дополнительные модификаторы иерархии: <code>.WithGameObjectName(name)</code> переименовывает корневой GameObject, <code>.UnderTransformGroup(groupName)</code> помещает объект под именованную группу в корне сцены (создаётся автоматически, если отсутствует), <code>.UnderTransform(parent)</code> помещает его под конкретный <code>Transform</code>.</p>
+<h3 id="инъекция-аргументов" class="doc-heading doc-heading--3">Инъекция аргументов</h3>
+<p class="doc-paragraph"><code>.WithArguments(params object[] args)</code> позволяет передать в конструктор явные аргументы, минуя контейнер. Каждое значение сопоставляется с параметром конструктора <strong>по типу</strong> (побеждает первое совпадение); параметры без совпадения резолвятся из контейнера в штатном режиме. Поведение идентично <code>WithArguments</code> в Zenject:</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">builder.Bind&lt;IInputService&gt;()
+       .To&lt;InputService&gt;()
+       .WithArguments(playerInput, cinemachineInputProvider)
+       .AsSingle();
+
+// InputService(PlayerInput pi, CinemachineInputProvider cip, ILoggingService log)
+// pi, cip &lt;- WithArguments  |  log &lt;- контейнер</code></pre></div>
+<h3 id="модификаторы-контрактов" class="doc-heading doc-heading--3">Модификаторы контрактов</h3>
+<div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>Метод</th><th>Описание</th></tr></thead><tbody><tr><td><code>.BindInterfaces()</code></td><td>Зарегистрировать под всеми интерфейсами конкретного типа</td></tr><tr><td><code>.BindInterfacesAndSelf()</code></td><td>Зарегистрировать под всеми интерфейсами и самим конкретным типом</td></tr></tbody></table></div>
+<h3 id="поддержка-саб-контейнеров" class="doc-heading doc-heading--3">Поддержка саб-контейнеров</h3>
+<p class="doc-paragraph"><code>.CopyIntoDirectSubContainers()</code> переключает биндинг на <strong>Scoped</strong> лайфтайм, так что внутри каждого <code>SceneInstaller</code>-саб-контейнера создаётся свежий экземпляр. Этот экземпляр получает в конструктор как глобальные зависимости (RootContainer), так и локальные для сцены (SceneInstaller):</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">// Глобальный инсталлер:
+builder.Bind&lt;LevelProgressServiceResolver&gt;()
+       .BindInterfacesAndSelf()
+       .CopyIntoDirectSubContainers()
+       .NonLazy();</code></pre></div>
+<h3 id="терминаторы-лайфтайма" class="doc-heading doc-heading--3">Терминаторы лайфтайма</h3>
+<div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>Метод</th><th>Аналог в Zenject</th><th>Поведение</th></tr></thead><tbody><tr><td><code>.AsSingle()</code></td><td><code>.AsSingle()</code></td><td>Lazy singleton</td></tr><tr><td><code>.AsSingleton()</code></td><td>-</td><td>Псевдоним для <code>AsSingle()</code></td></tr><tr><td><code>.NonLazy()</code></td><td><code>.AsSingle().NonLazy()</code></td><td>Eager singleton - создаётся сразу при сборке контейнера</td></tr><tr><td><code>.AsEagerSingleton()</code></td><td>-</td><td>Псевдоним для <code>NonLazy()</code></td></tr><tr><td><code>.AsTransient()</code></td><td><code>.AsTransient()</code></td><td>Новый экземпляр при каждом резолве</td></tr><tr><td><code>.AsScoped()</code></td><td>-</td><td>Один экземпляр на саб-контейнер (SceneInstaller)</td></tr></tbody></table></div>
+<p class="doc-paragraph"><code>Transient + Eager</code> явно запрещён - закоммиченный билдер бросит исключение на такой комбинации. Повторный вызов <code>Commit()</code> тоже бросает.</p>
+<p class="doc-paragraph">Если активен <code>.CopyIntoDirectSubContainers()</code>, вызовы <code>AsSingle()</code> и <code>NonLazy()</code> автоматически повышают лайфтайм до <code>Scoped</code>.</p>
+<h2 id="containerbindingbuilder" class="doc-heading doc-heading--2">ContainerBindingBuilder</h2>
+<p class="doc-paragraph"><code>ContainerBindingBuilder&lt;T&gt;</code> используется для <strong>пост-инициализационных биндингов</strong> на живом <code>Container</code> через <code>RootContext.Runtime.Bind&lt;T&gt;()</code> (extension-метод из <code>ContainerZenjectExtensions</code>). Поддерживается только регистрация уже существующих экземпляров - зарегистрировать новый тип в уже собранном контейнере нельзя.</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">RootContext.Runtime
+    .Bind&lt;ISomeService&gt;()
+    .FromInstance(myService)
+    .BindInterfacesAndSelf()
+    .AsSingle();</code></pre></div>
+<p class="doc-paragraph">Вызов <code>AsSingle()</code> без предшествующего <code>FromInstance()</code> бросает <code>InvalidOperationException</code>.</p>
+<h2 id="iinitializable" class="doc-heading doc-heading--2">IInitializable</h2>
+<p class="doc-paragraph"><code>IInitializable</code> - аналог одноимённого интерфейса из Zenject. Любой сервис, реализующий его, получит вызов <code>Initialize()</code> после того, как контейнер полностью собран и все зависимости внедрены, но до вызова <code>LaunchGame()</code>.</p>
+<p class="doc-paragraph">Порядок выполнения:</p>
+<ul class="doc-list">
+<li class="doc-list-item"><span class="doc-list-item-text"><code>Container.Build()</code> - все биндинги зарегистрированы</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><code>OnContainerReady</code> - проход инъекции полей и свойств</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><code>InstallGameInstanceRoutine()</code> - асинхронная настройка (Addressables и пр.)</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><strong><code>IInitializable.Initialize()</code></strong> &lt;- вы здесь</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><code>LaunchGame()</code> - точка входа пользователя</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><code>OnGameLaunched</code> - поздний проход инъекции</span></li>
+</ul>
+<p class="doc-paragraph">Чтобы сервис был обнаружен, его биндинг <strong>обязательно</strong> должен выставлять <code>IInitializable</code> как контракт - используйте <code>.BindInterfaces()</code> или <code>.BindInterfacesAndSelf()</code> в инсталлере. <code>ProjectRootInstaller</code> вызывает <code>Initialize()</code> внутри try/catch и логирует ошибки, не прерывая последовательность загрузки. <code>SceneInstaller</code> делает то же самое для scene-scoped сервисов.</p>
+<h2 id="zenjexinjector" class="doc-heading doc-heading--2">ZenjexInjector</h2>
+<p class="doc-paragraph"><code>ZenjexInjector</code> - ядро механизма инъекции. Резолвит все члены, помеченные <code>[Zenjex]</code>, из <code>RootContext</code>. Вызывается автоматически как <code>ZenjexRunner</code>, так и <code>ZenjexBehaviour</code>.</p>
+<p class="doc-paragraph">Инжектор ведёт собственный кэш рефлексии (<code>Dictionary&lt;Type, TypeZenjexInfo&gt;</code>), в котором хранятся три массива на тип: <code>FieldInfo[]</code>, <code>PropertyInfo[]</code>, <code>MethodInfo[]</code>. Кэш строится лениво и проходит вверх по цепочке наследования (<code>t = t.BaseType</code>), подхватывая члены, объявленные в базовых классах - это важно для подклассов <code>ZenjexBehaviour</code>.</p>
+<p class="doc-paragraph"><code>HasZenjexMembers(Type)</code> - быстрая предварительная проверка, которую <code>ZenjexRunner</code> использует, чтобы пропустить <code>MonoBehaviour</code>-типы без <code>[Zenjex]</code>-членов, не создавая для них полную запись <code>TypeZenjexInfo</code>.</p>
+<p class="doc-paragraph">Ошибки инъекции на каждом члене перехватываются по отдельности и логируются через <code>Debug.LogError</code>, так что один неудавшийся резолв не блокирует остальную часть прохода.</p>
+<h2 id="zenjexrunner" class="doc-heading doc-heading--2">ZenjexRunner</h2>
+<p class="doc-paragraph"><code>ZenjexRunner</code> - оркестратор инъекции на уровне всей сцены. Статический класс, который инициализируется через <code>[RuntimeInitializeOnLoadMethod(BeforeSceneLoad)]</code> и подписывается на два события <code>ProjectRootInstaller</code> и <code>SceneManager.sceneLoaded</code>.</p>
+<p class="doc-paragraph">Внутреннее состояние:</p>
+<ul class="doc-list">
+<li class="doc-list-item"><span class="doc-list-item-text"><code>_injected: HashSet&lt;int&gt;</code> - instance ID уже обработанных объектов, защита от двойной инъекции</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><code>_launched: bool</code> - был ли уже вызван <code>OnGameLaunched</code> (публично доступен как <code>IsReady</code>)</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><code>InjectedRecords: List&lt;InjectedRecord&gt;</code> - лог всех выполненных инъекций, используется окном отладчика</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><code>OnStateChanged: event Action</code> - срабатывает после каждого прохода инъекции или ручного вызова</span></li>
+</ul>
+<p class="doc-paragraph"><strong>Pass 1 - <code>OnContainerReady</code></strong> (срабатывает синхронно внутри <code>ProjectRootInstaller.Awake()</code> при порядке <code>-280</code>): Обходит все загруженные сцены через <code>SceneManager.GetSceneAt(i)</code>, собирает все <code>MonoBehaviour</code>-компоненты включая неактивные, проверяет <code>HasZenjexMembers</code> и вызывает <code>ZenjexInjector.Inject</code>. Поскольку это происходит при порядке <code>-280</code>, каждый последующий <code>Awake()</code> в сцене уже увидит заполненные поля.</p>
+<p class="doc-paragraph"><strong>Pass 2 - <code>OnGameLaunched</code></strong> (срабатывает после завершения <code>InstallGameInstanceRoutine()</code> и <code>IInitializable.Initialize()</code>): Повторяет тот же обход сцены. Покрывает объекты, зависимости которых были зарегистрированы в <code>InstallGameInstanceRoutine</code> и потому не могли быть резолвнуты в Pass 1. Устанавливает <code>_launched = true</code>.</p>
+<p class="doc-paragraph"><strong>Pass 3 - <code>SceneManager.sceneLoaded</code></strong> (срабатывает для каждой аддитивно загруженной сцены после запуска): Тот же обход, но для сцен, загруженных позже. Любой <code>MonoBehaviour</code>, инъецированный в этом проходе, уже выполнил свой <code>Awake()</code> до инъекции - раннер выдаёт предупреждение <code>ZNX-LATE</code>. Чтобы избежать этого, используйте <code>ZenjexBehaviour</code>.</p>
+<p class="doc-paragraph"><strong>Pass 4 - <code>InjectGameObject(GameObject go)</code></strong> (ручной, runtime): Вызывается сразу после <code>Instantiate()</code> для динамически созданных объектов. Если вызвать до <code>LaunchGame()</code>, вызов будет проигнорирован и выдано предупреждение.</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">var enemy = Instantiate(enemyPrefab);
+ZenjexRunner.InjectGameObject(enemy);</code></pre></div>
+<p class="doc-paragraph"><strong>Защита от двойной инъекции</strong>: <code>ZenjexBehaviour.Awake()</code> вызывает <code>ZenjexRunner.MarkInjected(this)</code> после того, как сам выполнил инъекцию. Раннер пропускает instance ID, уже присутствующий в <code>_injected</code>, так что двойного резолва между базовым классом и проходами раннера не возникает.</p>
+<p class="doc-paragraph">Каждая инъекция записывается в <code>InjectedRecords</code> как <code>InjectedRecord</code> (имя типа, имя GameObject, имя сцены, номер прохода, флаг опоздания) для окна отладчика.</p>
+<h2 id="zenjexbehaviour" class="doc-heading doc-heading--2">ZenjexBehaviour</h2>
+<p class="doc-paragraph"><code>ZenjexBehaviour</code> - абстрактный <code>MonoBehaviour</code> с <code>[DefaultExecutionOrder(-100)]</code>. Даёт наиболее строгую гарантию по времени инъекции: поля заполняются в собственном <code>Awake()</code>, до запуска любого <code>Awake()</code> с порядком по умолчанию. В отличие от проходов раннера, это работает и для префабов, созданных через <code>Instantiate()</code>, - порядок выполнения применяется к любому активному <code>MonoBehaviour</code> вне зависимости от того, как он попал в сцену.</p>
+<p class="doc-paragraph">Если <code>RootContext.HasInstance</code> возвращает false в момент вызова <code>Awake()</code> (контейнер ещё не собран), инъекция пропускается и выдаётся предупреждение; <code>OnAwake()</code> при этом всё равно вызывается.</p>
+<p class="doc-paragraph">Пример использования:</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">public class MyController : ZenjexBehaviour
+{
+    [Zenjex] private IMyService _service;
+
+    protected override void OnAwake()
+    {
+        // _service уже доступен здесь
+    }
+}</code></pre></div>
+<p class="doc-paragraph"><code>OnAwake()</code> - <code>protected virtual</code> метод. Подклассам больше не нужно вызывать <code>base.OnAwake()</code> - <code>ZenjexRunner.MarkInjected</code> вызывается напрямую в <code>ZenjexBehaviour.Awake()</code> до того, как выполняется <code>OnAwake()</code>. Вызов <code>base.OnAwake()</code> в подклассе безвреден (базовая реализация пустая), но не обязателен.</p>
+<p class="doc-paragraph"><code>SceneInstaller</code> тоже наследует <code>ZenjexBehaviour</code> (с порядком <code>-200</code>), чтобы получить глобальные <code>[Zenjex]</code>-инъекции до того, как начнёт строить контейнер сцены.</p>
+<h2 id="sceneinstaller" class="doc-heading doc-heading--2">SceneInstaller</h2>
+<p class="doc-paragraph"><code>SceneInstaller</code> - абстрактный <code>MonoBehaviour</code>, наследующий <code>ZenjexBehaviour</code>, с <code>[DefaultExecutionOrder(-200)]</code>. Аналог <code>SceneContext</code> из Zenject. Размещается в каждой игровой сцене на любом GameObject.</p>
+<p class="doc-paragraph">Создаёт <strong>дочерний контейнер</strong>, наследующий все глобальные биндинги из <code>ProjectRootInstaller.RootContainer</code>, и добавляет к ним локальные биндинги сцены:</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">RootContainer  (глобальный, ProjectRootInstaller)
+    └── SceneContainer  (для сцены, SceneInstaller)</code></pre></div>
+<p class="doc-paragraph">Жизненный цикл внутри <code>OnAwake()</code> (порядок <code>-200</code>, после <code>ProjectRootInstaller</code> с порядком <code>-280</code>):</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">SceneInstaller.OnAwake()
+  ├─ RootContext.Runtime.Scope(InstallBindings)  &lt;- создаётся дочерний контейнер
+  ├─ ZenjexSceneContext.Register(scene, container)
+  ├─ CallInitializables(SceneContainer)          &lt;- IInitializable для scene-local сервисов
+  ├─ OnSceneContainerReady?.Invoke(container)
+  └─ OnInstalled()                               &lt;- опциональный override</code></pre></div>
+<p class="doc-paragraph">Дочерний контейнер уничтожается в <code>OnDestroy()</code> при выгрузке сцены, что автоматически вызывает <code>IDisposable.Dispose()</code> на всех scoped-экземплярах.</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">public class GameplaySceneInstaller : SceneInstaller
+{
+    [SerializeField] private LevelProgressWatcher levelProgressWatcher;
+
+    public override void InstallBindings(ContainerBuilder builder)
+    {
+        builder.BindInstance(levelProgressWatcher).AsSingle();
+
+        builder.Bind&lt;LevelProgressServiceResolver&gt;()
+               .BindInterfacesAndSelf()
+               .CopyIntoDirectSubContainers()
+               .NonLazy();
+    }
+}</code></pre></div>
+<p class="doc-paragraph">Любой глобальный биндинг с <code>.CopyIntoDirectSubContainers()</code> (Scoped лайфтайм) будет заново создан внутри контейнера этой сцены и сможет получить как глобальные, так и локальные зависимости.</p>
+<h2 id="zenjexscenecontext" class="doc-heading doc-heading--2">ZenjexSceneContext</h2>
+<p class="doc-paragraph"><code>ZenjexSceneContext</code> - статический реестр scene-scoped контейнеров. <code>SceneInstaller</code> заполняет и очищает его автоматически.</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">// Резолвнуть из последнего загруженного контейнера сцены:
+ZenjexSceneContext.Resolve&lt;LevelProgressWatcher&gt;();
+
+// Получить сам контейнер для нескольких резолвов:
+var container = ZenjexSceneContext.GetActive();
+
+// Получить контейнер конкретной сцены:
+var container = ZenjexSceneContext.Get(scene);
+
+// Проверить наличие активного контейнера:
+if (ZenjexSceneContext.HasActiveScene) { ... }</code></pre></div>
+<p class="doc-paragraph">Контейнеры хранятся в <code>Dictionary&lt;int, Container&gt;</code> с ключом <code>Scene.handle</code>. <code>GetActive()</code> возвращает контейнер, зарегистрированный последним загруженным <code>SceneInstaller</code>; <code>Get(scene)</code> позволяет адресовать конкретную сцену напрямую.</p>
+<h2 id="хронология-выполнения" class="doc-heading doc-heading--2">Хронология выполнения</h2>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">Запуск приложения
+│
+├─ [RuntimeInitializeOnLoadMethod: AfterAssembliesLoaded]
+│     UnityInjector.Initialize()
+│
+├─ [RuntimeInitializeOnLoadMethod: BeforeSceneLoad]
+│     ZenjexRunner.Initialize()
+│
+Загрузка сцены
+│
+├─ ContainerScope.Awake()  (порядок: -1 000 000 000)
+│     UnityInjector создаёт SceneContainer как дочерний к RootContainer
+│
+├─ ProjectRootInstaller.Awake()  (порядок: -280)
+│     InstallBindings(builder)
+│     RootContainer = builder.Build()
+│     OnContainerReady.Invoke()
+│        └─ ZenjexRunner Pass 1: инъекция всех [Zenjex]-объектов сцены
+│     StartCoroutine(LateInitRoutine)
+│
+├─ SceneInstaller.OnAwake()  (порядок: -200)  [подкласс ZenjexBehaviour]
+│     ZenjexInjector.Inject(this)        &lt;- заполняются глобальные [Zenjex]-поля
+│     ZenjexRunner.MarkInjected(this)
+│     RootContext.Runtime.Scope(InstallBindings) &lt;- создаётся контейнер сцены
+│     CallInitializables(SceneContainer)
+│     OnSceneContainerReady.Invoke(SceneContainer)
+│
+├─ ZenjexBehaviour.Awake()  (порядок: -100)  [для каждого ZenjexBehaviour в сцене]
+│     ZenjexInjector.Inject(this)
+│     ZenjexRunner.MarkInjected(this)
+│     OnAwake()
+│
+├─ MonoBehaviour.Awake()  (порядок: 0, по умолчанию)
+│     [Zenjex]-поля уже заполнены из Pass 1
+│
+└─ LateInitRoutine (корутина, запускается после yield)
+      InstallGameInstanceRoutine()    &lt;- опциональная асинхронная инициализация
+      CallInitializables(RootContainer) &lt;- IInitializable.Initialize()
+      LaunchGame()                    &lt;- точка входа в игру
+      OnGameLaunched.Invoke()
+         └─ ZenjexRunner Pass 2: повторный обход для биндингов, добавленных в async init</code></pre></div>
+<h2 id="сводная-таблица-проходов-инъекции" class="doc-heading doc-heading--2">Сводная таблица проходов инъекции</h2>
+<div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>Проход</th><th>Триггер</th><th>До <code>Awake()</code>?</th><th>Предупреждение ZNX-LATE?</th></tr></thead><tbody><tr><td>Pass 1</td><td><code>OnContainerReady</code> (внутри <code>ProjectRootInstaller.Awake</code> при порядке -280)</td><td>Да</td><td>Нет</td></tr><tr><td>Pass 2</td><td><code>OnGameLaunched</code> (после корутины + <code>IInitializable</code>)</td><td>Нет</td><td>Нет</td></tr><tr><td>Pass 3</td><td><code>SceneManager.sceneLoaded</code> (аддитивные сцены)</td><td>Нет</td><td><strong>Да</strong></td></tr><tr><td>Pass 4</td><td><code>ZenjexRunner.InjectGameObject()</code> (вручную, runtime)</td><td>Нет</td><td>Нет</td></tr><tr><td><code>ZenjexBehaviour</code></td><td>Собственный <code>Awake()</code> при порядке -100</td><td>Да</td><td>Нет</td></tr><tr><td><code>SceneInstaller</code></td><td>Собственный <code>OnAwake()</code> при порядке -200 (подкласс ZenjexBehaviour)</td><td>Да</td><td>Нет</td></tr></tbody></table></div>
+<p class="doc-paragraph">← <a href="Reflex-Internals.ru">Reflex: внутреннее устройство</a> | <a href="Home.ru">Главная</a></p>
+
+      </div>
+      <div class="doc-body" id="doc-body-en" lang="en" style="display:none">
+<h2 id="zenjex-internals" class="doc-heading doc-heading--2">Zenjex Internals</h2>
+<h2 id="table-of-contents" class="doc-heading doc-heading--2">Table of Contents</h2>
+<ul class="doc-list">
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#projectrootinstaller">ProjectRootInstaller</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#rootcontext">RootContext</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#bindingbuilder">BindingBuilder</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#containerbindingbuilder">ContainerBindingBuilder</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#iinitializable">IInitializable</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#zenjexinjector">ZenjexInjector</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#zenjexrunner">ZenjexRunner</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#zenjexbehaviour">ZenjexBehaviour</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#sceneinstaller">SceneInstaller</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#zenjexscenecontext">ZenjexSceneContext</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#execution-timeline">Execution timeline</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#injection-pass-summary">Injection pass summary</a></span></li>
+</ul>
+<h2 id="projectrootinstaller" class="doc-heading doc-heading--2">ProjectRootInstaller</h2>
+<p class="doc-paragraph"><code>ProjectRootInstaller</code> is an abstract <code>MonoBehaviour</code> that implements <code>IInstaller</code> and serves as the mandatory entry point for the Zenjex layer. It runs at <code>[DefaultExecutionOrder(-280)]</code>.</p>
+<p class="doc-paragraph">Three abstract methods need to be implemented:</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">InstallBindings(ContainerBuilder)   - synchronous, fills the global container
+InstallGameInstanceRoutine()        - optional coroutine, runs after the container is built
+LaunchGame()                        - called after IInitializable services are initialized</code></pre></div>
+<p class="doc-paragraph">Internal <code>Awake</code> flow:</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">ProjectRootInstaller.Awake()
+  ├─ new ContainerBuilder()
+  ├─ InstallBindings(builder)          &lt;- user code
+  ├─ RootContainer = builder.Build()
+  ├─ OnContainerReady?.Invoke()        &lt;- ZenjexRunner Pass 1 fires here
+  └─ StartCoroutine(LateInitRoutine)
+       ├─ yield return InstallGameInstanceRoutine()  &lt;- optional async work
+       ├─ CallInitializables(RootContainer)          &lt;- IInitializable.Initialize() on every registered service
+       ├─ LaunchGame()                               &lt;- user code
+       └─ OnGameLaunched?.Invoke()     &lt;- ZenjexRunner Pass 2 fires here</code></pre></div>
+<p class="doc-paragraph"><code>RootContainer</code> is stored as a static property on <code>ProjectRootInstaller</code>. There is a guard that prevents re-initialization if <code>Awake()</code> gets called again - this can happen when Reload Domain is disabled.</p>
+<p class="doc-paragraph"><code>OnContainerReady</code> and <code>OnGameLaunched</code> are the two synchronization points that <code>ZenjexRunner</code> uses to orchestrate injection passes.</p>
+<p class="doc-paragraph">In practice, bindings are usually split across multiple child <code>MonoInstaller</code> components:</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">public class AppInstaller : ProjectRootInstaller
+{
+    [SerializeField] private InfrastructureInstaller _infra;
+    [SerializeField] private GameplayInstaller       _gameplay;
+
+    public override void InstallBindings(ContainerBuilder builder)
+    {
+        _infra.InstallBindings(builder);
+        _gameplay.InstallBindings(builder);
+    }
+
+    public override IEnumerator InstallGameInstanceRoutine()
+    {
+        yield return _infra.LoadAddressablesRoutine();
+    }
+
+    public override void LaunchGame() { /* GSM will start via IInitializable */ }
+}</code></pre></div>
+<h2 id="rootcontext" class="doc-heading doc-heading--2">RootContext</h2>
+<p class="doc-paragraph"><code>RootContext</code> is a thin static wrapper over <code>ProjectRootInstaller.RootContainer</code>. It exists so that user code does not need to reference <code>ProjectRootInstaller</code> directly.</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">public static class RootContext
+{
+    public static Container Runtime =&gt; ProjectRootInstaller.RootContainer;
+    public static bool HasInstance   =&gt; ProjectRootInstaller.RootContainer != null;
+    public static T Resolve&lt;T&gt;()     { ... }
+    public static object Resolve(Type type) { ... }
+}</code></pre></div>
+<p class="doc-paragraph"><code>Runtime</code> gives direct access to the container, which makes post-initialization binding possible via <code>RootContext.Runtime.Bind&lt;T&gt;()</code> - an extension method on <code>Container</code> added by <code>ContainerZenjectExtensions</code>. Both <code>Resolve</code> overloads throw <code>InvalidOperationException</code> if the container has not been built yet.</p>
+<h2 id="bindingbuilder" class="doc-heading doc-heading--2">BindingBuilder</h2>
+<p class="doc-paragraph"><code>BindingBuilder&lt;T&gt;</code> is the backbone of Zenjex&#x27;s Zenject-like fluent API. You get one by calling <code>builder.Bind&lt;T&gt;()</code> or <code>builder.BindInstance&lt;T&gt;(instance)</code> - extension methods on <code>ContainerBuilder</code> defined in <code>ReflexZenjectExtensions</code>.</p>
+<p class="doc-paragraph">The general pattern is: chain source modifiers, contract modifiers, and argument modifiers in any order, then finish with a lifetime method.</p>
+<h3 id="source-modifiers" class="doc-heading doc-heading--3">Source modifiers</h3>
+<div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>Method</th><th>Description</th></tr></thead><tbody><tr><td><code>.To&lt;TConcrete&gt;()</code></td><td>Bind interface/base T to a concrete implementation</td></tr><tr><td><code>.FromInstance(instance)</code></td><td>Wrap a pre-existing instance; always registers as Singleton</td></tr><tr><td><code>.FromComponentInNewPrefab(prefab)</code></td><td>Instantiate a prefab at resolve-time and extract the component; always Singleton + Lazy</td></tr><tr><td><code>.FromComponentInHierarchy()</code></td><td>Find an existing component in the loaded scene; always Singleton + Lazy</td></tr></tbody></table></div>
+<p class="doc-paragraph"><code>FromComponentInNewPrefab</code> has additional hierarchy modifiers: <code>.WithGameObjectName(name)</code> renames the root GameObject, <code>.UnderTransformGroup(groupName)</code> places the instance under a named scene-root group (created automatically if absent), and <code>.UnderTransform(parent)</code> places it under a specific <code>Transform</code>.</p>
+<h3 id="argument-injection" class="doc-heading doc-heading--3">Argument injection</h3>
+<p class="doc-paragraph"><code>.WithArguments(params object[] args)</code> lets you pass explicit constructor arguments that bypass the container. Each value is matched to a constructor parameter <strong>by type</strong> (first match wins); parameters with no match are resolved from the container normally. This mirrors Zenject&#x27;s <code>WithArguments</code>:</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">builder.Bind&lt;IInputService&gt;()
+       .To&lt;InputService&gt;()
+       .WithArguments(playerInput, cinemachineInputProvider)
+       .AsSingle();
+
+// InputService(PlayerInput pi, CinemachineInputProvider cip, ILoggingService log)
+// pi, cip &lt;- WithArguments  |  log &lt;- container</code></pre></div>
+<h3 id="contract-modifiers" class="doc-heading doc-heading--3">Contract modifiers</h3>
+<div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>Method</th><th>Description</th></tr></thead><tbody><tr><td><code>.BindInterfaces()</code></td><td>Register under all interfaces of the concrete type</td></tr><tr><td><code>.BindInterfacesAndSelf()</code></td><td>Register under all interfaces and the concrete type itself</td></tr></tbody></table></div>
+<h3 id="sub-container-support" class="doc-heading doc-heading--3">Sub-container support</h3>
+<p class="doc-paragraph"><code>.CopyIntoDirectSubContainers()</code> switches the binding to <strong>Scoped</strong> lifetime, so a fresh instance is created inside each <code>SceneInstaller</code> sub-container. That instance gets both global (RootContainer) and scene-local (SceneInstaller) dependencies in its constructor:</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">// Global installer:
+builder.Bind&lt;LevelProgressServiceResolver&gt;()
+       .BindInterfacesAndSelf()
+       .CopyIntoDirectSubContainers()
+       .NonLazy();</code></pre></div>
+<h3 id="lifetime-terminators" class="doc-heading doc-heading--3">Lifetime terminators</h3>
+<div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>Method</th><th>Zenject equivalent</th><th>Behaviour</th></tr></thead><tbody><tr><td><code>.AsSingle()</code></td><td><code>.AsSingle()</code></td><td>Lazy singleton</td></tr><tr><td><code>.AsSingleton()</code></td><td>-</td><td>Alias for <code>AsSingle()</code></td></tr><tr><td><code>.NonLazy()</code></td><td><code>.AsSingle().NonLazy()</code></td><td>Eager singleton - constructed immediately when the container is built</td></tr><tr><td><code>.AsEagerSingleton()</code></td><td>-</td><td>Alias for <code>NonLazy()</code></td></tr><tr><td><code>.AsTransient()</code></td><td><code>.AsTransient()</code></td><td>New instance on every resolve</td></tr><tr><td><code>.AsScoped()</code></td><td>-</td><td>One instance per sub-container (SceneInstaller)</td></tr></tbody></table></div>
+<p class="doc-paragraph"><code>Transient + Eager</code> is explicitly forbidden - a committed builder throws on this combination. Calling <code>Commit()</code> twice also throws.</p>
+<p class="doc-paragraph">When <code>.CopyIntoDirectSubContainers()</code> is set, <code>AsSingle()</code> and <code>NonLazy()</code> automatically promote the lifetime to <code>Scoped</code>.</p>
+<h2 id="containerbindingbuilder" class="doc-heading doc-heading--2">ContainerBindingBuilder</h2>
+<p class="doc-paragraph"><code>ContainerBindingBuilder&lt;T&gt;</code> is used for <strong>post-initialization binding</strong> on a live <code>Container</code> via <code>RootContext.Runtime.Bind&lt;T&gt;()</code> (extension method from <code>ContainerZenjectExtensions</code>). It only supports registering pre-existing instances - registering new types into an already-built container is not possible.</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">RootContext.Runtime
+    .Bind&lt;ISomeService&gt;()
+    .FromInstance(myService)
+    .BindInterfacesAndSelf()
+    .AsSingle();</code></pre></div>
+<p class="doc-paragraph">Calling <code>AsSingle()</code> without a prior <code>FromInstance()</code> throws <code>InvalidOperationException</code>.</p>
+<h2 id="iinitializable" class="doc-heading doc-heading--2">IInitializable</h2>
+<p class="doc-paragraph"><code>IInitializable</code> is a drop-in replacement for Zenject&#x27;s <code>IInitializable</code>. Any service that implements it will receive a <code>Initialize()</code> call after the container is fully built and all dependencies are injected, but before <code>LaunchGame()</code> runs.</p>
+<p class="doc-paragraph">Execution order:</p>
+<ul class="doc-list">
+<li class="doc-list-item"><span class="doc-list-item-text"><code>Container.Build()</code> - all bindings registered</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><code>OnContainerReady</code> - field/property injection pass</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><code>InstallGameInstanceRoutine()</code> - async setup (Addressables, etc.)</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><strong><code>IInitializable.Initialize()</code></strong> &lt;- you are here</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><code>LaunchGame()</code> - user entry-point</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><code>OnGameLaunched</code> - late injection pass</span></li>
+</ul>
+<p class="doc-paragraph">For the service to be discovered, its binding <strong>must</strong> expose <code>IInitializable</code> as a contract - use <code>.BindInterfaces()</code> or <code>.BindInterfacesAndSelf()</code> in the installer. <code>ProjectRootInstaller</code> calls <code>Initialize()</code> inside a try/catch and logs errors without interrupting the boot sequence. <code>SceneInstaller</code> does the same for scene-scoped services.</p>
+<h2 id="zenjexinjector" class="doc-heading doc-heading--2">ZenjexInjector</h2>
+<p class="doc-paragraph"><code>ZenjexInjector</code> is the core injection engine. It resolves all <code>[Zenjex]</code>-marked members on a target object from <code>RootContext</code>. It is called automatically by both <code>ZenjexRunner</code> and <code>ZenjexBehaviour</code>.</p>
+<p class="doc-paragraph">The injector has its own reflection cache (<code>Dictionary&lt;Type, TypeZenjexInfo&gt;</code>) that stores three arrays per type: <code>FieldInfo[]</code>, <code>PropertyInfo[]</code>, <code>MethodInfo[]</code>. The cache is built lazily and walks the full inheritance chain (<code>t = t.BaseType</code>) to pick up members declared in base classes - this is important for <code>ZenjexBehaviour</code> subclasses.</p>
+<p class="doc-paragraph"><code>HasZenjexMembers(Type)</code> is a fast pre-check that <code>ZenjexRunner</code> uses to skip <code>MonoBehaviour</code> types with no <code>[Zenjex]</code> members, without building a full <code>TypeZenjexInfo</code> entry for them.</p>
+<p class="doc-paragraph">Injection errors per member are caught individually and logged via <code>Debug.LogError</code>, so one failed resolve does not block the rest of the injection pass.</p>
+<h2 id="zenjexrunner" class="doc-heading doc-heading--2">ZenjexRunner</h2>
+<p class="doc-paragraph"><code>ZenjexRunner</code> is the scene-wide injection orchestrator. It is a static class that initializes via <code>[RuntimeInitializeOnLoadMethod(BeforeSceneLoad)]</code> and subscribes to the two <code>ProjectRootInstaller</code> events and <code>SceneManager.sceneLoaded</code>.</p>
+<p class="doc-paragraph">Internal state:</p>
+<ul class="doc-list">
+<li class="doc-list-item"><span class="doc-list-item-text"><code>_injected: HashSet&lt;int&gt;</code> - instance IDs of already-injected objects, guards against double injection</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><code>_launched: bool</code> - whether <code>OnGameLaunched</code> has fired (exposed publicly as <code>IsReady</code>)</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><code>InjectedRecords: List&lt;InjectedRecord&gt;</code> - a log of every injection, consumed by the debugger window</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><code>OnStateChanged: event Action</code> - fires after each injection pass or after a manual inject call</span></li>
+</ul>
+<p class="doc-paragraph"><strong>Pass 1 - <code>OnContainerReady</code></strong> (fires synchronously inside <code>ProjectRootInstaller.Awake()</code> at order <code>-280</code>): Walks all loaded scenes via <code>SceneManager.GetSceneAt(i)</code>, collects all <code>MonoBehaviour</code> components including inactive ones, checks <code>HasZenjexMembers</code>, then calls <code>ZenjexInjector.Inject</code>. Since this runs at order <code>-280</code>, every <code>Awake()</code> that follows will already see populated fields.</p>
+<p class="doc-paragraph"><strong>Pass 2 - <code>OnGameLaunched</code></strong> (fires after <code>InstallGameInstanceRoutine()</code> and <code>IInitializable.Initialize()</code> complete): Repeats the same scene walk. This catches objects whose dependencies were registered during <code>InstallGameInstanceRoutine</code> and could not be resolved in Pass 1. Sets <code>_launched = true</code>.</p>
+<p class="doc-paragraph"><strong>Pass 3 - <code>SceneManager.sceneLoaded</code></strong> (fires for each additively loaded scene after launch): Same walk, targeting late-arriving scenes. Any <code>MonoBehaviour</code> injected here already had its <code>Awake()</code> run before injection - the runner emits a <code>ZNX-LATE</code> warning. Use <code>ZenjexBehaviour</code> to avoid this.</p>
+<p class="doc-paragraph"><strong>Pass 4 - <code>InjectGameObject(GameObject go)</code></strong> (manual, runtime): Call right after <code>Instantiate()</code> for dynamically spawned objects. If called before <code>LaunchGame()</code>, the call is skipped and a warning is emitted.</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">var enemy = Instantiate(enemyPrefab);
+ZenjexRunner.InjectGameObject(enemy);</code></pre></div>
+<p class="doc-paragraph"><strong>Double-injection protection</strong>: <code>ZenjexBehaviour.Awake()</code> calls <code>ZenjexRunner.MarkInjected(this)</code> after injecting itself. The runner skips any instance ID already in <code>_injected</code>, so there is no chance of a double resolve between the base class and the runner passes.</p>
+<p class="doc-paragraph">Every injection is recorded in <code>InjectedRecords</code> as an <code>InjectedRecord</code> (type name, GameObject name, scene name, pass, late flag) for the debugger window.</p>
+<h2 id="zenjexbehaviour" class="doc-heading doc-heading--2">ZenjexBehaviour</h2>
+<p class="doc-paragraph"><code>ZenjexBehaviour</code> is an abstract <code>MonoBehaviour</code> running at <code>[DefaultExecutionOrder(-100)]</code>. It gives the strongest injection timing guarantee available: fields are injected inside its own <code>Awake()</code>, before any default-order <code>Awake()</code> runs. Unlike the runner passes, it also works on prefabs spawned via <code>Instantiate()</code>, since execution order applies to any active <code>MonoBehaviour</code> regardless of how it arrived in the scene.</p>
+<p class="doc-paragraph">If <code>RootContext.HasInstance</code> is false when <code>Awake()</code> runs (the container is not built yet), injection is skipped and a warning is logged; <code>OnAwake()</code> still fires.</p>
+<p class="doc-paragraph">Usage:</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">public class MyController : ZenjexBehaviour
+{
+    [Zenjex] private IMyService _service;
+
+    protected override void OnAwake()
+    {
+        // _service is already injected here
+    }
+}</code></pre></div>
+<p class="doc-paragraph"><code>OnAwake()</code> is a <code>protected virtual</code> method. Subclasses no longer need to call <code>base.OnAwake()</code> - <code>ZenjexRunner.MarkInjected</code> is called directly in <code>ZenjexBehaviour.Awake()</code> before <code>OnAwake()</code> is invoked. Calling <code>base.OnAwake()</code> in a subclass is harmless (the base implementation is empty) but not required.</p>
+<p class="doc-paragraph"><code>SceneInstaller</code> also extends <code>ZenjexBehaviour</code> (at order <code>-200</code>) so it can receive global <code>[Zenjex]</code> injections before it builds the scene container.</p>
+<h2 id="sceneinstaller" class="doc-heading doc-heading--2">SceneInstaller</h2>
+<p class="doc-paragraph"><code>SceneInstaller</code> is an abstract <code>MonoBehaviour</code> that extends <code>ZenjexBehaviour</code> and runs at <code>[DefaultExecutionOrder(-200)]</code>. It is the Zenjex equivalent of Zenject&#x27;s <code>SceneContext</code>. Place one per gameplay scene on any GameObject.</p>
+<p class="doc-paragraph">It creates a <strong>child container</strong> that inherits all global bindings from <code>ProjectRootInstaller.RootContainer</code> and adds scene-local bindings on top:</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">RootContainer  (global, ProjectRootInstaller)
+    └── SceneContainer  (per-scene, SceneInstaller)</code></pre></div>
+<p class="doc-paragraph">Lifecycle inside <code>OnAwake()</code> (runs at order <code>-200</code>, after <code>ProjectRootInstaller</code> at <code>-280</code>):</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">SceneInstaller.OnAwake()
+  ├─ RootContext.Runtime.Scope(InstallBindings)  &lt;- creates child container
+  ├─ ZenjexSceneContext.Register(scene, container)
+  ├─ CallInitializables(SceneContainer)          &lt;- IInitializable on scene-local services
+  ├─ OnSceneContainerReady?.Invoke(container)
+  └─ OnInstalled()                               &lt;- optional override</code></pre></div>
+<p class="doc-paragraph">The child container is disposed in <code>OnDestroy()</code> when the scene unloads, which triggers <code>IDisposable.Dispose()</code> on all scoped instances.</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">public class GameplaySceneInstaller : SceneInstaller
+{
+    [SerializeField] private LevelProgressWatcher levelProgressWatcher;
+
+    public override void InstallBindings(ContainerBuilder builder)
+    {
+        builder.BindInstance(levelProgressWatcher).AsSingle();
+
+        builder.Bind&lt;LevelProgressServiceResolver&gt;()
+               .BindInterfacesAndSelf()
+               .CopyIntoDirectSubContainers()
+               .NonLazy();
+    }
+}</code></pre></div>
+<p class="doc-paragraph">Any global binding marked with <code>.CopyIntoDirectSubContainers()</code> (Scoped lifetime) will be freshly instantiated inside this scene&#x27;s container and can receive both global and scene-local dependencies.</p>
+<h2 id="zenjexscenecontext" class="doc-heading doc-heading--2">ZenjexSceneContext</h2>
+<p class="doc-paragraph"><code>ZenjexSceneContext</code> is a static registry of scene-scoped containers. <code>SceneInstaller</code> populates and cleans it up automatically.</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">// Resolve from the most recently loaded scene container:
+ZenjexSceneContext.Resolve&lt;LevelProgressWatcher&gt;();
+
+// Get the container itself for multiple lookups:
+var container = ZenjexSceneContext.GetActive();
+
+// Get a container for a specific scene:
+var container = ZenjexSceneContext.Get(scene);
+
+// Guard before resolving:
+if (ZenjexSceneContext.HasActiveScene) { ... }</code></pre></div>
+<p class="doc-paragraph">Internally, containers are stored in a <code>Dictionary&lt;int, Container&gt;</code> keyed by <code>Scene.handle</code>. <code>GetActive()</code> returns the container from the most recently loaded <code>SceneInstaller</code>; <code>Get(scene)</code> lets you target a specific scene directly.</p>
+<h2 id="execution-timeline" class="doc-heading doc-heading--2">Execution timeline</h2>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">Application start
+│
+├─ [RuntimeInitializeOnLoadMethod: AfterAssembliesLoaded]
+│     UnityInjector.Initialize()
+│
+├─ [RuntimeInitializeOnLoadMethod: BeforeSceneLoad]
+│     ZenjexRunner.Initialize()
+│
+Scene loads
+│
+├─ ContainerScope.Awake()  (order: -1,000,000,000)
+│     UnityInjector creates SceneContainer as child of RootContainer
+│
+├─ ProjectRootInstaller.Awake()  (order: -280)
+│     InstallBindings(builder)
+│     RootContainer = builder.Build()
+│     OnContainerReady.Invoke()
+│        └─ ZenjexRunner Pass 1: injects all [Zenjex] scene objects
+│     StartCoroutine(LateInitRoutine)
+│
+├─ SceneInstaller.OnAwake()  (order: -200)  [ZenjexBehaviour subclass]
+│     ZenjexInjector.Inject(this)        &lt;- global [Zenjex] fields filled
+│     ZenjexRunner.MarkInjected(this)
+│     RootContext.Runtime.Scope(InstallBindings) &lt;- scene container created
+│     CallInitializables(SceneContainer)
+│     OnSceneContainerReady.Invoke(SceneContainer)
+│
+├─ ZenjexBehaviour.Awake()  (order: -100)  [for each ZenjexBehaviour in scene]
+│     ZenjexInjector.Inject(this)
+│     ZenjexRunner.MarkInjected(this)
+│     OnAwake()
+│
+├─ MonoBehaviour.Awake()  (order: 0, default)
+│     [Zenjex] fields already populated from Pass 1
+│
+└─ LateInitRoutine (coroutine, runs after yielding)
+      InstallGameInstanceRoutine()    &lt;- optional async initialization
+      CallInitializables(RootContainer) &lt;- IInitializable.Initialize()
+      LaunchGame()                    &lt;- game entry point
+      OnGameLaunched.Invoke()
+         └─ ZenjexRunner Pass 2: re-scans scene for bindings added during async init</code></pre></div>
+<h2 id="injection-pass-summary" class="doc-heading doc-heading--2">Injection pass summary</h2>
+<div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>Pass</th><th>Trigger</th><th>Fires before <code>Awake()</code>?</th><th>ZNX-LATE warning?</th></tr></thead><tbody><tr><td>Pass 1</td><td><code>OnContainerReady</code> (inside <code>ProjectRootInstaller.Awake</code> at -280)</td><td>Yes</td><td>No</td></tr><tr><td>Pass 2</td><td><code>OnGameLaunched</code> (after coroutine + <code>IInitializable</code>)</td><td>No</td><td>No</td></tr><tr><td>Pass 3</td><td><code>SceneManager.sceneLoaded</code> (additive scenes)</td><td>No</td><td><strong>Yes</strong></td></tr><tr><td>Pass 4</td><td><code>ZenjexRunner.InjectGameObject()</code> (manual, runtime)</td><td>No</td><td>No</td></tr><tr><td><code>ZenjexBehaviour</code></td><td>Own <code>Awake()</code> at order -100</td><td>Yes</td><td>No</td></tr><tr><td><code>SceneInstaller</code></td><td>Own <code>OnAwake()</code> at order -200 (ZenjexBehaviour subclass)</td><td>Yes</td><td>No</td></tr></tbody></table></div>
+<p class="doc-paragraph">← <a href="Reflex-Internals">Reflex Internals</a> | <a href="Home">Home</a></p>
+
+      </div>
+
+      <div class="doc-page-nav"><a href="../../docs/getting-started/injection.html" class="doc-nav-link">
+          <span class="t" data-ru="← Назад" data-en="← Previous">← Назад</span>
+          <span class="doc-nav-title t" data-ru="Инъекции" data-en="Injection">Инъекции</span>
+        </a><a href="../../docs/internals/reflex-internals.html" class="doc-nav-link">
+          <span class="t" data-ru="Далее →" data-en="Next →">Далее →</span>
+          <span class="doc-nav-title t" data-ru="Reflex: устройство" data-en="Reflex Internals">Reflex: устройство</span>
+        </a></div>
+
+    </main>
+  </div>
+
+  <footer>
+    <span class="t" data-ru="© 2026 Zenjex — документация" data-en="© 2026 Zenjex — documentation">© 2026 Zenjex — документация</span>
+  </footer>
+
+</div>
+
+<script src="../../js/theme.js"></script>
+<script src="../../js/lang.js"></script>
+<script src="../../js/scroll.js"></script>
+<script>
+  // Sidebar toggle
+  function toggleSidebar() {
+    var s = document.getElementById('sidebar');
+    var b = document.getElementById('sidebar-backdrop');
+    var t = document.getElementById('sidebar-toggle');
+    var open = s.classList.toggle('open');
+    b.classList.toggle('open', open);
+    t.classList.toggle('open', open);
+  }
+
+  // Language switch: show/hide ru/en body blocks
+  var _origSetLang = window.setLang;
+  window.setLang = function(lang) {
+    if (_origSetLang) _origSetLang(lang);
+    var ru = document.getElementById('doc-body-ru');
+    var en = document.getElementById('doc-body-en');
+    if (ru) ru.style.display = lang === 'ru' ? '' : 'none';
+    if (en) en.style.display = lang === 'en' ? '' : 'none';
+  };
+
+  // Apply saved lang on load
+  (function() {
+    var lang = localStorage.getItem('cl-lang') || 'ru';
+    var ru = document.getElementById('doc-body-ru');
+    var en = document.getElementById('doc-body-en');
+    if (ru) ru.style.display = lang === 'ru' ? '' : 'none';
+    if (en) en.style.display = lang === 'en' ? '' : 'none';
+  })();
+</script>
+
+</body>
+</html>

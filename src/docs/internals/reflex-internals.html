@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reflex: устройство — Zenjex</title>
+  <link rel="stylesheet" href="../../css/variables.css"/>
+  <link rel="stylesheet" href="../../css/animations.css"/>
+  <link rel="stylesheet" href="../../css/layout.css"/>
+  <link rel="stylesheet" href="../../css/wiki.css"/>
+  <link rel="stylesheet" href="../../css/docs.css"/>
+</head>
+<body>
+
+<div class="app">
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()" aria-label="Menu">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      </button>
+      <a class="topbar-logo" href="../../index.html">
+        <span class="topbar-logo-name">Zenjex</span>
+      </a>
+      <div class="topbar-sep"></div>
+      <span class="topbar-label t" data-ru="Документация" data-en="Documentation">Документация</span>
+    </div>
+    <div class="topbar-right">
+      <nav class="topbar-nav">
+        <a class="topbar-nav-link" href="../../index.html">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <span class="t" data-ru="Changelog" data-en="Changelog">Changelog</span>
+        </a>
+        <a class="topbar-nav-link topbar-nav-link--active" href="../../docs.html">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+          <span class="t" data-ru="Документация" data-en="Docs">Документация</span>
+        </a>
+      </nav>
+      <a class="repo-link" href="https://github.com/antonprv/Zenjex" target="_blank" rel="noopener">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.1 3.3 9.4 7.9 10.9.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.54-3.88-1.54-.52-1.34-1.28-1.7-1.28-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.2 1.77 1.2 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.55-.29-5.23-1.28-5.23-5.68 0-1.25.45-2.28 1.18-3.08-.12-.29-.51-1.46.11-3.04 0 0 .96-.31 3.15 1.18a10.9 10.9 0 015.74 0C17.3 5.37 18.26 5.68 18.26 5.68c.62 1.58.23 2.75.11 3.04.74.8 1.18 1.83 1.18 3.08 0 4.41-2.69 5.38-5.25 5.67.41.35.78 1.05.78 2.12v3.15c0 .31.21.67.8.56C20.2 21.4 23.5 17.1 23.5 12 23.5 5.65 18.35.5 12 .5z"/></svg>
+        GitHub
+      </a>
+      <div class="lang-switcher" role="group">
+        <button class="lang-btn active" id="btn-ru" onclick="setLang('ru')">RU</button>
+        <button class="lang-btn"        id="btn-en" onclick="setLang('en')">EN</button>
+      </div>
+      <button class="theme-switcher" onclick="toggleTheme()" aria-label="Toggle theme">
+        <svg class="theme-icon sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <svg class="theme-icon moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="main">
+    <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="toggleSidebar()"></div>
+    <nav class="sidebar" id="sidebar">
+      <p class="sidebar-section-label t" data-ru="Разделы" data-en="Sections">Разделы</p>
+      <ul class="version-list" id="doc-list">
+<li class="version-group">
+  <div class="version-group-label"><span class="t" data-ru="Начало работы" data-en="Getting Started">Начало работы</span></div>
+  <ul class="version-sublist">
+    <li class="version-item doc-page-item" data-page-id="overview">
+      <a class="version-btn" href="../../docs/getting-started/overview.html">
+        <span class="version-btn-tag"><span class="t" data-ru="Обзор" data-en="Overview">Обзор</span></span>
+      </a>
+    </li>
+    <li class="version-item doc-page-item" data-page-id="quick-start">
+      <a class="version-btn" href="../../docs/getting-started/quick-start.html">
+        <span class="version-btn-tag"><span class="t" data-ru="Быстрый старт" data-en="Quick Start">Быстрый старт</span></span>
+      </a>
+    </li>
+    <li class="version-item doc-page-item" data-page-id="bindings">
+      <a class="version-btn" href="../../docs/getting-started/bindings.html">
+        <span class="version-btn-tag"><span class="t" data-ru="Биндинги" data-en="Bindings">Биндинги</span></span>
+      </a>
+    </li>
+    <li class="version-item doc-page-item" data-page-id="injection">
+      <a class="version-btn" href="../../docs/getting-started/injection.html">
+        <span class="version-btn-tag"><span class="t" data-ru="Инъекции" data-en="Injection">Инъекции</span></span>
+      </a>
+    </li>
+  </ul>
+</li>
+<li class="version-group">
+  <div class="version-group-label"><span class="t" data-ru="Внутреннее устройство" data-en="Internals">Внутреннее устройство</span></div>
+  <ul class="version-sublist">
+    <li class="version-item doc-page-item" data-page-id="zenjex-internals">
+      <a class="version-btn" href="../../docs/internals/zenjex-internals.html">
+        <span class="version-btn-tag"><span class="t" data-ru="Zenjex: устройство" data-en="Zenjex Internals">Zenjex: устройство</span></span>
+      </a>
+    </li>
+    <li class="version-item doc-page-item active" data-page-id="reflex-internals">
+      <a class="version-btn" href="../../docs/internals/reflex-internals.html">
+        <span class="version-btn-tag"><span class="t" data-ru="Reflex: устройство" data-en="Reflex Internals">Reflex: устройство</span></span>
+      </a>
+    </li>
+  </ul>
+</li>
+</ul>
+    </nav>
+
+    <main class="content wiki-content" id="doc-content">
+
+      <div class="doc-page-header">
+        <h1 class="doc-page-title t" data-ru="Reflex: устройство" data-en="Reflex Internals">Reflex: устройство</h1>
+      </div>
+      <div class="release-rule"></div>
+
+      <div class="doc-body" id="doc-body-ru" lang="ru">
+<h2 id="reflex-внутреннее-устройство" class="doc-heading doc-heading--2">Reflex: внутреннее устройство</h2>
+<h2 id="содержание" class="doc-heading doc-heading--2">Содержание</h2>
+<ul class="doc-list">
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#общая-схема">Общая схема</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#иерархия-контейнеров">Иерархия контейнеров</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#containerbuilder">ContainerBuilder</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#резолверы-и-лайфтаймы">Резолверы и лайфтаймы</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#активация-объектов">Активация объектов</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#кэш-рефлексии">Кэш рефлексии</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#пайплайн-инъекции-по-атрибутам">Пайплайн инъекции по атрибутам</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#bootstrap-в-unity---unityinjector">Bootstrap в Unity - UnityInjector</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#containerscope">ContainerScope</a></span></li>
+</ul>
+<h2 id="общая-схема" class="doc-heading doc-heading--2">Общая схема</h2>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">┌──────────────────────────────────────────────────────────┐
+│                      Unity Runtime                       │
+│                                                          │
+│  ┌─────────────────────────────────────────────────────┐ │
+│  │                  Reflex (core DI)                   │ │
+│  │                                                     │ │
+│  │   ReflexSettings ──► RootContainer                  │ │
+│  │                           │                         │ │
+│  │                    SceneContainer (на сцену)        │ │
+│  │                     наследует RootContainer         │ │
+│  └─────────────────────────────────────────────────────┘ │
+│                                                          │
+│  ┌─────────────────────────────────────────────────────┐ │
+│  │              Zenjex (extension layer)               │ │
+│  │                                                     │ │
+│  │  ProjectRootInstaller  ──► RootContext (static)     │ │
+│  │  BindingBuilder (fluent Zenject-style API)          │ │
+│  │  ZenjexRunner  ──► ZenjexInjector  ──► [Zenjex]     │ │
+│  │  SceneInstaller (scene-scoped саб-контейнер)        │ │
+│  │  ZenjexBehaviour (инъекция до Awake, гарантированно)│ │
+│  └─────────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────┘</code></pre></div>
+<p class="doc-paragraph">Reflex управляет жизненным циклом контейнеров. Zenjex управляет оркестрацией инъекций и предоставляет совместимый с Zenject API поверх него. Слои развязаны: Zenjex обращается к Reflex только через <code>Container</code>, <code>ContainerBuilder</code> и <code>IInstaller</code>.</p>
+<h2 id="иерархия-контейнеров" class="doc-heading doc-heading--2">Иерархия контейнеров</h2>
+<p class="doc-paragraph">Reflex строит <strong>дерево контейнеров «родитель - потомок»</strong>. В типичном проекте два уровня:</p>
+<ul class="doc-list">
+<li class="doc-list-item"><span class="doc-list-item-text"><strong>RootContainer</strong> - собирается один раз из <code>ReflexSettings.RootScopes</code> до загрузки любой сцены. Хранит биндинги, которые должны жить во всех сценах: глобальные сервисы, конфиги, фабрики. Доступен также как статическое поле <code>Container.RootContainer</code>.</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><strong>SceneContainer</strong> - создаётся как дочерняя область <code>RootContainer</code> каждый раз, когда загружается сцена с <code>ContainerScope</code>. Наследует все резолверы родителя, может добавлять и перекрывать локальные биндинги. Уничтожается при выгрузке сцены.</span></li>
+</ul>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">RootContainer
+    └── SceneContainer (Scene A)
+    └── SceneContainer (Scene B, additive)</code></pre></div>
+<p class="doc-paragraph">При резолве тип ищется в собственном словаре <code>ResolversByContract</code>. Резолверы родителя <strong>копируются</strong> в потомка при сборке (<code>ContainerBuilder.Build()</code> делает shallow-copy из <code>Parent.ResolversByContract</code>), поэтому резолв всегда представляет собой один поиск по словарю без обхода родителей в рантайме.</p>
+<h2 id="containerbuilder" class="doc-heading doc-heading--2">ContainerBuilder</h2>
+<p class="doc-paragraph"><code>ContainerBuilder</code> - единственный способ создать <code>Container</code>. Он накапливает объекты <code>Binding</code> - каждый из них связывает <code>IResolver</code> с набором контрактов (типов) - а затем <code>Build()</code> материализует контейнер.</p>
+<p class="doc-paragraph">Ключевые шаги <code>Build()</code>:</p>
+<ul class="doc-list">
+<li class="doc-list-item"><span class="doc-list-item-text">Резолверы родителя сначала копируются в словарь нового контейнера, поэтому дочерние биндинги могут их перекрыть.</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text">Поле <code>DeclaringContainer</code> каждого резолвера устанавливается в новый контейнер. Именно это обеспечивает привязку singleton-экземпляров к контейнеру, который их объявил, а не к тому, который запросил.</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text">Унаследованные от родителя биндинги <code>Scoped + Eager</code> немедленно резолвятся в новом дочернем контейнере, создавая свежие scoped-экземпляры.</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text">Собственные биндинги <code>Singleton/Scoped + Eager</code> тоже резолвятся немедленно. Всё остальное - ленивое по умолчанию.</span></li>
+</ul>
+<p class="doc-paragraph">У <code>ContainerBuilder</code> также есть два статических хука для инструментария: <code>OnRootContainerBuilding</code> и <code>OnSceneContainerBuilding</code>, которые <code>UnityInjector</code> вызывает при создании контейнеров.</p>
+<h2 id="резолверы-и-лайфтаймы" class="doc-heading doc-heading--2">Резолверы и лайфтаймы</h2>
+<p class="doc-paragraph">Каждый биндинг сопоставляется ровно с одним <code>IResolver</code>. Резолвер решает, создавать ли новый экземпляр или вернуть кэшированный. Существует семь типов:</p>
+<div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>Резолвер</th><th>Лайфтайм</th><th>Поведение</th></tr></thead><tbody><tr><td><code>SingletonValueResolver</code></td><td>Singleton</td><td>Оборачивает готовый экземпляр, всегда возвращает его</td></tr><tr><td><code>SingletonTypeResolver</code></td><td>Singleton</td><td>Создаёт экземпляр при первом резолве, кэширует в <code>DeclaringContainer</code></td></tr><tr><td><code>TransientTypeResolver</code></td><td>Transient</td><td>Создаёт новый экземпляр при каждом резолве</td></tr><tr><td><code>ScopedTypeResolver</code></td><td>Scoped</td><td>Один экземпляр на область контейнера</td></tr><tr><td><code>SingletonFactoryResolver</code></td><td>Singleton</td><td>Вызывает фабричный делегат один раз, кэширует результат</td></tr><tr><td><code>TransientFactoryResolver</code></td><td>Transient</td><td>Вызывает фабрику при каждом резолве</td></tr><tr><td><code>ScopedFactoryResolver</code></td><td>Scoped</td><td>Вызывает фабрику один раз на область</td></tr></tbody></table></div>
+<p class="doc-paragraph"><code>Transient + Eager</code> запрещён на уровне assert - eagerly-созданный transient будет создан и сразу станет недостижимым, что не имеет смысла.</p>
+<h2 id="активация-объектов" class="doc-heading doc-heading--2">Активация объектов</h2>
+<p class="doc-paragraph">Когда резолверу типа нужно создать новый экземпляр, он вызывает <code>Container.Construct(type)</code>, который делегирует работу сначала <code>ConstructorInjector</code>, а затем <code>AttributeInjector</code>.</p>
+<p class="doc-paragraph">Приоритет при выборе конструктора:</p>
+<ul class="doc-list">
+<li class="doc-list-item"><span class="doc-list-item-text">Конструктор с атрибутом <code>[ReflexConstructor]</code>, если он есть.</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text">Иначе - конструктор с наибольшим числом параметров.</span></li>
+</ul>
+<p class="doc-paragraph">На горячем пути Reflex <strong>не использует</strong> <code>Activator.CreateInstance</code> или <code>ConstructorInfo.Invoke</code> напрямую. Вместо этого при регистрации компилируется типизированный делегат через <strong><code>System.Linq.Expressions</code></strong>:</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">// MonoActivatorFactory (Mono / Editor)
+var lambda = Expression.Lambda&lt;ObjectActivator&gt;(
+    Expression.Convert(Expression.New(constructor, argumentsExpressions), typeof(object)),
+    param);
+return lambda.Compile();</code></pre></div>
+<p class="doc-paragraph">Скомпилированный делегат кэшируется в <code>TypeConstructionInfoCache</code> с ключом <code>Type.TypeHandle.Value</code> (сырой <code>IntPtr</code>), так что последующие обращения - это один поиск по словарю без накладных расходов на рефлексию.</p>
+<p class="doc-paragraph">На <strong>IL2CPP</strong> (AOT-платформы) <code>Expression.Compile()</code> недоступен. <code>IL2CPPActivatorFactory</code> откатывается к <code>FormatterServices.GetUninitializedObject</code> + <code>ConstructorInfo.Invoke</code> и полностью обходится без expression tree, но всё равно кэширует информацию о конструкции, чтобы не сканировать рефлексию повторно. <code>ActivatorFactoryManager</code> выбирает нужную фабрику при старте на основе scripting backend.</p>
+<h2 id="кэш-рефлексии" class="doc-heading doc-heading--2">Кэш рефлексии</h2>
+<p class="doc-paragraph">Два кэша исключают повторное сканирование рефлексией:</p>
+<p class="doc-paragraph"><strong><code>TypeConstructionInfoCache</code></strong> - хранит <code>TypeConstructionInfo</code> на тип с ключом <code>TypeHandle.Value</code>. Каждая запись содержит скомпилированный делегат <code>ObjectActivator</code> и массив <code>MemberParamInfo[]</code> с описанием типов параметров конструктора и их значений по умолчанию. Строится лениво при первом вызове <code>Construct()</code> для данного типа.</p>
+<p class="doc-paragraph"><strong><code>TypeInfoCache</code></strong> - хранит <code>TypeAttributeInfo</code> на тип: списки полей, свойств и методов с атрибутом <code>[Inject]</code>. Строится лениво при первом вызове <code>AttributeInjector.Inject()</code>. Во время сканирования использует pooled-экземпляры <code>List&lt;T&gt;</code>, чтобы снизить аллокации.</p>
+<p class="doc-paragraph">Ни один из кэшей никогда не инвалидируется - Unity не перезагружает типы в рантайме.</p>
+<h2 id="пайплайн-инъекции-по-атрибутам" class="doc-heading doc-heading--2">Пайплайн инъекции по атрибутам</h2>
+<p class="doc-paragraph">После создания объекта <code>AttributeInjector.Inject(instance, container)</code> выполняет второй проход по членам с атрибутом <code>[Inject]</code>.</p>
+<p class="doc-paragraph">Если тип реализует <code>IAttributeInjectionContract</code>, вызов диспатчится напрямую в source-generated метод <code>ReflexInject(container)</code> - это нулевой по рефлексии быстрый путь, включаемый через <code>[SourceGeneratorInjectable]</code>. Диспатч инлайнится с <code>AggressiveInlining</code>. В противном случае инжектор читает из <code>TypeInfoCache</code> и вызывает:</p>
+<ul class="doc-list">
+<li class="doc-list-item"><span class="doc-list-item-text"><code>FieldInjector</code> - задаёт поля через <code>FieldInfo.SetValue</code></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><code>PropertyInjector</code> - задаёт свойства через <code>PropertyInfo.SetValue</code></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><code>MethodInjector</code> - вызывает метод с резолвнутыми аргументами</span></li>
+</ul>
+<h2 id="bootstrap-в-unity---unityinjector" class="doc-heading doc-heading--2">Bootstrap в Unity - UnityInjector</h2>
+<p class="doc-paragraph"><code>UnityInjector</code> связывает Reflex с player loop Unity. Подключается через <code>[RuntimeInitializeOnLoadMethod(AfterAssembliesLoaded)]</code>, который срабатывает до загрузки любой сцены. Сборка помечена <code>[AlwaysLinkAssembly]</code>, чтобы код выполнился даже если сборка иначе была бы stripped.</p>
+<p class="doc-paragraph">Последовательность запуска:</p>
+<ul class="doc-list">
+<li class="doc-list-item"><span class="doc-list-item-text">Статическое состояние сбрасывается - это важно при отключённом <strong>Reload Domain</strong> в настройках редактора. Сброс обёрнут в <code>#if UNITY_EDITOR</code> и не выполняется в сборках.</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text">Подписка на <code>OnSceneLoaded</code>, <code>SceneManager.sceneUnloaded</code> и <code>Application.quitting</code>.</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text">При загрузке первой сцены: если <code>Container.RootContainer</code> равен null, он собирается из всех активных <code>RootScopes</code> в <code>ReflexSettings</code>, затем создаётся <code>SceneContainer</code> как дочерняя область.</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text">При выгрузке сцены: соответствующий <code>SceneContainer</code> уничтожается и удаляется из <code>ContainersPerScene</code>.</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text">При выходе из приложения: <code>RootContainer</code> уничтожается, всё статическое состояние и подписки на события очищаются.</span></li>
+</ul>
+<p class="doc-paragraph"><code>ContainersPerScene</code> - <code>Dictionary&lt;Scene, Container&gt;</code> для поиска нужного контейнера во время инъекции. Если в сцене окажется два компонента <code>ContainerScope</code>, будет брошен <code>SceneHasMultipleSceneScopesException</code>.</p>
+<h2 id="containerscope" class="doc-heading doc-heading--2">ContainerScope</h2>
+<p class="doc-paragraph"><code>ContainerScope</code> - <code>MonoBehaviour</code> с порядком выполнения <code>-1 000 000 000</code>, то есть гарантированно запускается раньше всего остального. Его <code>Awake()</code> вызывает <code>UnityInjector.OnSceneLoaded.Invoke(scene, this)</code>, что запускает создание контейнера и инъекцию по сцене до того, как в ней сработает любой другой <code>Awake()</code>. Важно: <code>Awake()</code> вызывается только для <code>ContainerScope</code>-экземпляров, размещённых в сценах - root scopes из <code>ReflexSettings</code> Unity никогда не инстанцирует.</p>
+<p class="doc-paragraph"><code>ContainerScope.InstallBindings(builder)</code> собирает все компоненты <code>IInstaller</code> на себе и дочерних объектах через <code>GetComponentsInChildren&lt;IInstaller&gt;()</code> с pooled <code>List&lt;IInstaller&gt;</code>, затем вызывает на каждом <code>InstallBindings</code>. Именно так <code>GameInstaller</code> (или любое количество инсталлеров) подхватывается автоматически.</p>
+<p class="doc-paragraph"><code>GameObjectSelfInjector</code> - вспомогательный <code>MonoBehaviour</code> (порядок <code>SceneContainerScopeExecutionOrder + 100</code>), который инъецирует один конкретный GameObject из контейнера сцены. Поддерживает три стратегии: <code>Single</code> (только данный компонент), <code>Object</code> (все компоненты на GameObject) и <code>Recursive</code> (полная иерархия). Нужен для объектов, которые не покрываются сценарным обходом.</p>
+<p class="doc-paragraph">← <a href="Home.ru">Главная</a> | <a href="Zenjex-Internals.ru">Zenjex: внутреннее устройство</a> →</p>
+
+      </div>
+      <div class="doc-body" id="doc-body-en" lang="en" style="display:none">
+<h2 id="reflex-internals" class="doc-heading doc-heading--2">Reflex Internals</h2>
+<h2 id="table-of-contents" class="doc-heading doc-heading--2">Table of Contents</h2>
+<ul class="doc-list">
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#high-level-overview">High-level overview</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#container-hierarchy">Container hierarchy</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#containerbuilder">ContainerBuilder</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#resolvers-and-lifetimes">Resolvers and lifetimes</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#object-activation">Object activation</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#reflection-cache">Reflection cache</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#attribute-injection-pipeline">Attribute injection pipeline</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#unity-bootstrap---unityinjector">Unity bootstrap - UnityInjector</a></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><a href="#containerscope">ContainerScope</a></span></li>
+</ul>
+<h2 id="high-level-overview" class="doc-heading doc-heading--2">High-level overview</h2>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">┌──────────────────────────────────────────────────────────┐
+│                      Unity Runtime                       │
+│                                                          │
+│  ┌─────────────────────────────────────────────────────┐ │
+│  │                  Reflex (core DI)                   │ │
+│  │                                                     │ │
+│  │   ReflexSettings ──► RootContainer                  │ │
+│  │                           │                         │ │
+│  │                    SceneContainer (per scene)       │ │
+│  │                     inherits from RootContainer     │ │
+│  └─────────────────────────────────────────────────────┘ │
+│                                                          │
+│  ┌─────────────────────────────────────────────────────┐ │
+│  │              Zenjex (extension layer)               │ │
+│  │                                                     │ │
+│  │  ProjectRootInstaller  ──► RootContext (static)     │ │
+│  │  BindingBuilder (fluent Zenject-style API)          │ │
+│  │  ZenjexRunner  ──► ZenjexInjector  ──► [Zenjex]     │ │
+│  │  SceneInstaller (scene-scoped sub-container)        │ │
+│  │  ZenjexBehaviour (guaranteed pre-Awake injection)   │ │
+│  └─────────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────┘</code></pre></div>
+<p class="doc-paragraph">Reflex owns the container lifecycle. Zenjex owns the injection orchestration and exposes a Zenject-compatible API on top. The two layers are decoupled - Zenjex talks to Reflex only through <code>Container</code>, <code>ContainerBuilder</code>, and <code>IInstaller</code>.</p>
+<h2 id="container-hierarchy" class="doc-heading doc-heading--2">Container hierarchy</h2>
+<p class="doc-paragraph">Reflex uses a <strong>parent-child container tree</strong>. A typical setup has two levels:</p>
+<ul class="doc-list">
+<li class="doc-list-item"><span class="doc-list-item-text"><strong>RootContainer</strong> - built once from <code>ReflexSettings.RootScopes</code> before any scene loads. Holds bindings that need to survive across all scenes: global services, configs, factories. Also stored as the static <code>Container.RootContainer</code>.</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><strong>SceneContainer</strong> - created as a child scope of <code>RootContainer</code> each time a scene with a <code>ContainerScope</code> loads. It inherits all resolvers from the parent, can add or override bindings locally, and is disposed when the scene unloads.</span></li>
+</ul>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">RootContainer
+    └── SceneContainer (Scene A)
+    └── SceneContainer (Scene B, additive)</code></pre></div>
+<p class="doc-paragraph">When resolving a type, a container looks in its own <code>ResolversByContract</code> dictionary. Parent resolvers are <strong>copied</strong> into the child at build time (<code>ContainerBuilder.Build()</code> shallow-copies <code>Parent.ResolversByContract</code>), so resolution is always a single dictionary lookup with no runtime parent traversal.</p>
+<h2 id="containerbuilder" class="doc-heading doc-heading--2">ContainerBuilder</h2>
+<p class="doc-paragraph"><code>ContainerBuilder</code> is the only way to create a <code>Container</code>. It collects <code>Binding</code> objects - each one pairs an <code>IResolver</code> with a set of contracts (types) - then <code>Build()</code> materializes the container.</p>
+<p class="doc-paragraph">Key steps in <code>Build()</code>:</p>
+<ul class="doc-list">
+<li class="doc-list-item"><span class="doc-list-item-text">Parent resolvers are shallow-copied into the new container&#x27;s dictionary first, so child bindings can shadow them.</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text">Each resolver&#x27;s <code>DeclaringContainer</code> is set to the new container. This is what keeps singleton instances scoped to the container that declared them, not the one that resolved them.</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text">Inherited <code>Scoped + Eager</code> bindings from the parent are resolved immediately against the new child container, creating fresh scoped instances.</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text">Self-owned <code>Singleton/Scoped + Eager</code> bindings are resolved immediately as well. Everything else is lazy by default.</span></li>
+</ul>
+<p class="doc-paragraph"><code>ContainerBuilder</code> also has two static extension hooks for tooling: <code>OnRootContainerBuilding</code> and <code>OnSceneContainerBuilding</code>, both invoked by <code>UnityInjector</code> during container creation.</p>
+<h2 id="resolvers-and-lifetimes" class="doc-heading doc-heading--2">Resolvers and lifetimes</h2>
+<p class="doc-paragraph">Every binding maps to exactly one <code>IResolver</code>. The resolver decides whether to create a new instance or return a cached one. There are seven types:</p>
+<div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>Resolver</th><th>Lifetime</th><th>Behaviour</th></tr></thead><tbody><tr><td><code>SingletonValueResolver</code></td><td>Singleton</td><td>Wraps a pre-existing instance, always returns it</td></tr><tr><td><code>SingletonTypeResolver</code></td><td>Singleton</td><td>Creates the instance on first resolve, caches it on <code>DeclaringContainer</code></td></tr><tr><td><code>TransientTypeResolver</code></td><td>Transient</td><td>Creates a new instance on every resolve</td></tr><tr><td><code>ScopedTypeResolver</code></td><td>Scoped</td><td>Creates one instance per container scope</td></tr><tr><td><code>SingletonFactoryResolver</code></td><td>Singleton</td><td>Calls a factory delegate once, caches the result</td></tr><tr><td><code>TransientFactoryResolver</code></td><td>Transient</td><td>Calls the factory on every resolve</td></tr><tr><td><code>ScopedFactoryResolver</code></td><td>Scoped</td><td>Calls the factory once per scope</td></tr></tbody></table></div>
+<p class="doc-paragraph"><code>Transient + Eager</code> is forbidden at the assertion level - an eagerly created transient would be constructed and immediately become unreachable, which makes no sense.</p>
+<h2 id="object-activation" class="doc-heading doc-heading--2">Object activation</h2>
+<p class="doc-paragraph">When a type resolver needs to construct a new instance, it calls <code>Container.Construct(type)</code>, which delegates to <code>ConstructorInjector</code> and then <code>AttributeInjector</code>.</p>
+<p class="doc-paragraph">Constructor selection priority:</p>
+<ul class="doc-list">
+<li class="doc-list-item"><span class="doc-list-item-text">A constructor marked <code>[ReflexConstructor]</code>, if one exists.</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text">The constructor with the most parameters otherwise.</span></li>
+</ul>
+<p class="doc-paragraph">On the hot path, Reflex does <strong>not</strong> use <code>Activator.CreateInstance</code> or bare <code>ConstructorInfo.Invoke</code>. Instead, it compiles a typed delegate at registration time using <strong><code>System.Linq.Expressions</code></strong>:</p>
+<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">// MonoActivatorFactory (Mono / Editor)
+var lambda = Expression.Lambda&lt;ObjectActivator&gt;(
+    Expression.Convert(Expression.New(constructor, argumentsExpressions), typeof(object)),
+    param);
+return lambda.Compile();</code></pre></div>
+<p class="doc-paragraph">The compiled delegate is cached in <code>TypeConstructionInfoCache</code> keyed by <code>Type.TypeHandle.Value</code> (a raw <code>IntPtr</code>), so subsequent lookups are a single dictionary read with no reflection overhead.</p>
+<p class="doc-paragraph">On <strong>IL2CPP</strong> (AOT platforms), <code>Expression.Compile()</code> is unavailable. <code>IL2CPPActivatorFactory</code> falls back to <code>FormatterServices.GetUninitializedObject</code> + <code>ConstructorInfo.Invoke</code> and skips the expression tree entirely, but still caches the construction info to avoid repeated reflection scans. <code>ActivatorFactoryManager</code> picks the right factory at startup based on the scripting backend.</p>
+<h2 id="reflection-cache" class="doc-heading doc-heading--2">Reflection cache</h2>
+<p class="doc-paragraph">Two caches prevent repeated reflection scans:</p>
+<p class="doc-paragraph"><strong><code>TypeConstructionInfoCache</code></strong> - stores <code>TypeConstructionInfo</code> per type, keyed by <code>TypeHandle.Value</code>. Each entry holds the compiled <code>ObjectActivator</code> delegate and a <code>MemberParamInfo[]</code> describing constructor parameter types and default values. Built lazily on the first <code>Construct()</code> call per type.</p>
+<p class="doc-paragraph"><strong><code>TypeInfoCache</code></strong> - stores <code>TypeAttributeInfo</code> per type: lists of fields, properties, and methods carrying <code>[Inject]</code>. Built lazily on the first <code>AttributeInjector.Inject()</code> call. Uses pooled <code>List&lt;T&gt;</code> instances during the scanning pass to keep allocations down.</p>
+<p class="doc-paragraph">Neither cache ever invalidates - Unity does not hot-reload types at runtime.</p>
+<h2 id="attribute-injection-pipeline" class="doc-heading doc-heading--2">Attribute injection pipeline</h2>
+<p class="doc-paragraph">After construction, <code>AttributeInjector.Inject(instance, container)</code> runs a second pass for <code>[Inject]</code>-marked members.</p>
+<p class="doc-paragraph">If the type implements <code>IAttributeInjectionContract</code>, the call dispatches directly to a source-generated <code>ReflexInject(container)</code> method - a zero-reflection fast path, opt-in via <code>[SourceGeneratorInjectable]</code>. The dispatch is inlined with <code>AggressiveInlining</code>. Otherwise the injector reads from <code>TypeInfoCache</code> and calls:</p>
+<ul class="doc-list">
+<li class="doc-list-item"><span class="doc-list-item-text"><code>FieldInjector</code> - sets fields via <code>FieldInfo.SetValue</code></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><code>PropertyInjector</code> - sets properties via <code>PropertyInfo.SetValue</code></span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><code>MethodInjector</code> - calls the method with resolved arguments</span></li>
+</ul>
+<h2 id="unity-bootstrap---unityinjector" class="doc-heading doc-heading--2">Unity bootstrap - UnityInjector</h2>
+<p class="doc-paragraph"><code>UnityInjector</code> is the entry point that connects Reflex to the Unity player loop. It hooks in via <code>[RuntimeInitializeOnLoadMethod(AfterAssembliesLoaded)]</code>, which fires before any scene loads. The assembly carries <code>[AlwaysLinkAssembly]</code> to ensure this runs even if the assembly would otherwise be stripped.</p>
+<p class="doc-paragraph">Startup sequence:</p>
+<ul class="doc-list">
+<li class="doc-list-item"><span class="doc-list-item-text">Static state is reset - this matters when <strong>Reload Domain</strong> is disabled in Editor settings. The reset is wrapped in <code>#if UNITY_EDITOR</code> so it does not run in builds.</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text"><code>OnSceneLoaded</code>, <code>SceneManager.sceneUnloaded</code>, and <code>Application.quitting</code> are subscribed.</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text">On the first scene load: if <code>Container.RootContainer</code> is null, it is built from all active <code>RootScopes</code> in <code>ReflexSettings</code>, then a <code>SceneContainer</code> is created as a child scope.</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text">On scene unload: the corresponding <code>SceneContainer</code> is disposed and removed from <code>ContainersPerScene</code>.</span></li>
+<li class="doc-list-item"><span class="doc-list-item-text">On quit: <code>RootContainer</code> is disposed and all static state and event subscriptions are cleaned up.</span></li>
+</ul>
+<p class="doc-paragraph"><code>ContainersPerScene</code> is a <code>Dictionary&lt;Scene, Container&gt;</code> used to look up the right container during injection. If a scene has two <code>ContainerScope</code> components, <code>SceneHasMultipleSceneScopesException</code> is thrown.</p>
+<h2 id="containerscope" class="doc-heading doc-heading--2">ContainerScope</h2>
+<p class="doc-paragraph"><code>ContainerScope</code> is a <code>MonoBehaviour</code> with execution order <code>-1,000,000,000</code> - the lowest possible value, so it always runs before everything else. Its <code>Awake()</code> calls <code>UnityInjector.OnSceneLoaded.Invoke(scene, this)</code>, which triggers container creation and scene injection before any other <code>Awake()</code> in the scene. Note that <code>Awake()</code> is only invoked for <code>ContainerScope</code> instances placed in scenes - root scopes listed in <code>ReflexSettings</code> are never instantiated by Unity.</p>
+<p class="doc-paragraph"><code>ContainerScope.InstallBindings(builder)</code> collects all <code>IInstaller</code> components on itself and its children via <code>GetComponentsInChildren&lt;IInstaller&gt;()</code> using a pooled <code>List&lt;IInstaller&gt;</code>, then calls <code>InstallBindings</code> on each one. This is how a <code>GameInstaller</code> (or any number of installers) gets picked up automatically.</p>
+<p class="doc-paragraph"><code>GameObjectSelfInjector</code> is a companion <code>MonoBehaviour</code> (execution order <code>SceneContainerScopeExecutionOrder + 100</code>) that injects a single GameObject from the scene container. It supports three strategies: <code>Single</code> (this component only), <code>Object</code> (all components on the GameObject), and <code>Recursive</code> (the full hierarchy). Use it for objects not covered by scene-wide injection.</p>
+<p class="doc-paragraph">← <a href="Home">Home</a> | <a href="Zenjex-Internals">Zenjex Internals</a> →</p>
+
+      </div>
+
+      <div class="doc-page-nav"><a href="../../docs/internals/zenjex-internals.html" class="doc-nav-link">
+          <span class="t" data-ru="← Назад" data-en="← Previous">← Назад</span>
+          <span class="doc-nav-title t" data-ru="Zenjex: устройство" data-en="Zenjex Internals">Zenjex: устройство</span>
+        </a></div>
+
+    </main>
+  </div>
+
+  <footer>
+    <span class="t" data-ru="© 2026 Zenjex — документация" data-en="© 2026 Zenjex — documentation">© 2026 Zenjex — документация</span>
+  </footer>
+
+</div>
+
+<script src="../../js/theme.js"></script>
+<script src="../../js/lang.js"></script>
+<script src="../../js/scroll.js"></script>
+<script>
+  // Sidebar toggle
+  function toggleSidebar() {
+    var s = document.getElementById('sidebar');
+    var b = document.getElementById('sidebar-backdrop');
+    var t = document.getElementById('sidebar-toggle');
+    var open = s.classList.toggle('open');
+    b.classList.toggle('open', open);
+    t.classList.toggle('open', open);
+  }
+
+  // Language switch: show/hide ru/en body blocks
+  var _origSetLang = window.setLang;
+  window.setLang = function(lang) {
+    if (_origSetLang) _origSetLang(lang);
+    var ru = document.getElementById('doc-body-ru');
+    var en = document.getElementById('doc-body-en');
+    if (ru) ru.style.display = lang === 'ru' ? '' : 'none';
+    if (en) en.style.display = lang === 'en' ? '' : 'none';
+  };
+
+  // Apply saved lang on load
+  (function() {
+    var lang = localStorage.getItem('cl-lang') || 'ru';
+    var ru = document.getElementById('doc-body-ru');
+    var en = document.getElementById('doc-body-en');
+    if (ru) ru.style.display = lang === 'ru' ? '' : 'none';
+    if (en) en.style.display = lang === 'en' ? '' : 'none';
+  })();
+</script>
+
+</body>
+</html>
