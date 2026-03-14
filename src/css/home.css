@@ -70,14 +70,15 @@
 
 /* Hero logo — big, on top */
 .home-hero-logo-wrap {
-  flex-shrink: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
   margin-bottom: 2.6rem;
 }
 
 .home-hero-logo {
-  width: 55%;
-  max-width: 560px;
-  min-width: 260px;
+  /* 55% of the viewport width, clamped between 260px and 560px */
+  width: clamp(260px, 55vw, 560px);
   height: auto;
   display: block;
   background: transparent;
@@ -436,9 +437,7 @@
   }
 
   .home-hero-logo {
-    width: 65%;
-    max-width: 320px;
-    min-width: 180px;
+    width: clamp(180px, 70vw, 320px);
   }
 
   .home-hero-logo-wrap {
