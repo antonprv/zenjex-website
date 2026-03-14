@@ -75,7 +75,9 @@
 }
 
 .home-hero-logo {
-  width: 340px;
+  width: 55%;
+  max-width: 560px;
+  min-width: 260px;
   height: auto;
   display: block;
   background: transparent;
@@ -434,7 +436,9 @@
   }
 
   .home-hero-logo {
-    width: 220px;
+    width: 65%;
+    max-width: 320px;
+    min-width: 180px;
   }
 
   .home-hero-logo-wrap {
