@@ -11,8 +11,8 @@
 
 /* ── Fallback accents (before config loads) ── */
 :root {
-  --accent-dark:  #847271;
-  --accent-light: #a67c52;
+  --accent-dark:  #4ccbad;
+  --accent-light: #4c3eaf;
 }
 
 /* ── Dark theme (default) ── */
@@ -22,7 +22,7 @@
   --bg:       #0d0d0d;
   --surface:  #161616;
   --card:     #1c1c1c;
-  --accent2:  #e8d5a3;
+  --accent2:  #a8f0e0;
   --text:     #f0ece4;
   --muted:    #8a8070;
   --border:   var(--border-dark,          rgba(132, 114, 113, 0.18));
