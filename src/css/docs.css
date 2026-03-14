@@ -271,6 +271,7 @@
   margin: 0.8rem 0 1.2rem;
   border-radius: 10px;
   border: 1px solid var(--border);
+  overflow-x: auto;
   transition: border-color 0.22s;
 }
 .doc-table-wrap:hover {
@@ -290,6 +291,16 @@
 .doc-table td:nth-child(2) { width: 26%; }
 .doc-table th:nth-child(3),
 .doc-table td:nth-child(3) { width: 32%; }
+
+/* 4-column tables */
+.doc-table:has(th:nth-child(4)) th:first-child,
+.doc-table:has(th:nth-child(4)) td:first-child { width: 16%; }
+.doc-table:has(th:nth-child(4)) th:nth-child(2),
+.doc-table:has(th:nth-child(4)) td:nth-child(2) { width: 44%; }
+.doc-table:has(th:nth-child(4)) th:nth-child(3),
+.doc-table:has(th:nth-child(4)) td:nth-child(3) { width: 20%; }
+.doc-table:has(th:nth-child(4)) th:nth-child(4),
+.doc-table:has(th:nth-child(4)) td:nth-child(4) { width: 20%; }
 
 
 .doc-table th {
