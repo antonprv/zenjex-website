@@ -97,13 +97,13 @@
   line-height: 1.5;
 }
 
-/* Inside table cells, allow code to wrap */
+/* Inside table cells, code stays as one unit but cell text can still wrap around it */
 .doc-table th code,
 .doc-table td code {
-  white-space: normal;
-  display: inline;
-  word-break: break-word;
-  overflow-wrap: break-word;
+  white-space: nowrap;
+  display: inline-block;
+  word-break: normal;
+  overflow-wrap: normal;
 }
 
 [data-theme="light"] .doc-paragraph code,
@@ -294,14 +294,15 @@
 .doc-table td:nth-child(3) { width: 32%; }
 
 /* 4-column tables */
-.doc-table:has(th:nth-child(4)) th:first-child,
-.doc-table:has(th:nth-child(4)) td:first-child { width: 16%; }
+.doc-table:has(th:nth-child(4)) {
+  table-layout: auto;
+}
 .doc-table:has(th:nth-child(4)) th:nth-child(2),
-.doc-table:has(th:nth-child(4)) td:nth-child(2) { width: 44%; }
+.doc-table:has(th:nth-child(4)) td:nth-child(2) { width: 46%; }
 .doc-table:has(th:nth-child(4)) th:nth-child(3),
-.doc-table:has(th:nth-child(4)) td:nth-child(3) { width: 20%; }
+.doc-table:has(th:nth-child(4)) td:nth-child(3) { width: 18%; }
 .doc-table:has(th:nth-child(4)) th:nth-child(4),
-.doc-table:has(th:nth-child(4)) td:nth-child(4) { width: 20%; }
+.doc-table:has(th:nth-child(4)) td:nth-child(4) { width: 18%; }
 
 
 .doc-table th {
