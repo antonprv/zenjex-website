@@ -53,9 +53,46 @@
       "text": "Internal `Awake` flow:"
     },
     {
-      "type": "code",
-      "lang": "csharp",
-      "text": "ProjectRootInstaller.Awake()\n  ├─ new ContainerBuilder()\n  ├─ InstallBindings(builder)          <- user code\n  ├─ RootContainer = builder.Build()\n  ├─ OnContainerReady?.Invoke()        <- ZenjexRunner Pass 1 fires here\n  └─ StartCoroutine(LateInitRoutine)\n       ├─ yield return InstallGameInstanceRoutine()  <- optional async work\n       ├─ CallInitializables(RootContainer)          <- IInitializable.Initialize() on every registered service\n       ├─ LaunchGame()                               <- user code\n       └─ OnGameLaunched?.Invoke()     <- ZenjexRunner Pass 2 fires here"
+      "type": "diagram",
+      "kind": "flow",
+      "title": "ProjectRootInstaller.Awake()",
+      "steps": [
+        {
+          "label": "new ContainerBuilder()"
+        },
+        {
+          "label": "InstallBindings(builder)",
+          "note": "user code"
+        },
+        {
+          "label": "RootContainer = builder.Build()"
+        },
+        {
+          "label": "OnContainerReady?.Invoke()",
+          "note": "ZenjexRunner Pass 1"
+        },
+        {
+          "label": "StartCoroutine(LateInitRoutine)",
+          "children": [
+            {
+              "label": "InstallGameInstanceRoutine()",
+              "note": "optional async work"
+            },
+            {
+              "label": "CallInitializables(RootContainer)",
+              "note": "IInitializable.Initialize()"
+            },
+            {
+              "label": "LaunchGame()",
+              "note": "user code"
+            },
+            {
+              "label": "OnGameLaunched?.Invoke()",
+              "note": "ZenjexRunner Pass 2"
+            }
+          ]
+        }
+      ]
     },
     {
       "type": "paragraph",
@@ -404,18 +441,49 @@
       "text": "It creates a **child container** that inherits all global bindings from `ProjectRootInstaller.RootContainer` and adds scene-local bindings on top:"
     },
     {
-      "type": "code",
-      "lang": "csharp",
-      "text": "RootContainer  (global, ProjectRootInstaller)\n    └── SceneContainer  (per-scene, SceneInstaller)"
+      "type": "diagram",
+      "kind": "hierarchy",
+      "nodes": [
+        {
+          "label": "RootContainer",
+          "sub": "global · ProjectRootInstaller",
+          "children": [
+            {
+              "label": "SceneContainer",
+              "sub": "per-scene · SceneInstaller"
+            }
+          ]
+        }
+      ]
     },
     {
       "type": "paragraph",
       "text": "Lifecycle inside `OnAwake()` (runs at order `-200`, after `ProjectRootInstaller` at `-280`):"
     },
     {
-      "type": "code",
-      "lang": "csharp",
-      "text": "SceneInstaller.OnAwake()\n  ├─ RootContext.Runtime.Scope(InstallBindings)  <- creates child container\n  ├─ ZenjexSceneContext.Register(scene, container)\n  ├─ CallInitializables(SceneContainer)          <- IInitializable on scene-local services\n  ├─ OnSceneContainerReady?.Invoke(container)\n  └─ OnInstalled()                               <- optional override"
+      "type": "diagram",
+      "kind": "flow",
+      "title": "SceneInstaller.OnAwake()",
+      "steps": [
+        {
+          "label": "RootContext.Runtime.Scope(InstallBindings)",
+          "note": "creates child container"
+        },
+        {
+          "label": "ZenjexSceneContext.Register(scene, container)"
+        },
+        {
+          "label": "CallInitializables(SceneContainer)",
+          "note": "IInitializable on scene-local services"
+        },
+        {
+          "label": "OnSceneContainerReady?.Invoke(container)"
+        },
+        {
+          "label": "OnInstalled()",
+          "note": "optional override"
+        }
+      ]
     },
     {
       "type": "paragraph",
@@ -454,9 +522,74 @@
       "text": "Execution timeline"
     },
     {
-      "type": "code",
-      "lang": "csharp",
-      "text": "Application start\n│\n├─ [RuntimeInitializeOnLoadMethod: AfterAssembliesLoaded]\n│     UnityInjector.Initialize()\n│\n├─ [RuntimeInitializeOnLoadMethod: BeforeSceneLoad]\n│     ZenjexRunner.Initialize()\n│\nScene loads\n│\n├─ ContainerScope.Awake()  (order: -1,000,000,000)\n│     UnityInjector creates SceneContainer as child of RootContainer\n│\n├─ ProjectRootInstaller.Awake()  (order: -280)\n│     InstallBindings(builder)\n│     RootContainer = builder.Build()\n│     OnContainerReady.Invoke()\n│        └─ ZenjexRunner Pass 1: injects all [Zenjex] scene objects\n│     StartCoroutine(LateInitRoutine)\n│\n├─ SceneInstaller.OnAwake()  (order: -200)  [ZenjexBehaviour subclass]\n│     ZenjexInjector.Inject(this)        <- global [Zenjex] fields filled\n│     ZenjexRunner.MarkInjected(this)\n│     RootContext.Runtime.Scope(InstallBindings) <- scene container created\n│     CallInitializables(SceneContainer)\n│     OnSceneContainerReady.Invoke(SceneContainer)\n│\n├─ ZenjexBehaviour.Awake()  (order: -100)  [for each ZenjexBehaviour in scene]\n│     ZenjexInjector.Inject(this)\n│     ZenjexRunner.MarkInjected(this)\n│     OnAwake()\n│\n├─ MonoBehaviour.Awake()  (order: 0, default)\n│     [Zenjex] fields already populated from Pass 1\n│\n└─ LateInitRoutine (coroutine, runs after yielding)\n      InstallGameInstanceRoutine()    <- optional async initialization\n      CallInitializables(RootContainer) <- IInitializable.Initialize()\n      LaunchGame()                    <- game entry point\n      OnGameLaunched.Invoke()\n         └─ ZenjexRunner Pass 2: re-scans scene for bindings added during async init"
+      "type": "diagram",
+      "kind": "timeline",
+      "groups": [
+        {
+          "label": "Application start",
+          "items": [
+            {
+              "label": "RuntimeInitializeOnLoadMethod: AfterAssembliesLoaded",
+              "sub": "UnityInjector.Initialize()"
+            },
+            {
+              "label": "RuntimeInitializeOnLoadMethod: BeforeSceneLoad",
+              "sub": "ZenjexRunner.Initialize()"
+            }
+          ]
+        },
+        {
+          "label": "Scene loads",
+          "items": [
+            {
+              "label": "ContainerScope.Awake()",
+              "order": "-1,000,000,000",
+              "sub": "UnityInjector creates SceneContainer"
+            },
+            {
+              "label": "ProjectRootInstaller.Awake()",
+              "order": "-280",
+              "sub": "Build container → OnContainerReady → Pass 1"
+            },
+            {
+              "label": "SceneInstaller.OnAwake()",
+              "order": "-200",
+              "sub": "Create scene container → scene IInitializables"
+            },
+            {
+              "label": "ZenjexBehaviour.Awake()",
+              "order": "-100",
+              "sub": "Inject(this) → OnAwake()"
+            },
+            {
+              "label": "MonoBehaviour.Awake()",
+              "order": "0",
+              "sub": "[Zenjex] fields populated from Pass 1"
+            }
+          ]
+        },
+        {
+          "label": "After yield (coroutine)",
+          "items": [
+            {
+              "label": "InstallGameInstanceRoutine()",
+              "sub": "optional async initialization"
+            },
+            {
+              "label": "CallInitializables(RootContainer)",
+              "sub": "IInitializable.Initialize()"
+            },
+            {
+              "label": "LaunchGame()",
+              "sub": "game entry point"
+            },
+            {
+              "label": "OnGameLaunched.Invoke()",
+              "sub": "ZenjexRunner Pass 2"
+            }
+          ]
+        }
+      ]
     },
     {
       "type": "heading",
@@ -566,9 +699,46 @@
       "text": "Порядок выполнения внутри `Awake`:"
     },
     {
-      "type": "code",
-      "lang": "csharp",
-      "text": "ProjectRootInstaller.Awake()\n  ├─ new ContainerBuilder()\n  ├─ InstallBindings(builder)          <- пользовательский код\n  ├─ RootContainer = builder.Build()\n  ├─ OnContainerReady?.Invoke()        <- здесь срабатывает Pass 1 ZenjexRunner\n  └─ StartCoroutine(LateInitRoutine)\n       ├─ yield return InstallGameInstanceRoutine()  <- опциональная асинхронная работа\n       ├─ CallInitializables(RootContainer)          <- IInitializable.Initialize() для каждого зарегистрированного сервиса\n       ├─ LaunchGame()                               <- пользовательский код\n       └─ OnGameLaunched?.Invoke()     <- здесь срабатывает Pass 2 ZenjexRunner"
+      "type": "diagram",
+      "kind": "flow",
+      "title": "ProjectRootInstaller.Awake()",
+      "steps": [
+        {
+          "label": "new ContainerBuilder()"
+        },
+        {
+          "label": "InstallBindings(builder)",
+          "note": "пользовательский код"
+        },
+        {
+          "label": "RootContainer = builder.Build()"
+        },
+        {
+          "label": "OnContainerReady?.Invoke()",
+          "note": "Pass 1 ZenjexRunner"
+        },
+        {
+          "label": "StartCoroutine(LateInitRoutine)",
+          "children": [
+            {
+              "label": "InstallGameInstanceRoutine()",
+              "note": "асинхронная работа"
+            },
+            {
+              "label": "CallInitializables(RootContainer)",
+              "note": "IInitializable.Initialize()"
+            },
+            {
+              "label": "LaunchGame()",
+              "note": "пользовательский код"
+            },
+            {
+              "label": "OnGameLaunched?.Invoke()",
+              "note": "Pass 2 ZenjexRunner"
+            }
+          ]
+        }
+      ]
     },
     {
       "type": "paragraph",
@@ -917,18 +1087,49 @@
       "text": "Создаёт **дочерний контейнер**, наследующий все глобальные биндинги из `ProjectRootInstaller.RootContainer`, и добавляет к ним локальные биндинги сцены:"
     },
     {
-      "type": "code",
-      "lang": "csharp",
-      "text": "RootContainer  (глобальный, ProjectRootInstaller)\n    └── SceneContainer  (для сцены, SceneInstaller)"
+      "type": "diagram",
+      "kind": "hierarchy",
+      "nodes": [
+        {
+          "label": "RootContainer",
+          "sub": "глобальный · ProjectRootInstaller",
+          "children": [
+            {
+              "label": "SceneContainer",
+              "sub": "для сцены · SceneInstaller"
+            }
+          ]
+        }
+      ]
     },
     {
       "type": "paragraph",
       "text": "Жизненный цикл внутри `OnAwake()` (порядок `-200`, после `ProjectRootInstaller` с порядком `-280`):"
     },
     {
-      "type": "code",
-      "lang": "csharp",
-      "text": "SceneInstaller.OnAwake()\n  ├─ RootContext.Runtime.Scope(InstallBindings)  <- создаётся дочерний контейнер\n  ├─ ZenjexSceneContext.Register(scene, container)\n  ├─ CallInitializables(SceneContainer)          <- IInitializable для scene-local сервисов\n  ├─ OnSceneContainerReady?.Invoke(container)\n  └─ OnInstalled()                               <- опциональный override"
+      "type": "diagram",
+      "kind": "flow",
+      "title": "SceneInstaller.OnAwake()",
+      "steps": [
+        {
+          "label": "RootContext.Runtime.Scope(InstallBindings)",
+          "note": "создаётся дочерний контейнер"
+        },
+        {
+          "label": "ZenjexSceneContext.Register(scene, container)"
+        },
+        {
+          "label": "CallInitializables(SceneContainer)",
+          "note": "IInitializable для scene-local сервисов"
+        },
+        {
+          "label": "OnSceneContainerReady?.Invoke(container)"
+        },
+        {
+          "label": "OnInstalled()",
+          "note": "опциональный override"
+        }
+      ]
     },
     {
       "type": "paragraph",
@@ -967,9 +1168,74 @@
       "text": "Хронология выполнения"
     },
     {
-      "type": "code",
-      "lang": "csharp",
-      "text": "Запуск приложения\n│\n├─ [RuntimeInitializeOnLoadMethod: AfterAssembliesLoaded]\n│     UnityInjector.Initialize()\n│\n├─ [RuntimeInitializeOnLoadMethod: BeforeSceneLoad]\n│     ZenjexRunner.Initialize()\n│\nЗагрузка сцены\n│\n├─ ContainerScope.Awake()  (порядок: -1 000 000 000)\n│     UnityInjector создаёт SceneContainer как дочерний к RootContainer\n│\n├─ ProjectRootInstaller.Awake()  (порядок: -280)\n│     InstallBindings(builder)\n│     RootContainer = builder.Build()\n│     OnContainerReady.Invoke()\n│        └─ ZenjexRunner Pass 1: инъекция всех [Zenjex]-объектов сцены\n│     StartCoroutine(LateInitRoutine)\n│\n├─ SceneInstaller.OnAwake()  (порядок: -200)  [подкласс ZenjexBehaviour]\n│     ZenjexInjector.Inject(this)        <- заполняются глобальные [Zenjex]-поля\n│     ZenjexRunner.MarkInjected(this)\n│     RootContext.Runtime.Scope(InstallBindings) <- создаётся контейнер сцены\n│     CallInitializables(SceneContainer)\n│     OnSceneContainerReady.Invoke(SceneContainer)\n│\n├─ ZenjexBehaviour.Awake()  (порядок: -100)  [для каждого ZenjexBehaviour в сцене]\n│     ZenjexInjector.Inject(this)\n│     ZenjexRunner.MarkInjected(this)\n│     OnAwake()\n│\n├─ MonoBehaviour.Awake()  (порядок: 0, по умолчанию)\n│     [Zenjex]-поля уже заполнены из Pass 1\n│\n└─ LateInitRoutine (корутина, запускается после yield)\n      InstallGameInstanceRoutine()    <- опциональная асинхронная инициализация\n      CallInitializables(RootContainer) <- IInitializable.Initialize()\n      LaunchGame()                    <- точка входа в игру\n      OnGameLaunched.Invoke()\n         └─ ZenjexRunner Pass 2: повторный обход для биндингов, добавленных в async init"
+      "type": "diagram",
+      "kind": "timeline",
+      "groups": [
+        {
+          "label": "Запуск приложения",
+          "items": [
+            {
+              "label": "RuntimeInitializeOnLoadMethod: AfterAssembliesLoaded",
+              "sub": "UnityInjector.Initialize()"
+            },
+            {
+              "label": "RuntimeInitializeOnLoadMethod: BeforeSceneLoad",
+              "sub": "ZenjexRunner.Initialize()"
+            }
+          ]
+        },
+        {
+          "label": "Загрузка сцены",
+          "items": [
+            {
+              "label": "ContainerScope.Awake()",
+              "order": "-1 000 000 000",
+              "sub": "UnityInjector создаёт SceneContainer"
+            },
+            {
+              "label": "ProjectRootInstaller.Awake()",
+              "order": "-280",
+              "sub": "Сборка контейнера → OnContainerReady → Pass 1"
+            },
+            {
+              "label": "SceneInstaller.OnAwake()",
+              "order": "-200",
+              "sub": "Создание контейнера сцены → IInitializable"
+            },
+            {
+              "label": "ZenjexBehaviour.Awake()",
+              "order": "-100",
+              "sub": "Inject(this) → OnAwake()"
+            },
+            {
+              "label": "MonoBehaviour.Awake()",
+              "order": "0",
+              "sub": "[Zenjex]-поля уже заполнены из Pass 1"
+            }
+          ]
+        },
+        {
+          "label": "После yield (корутина)",
+          "items": [
+            {
+              "label": "InstallGameInstanceRoutine()",
+              "sub": "асинхронная инициализация"
+            },
+            {
+              "label": "CallInitializables(RootContainer)",
+              "sub": "IInitializable.Initialize()"
+            },
+            {
+              "label": "LaunchGame()",
+              "sub": "точка входа в игру"
+            },
+            {
+              "label": "OnGameLaunched.Invoke()",
+              "sub": "ZenjexRunner Pass 2"
+            }
+          ]
+        }
+      ]
     },
     {
       "type": "heading",

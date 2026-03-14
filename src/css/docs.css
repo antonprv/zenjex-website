@@ -411,3 +411,293 @@
 [data-theme="light"] .doc-code-wrap pre code .hl-s { color: #a31515 !important; }
 [data-theme="light"] .doc-code-wrap pre code .hl-c { color: #4a7c3f !important; }
 [data-theme="light"] .doc-code-wrap pre code .hl-a { color: #795e26 !important; }
+
+/* ════════════════════════════════════════════════════════════
+   DIAGRAMS
+   ════════════════════════════════════════════════════════════ */
+
+/* ── Shared ── */
+.dgm-flow-label code,
+.dgm-tl-label,
+.dgm-hier-box code,
+.dgm-arch-item {
+  font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', monospace;
+  font-size: 0.8rem;
+}
+
+/* ── Flow diagram ── */
+.dgm-flow-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 0.6rem;
+  letter-spacing: 0.02em;
+}
+
+.dgm-flow {
+  display: flex;
+  flex-direction: column;
+  margin: 0.8rem 0 1.2rem;
+  padding: 1.2rem 1.4rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.dgm-flow-item {
+  display: flex;
+  gap: 0;
+  min-height: 2.2rem;
+}
+
+.dgm-flow-connector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 20px;
+  flex-shrink: 0;
+}
+
+.dgm-flow-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-top: 0.4rem;
+  flex-shrink: 0;
+  z-index: 1;
+}
+.dgm-flow-dot--child {
+  width: 8px;
+  height: 8px;
+  background: color-mix(in srgb, var(--accent) 60%, var(--border));
+}
+
+.dgm-flow-line {
+  width: 2px;
+  flex: 1;
+  background: color-mix(in srgb, var(--accent) 25%, var(--border));
+  min-height: 0.6rem;
+}
+
+.dgm-flow-content {
+  flex: 1;
+  padding: 0.3rem 0 0.5rem 0.7rem;
+}
+
+.dgm-flow-label code {
+  color: var(--text);
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--border));
+  border-radius: 4px;
+  padding: 0.15em 0.5em;
+  display: inline-block;
+}
+
+.dgm-flow-note {
+  font-size: 0.74rem;
+  color: var(--muted);
+  margin-top: 0.2rem;
+  padding-left: 0.1rem;
+}
+
+.dgm-flow-children {
+  margin-left: 1rem;
+  margin-top: 0.3rem;
+  padding-left: 0.8rem;
+  border-left: 2px solid color-mix(in srgb, var(--accent) 20%, var(--border));
+}
+
+/* ── Hierarchy diagram ── */
+.dgm-hierarchy {
+  margin: 0.8rem 0 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.dgm-hier-node {
+  display: flex;
+  flex-direction: column;
+  padding-left: calc(var(--depth, 0) * 2rem);
+}
+.dgm-hier-node + .dgm-hier-node { margin-top: 0.5rem; }
+
+.dgm-hier-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  border-left: 3px solid var(--accent);
+  font-size: 0.82rem;
+  align-self: flex-start;
+}
+.dgm-hier-node[style*="--depth:1"] .dgm-hier-box {
+  border-left-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+}
+.dgm-hier-node[style*="--depth:2"] .dgm-hier-box {
+  border-left-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+}
+
+.dgm-hier-box code { color: var(--text); background: none; border: none; padding: 0; }
+.dgm-hier-sub { font-size: 0.72rem; color: var(--muted); }
+
+.dgm-hier-children {
+  margin-left: 1.5rem;
+  margin-top: 0.4rem;
+  padding-left: 0.8rem;
+  border-left: 2px dashed color-mix(in srgb, var(--accent) 30%, var(--border));
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+/* ── Timeline diagram ── */
+.dgm-timeline {
+  margin: 0.8rem 0 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.dgm-tl-group-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  opacity: 0.8;
+  margin-bottom: 0.5rem;
+}
+
+.dgm-tl-items {
+  display: flex;
+  flex-direction: column;
+  padding: 0.6rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.dgm-tl-item {
+  display: flex;
+  gap: 0;
+  min-height: 2rem;
+}
+
+.dgm-tl-connector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 18px;
+  flex-shrink: 0;
+}
+
+.dgm-tl-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-top: 0.45rem;
+  flex-shrink: 0;
+}
+
+.dgm-tl-line {
+  width: 2px;
+  flex: 1;
+  background: color-mix(in srgb, var(--accent) 22%, var(--border));
+  min-height: 0.4rem;
+}
+.dgm-tl-item:last-child .dgm-tl-line { display: none; }
+
+.dgm-tl-body {
+  flex: 1;
+  padding: 0.25rem 0 0.5rem 0.7rem;
+}
+
+.dgm-tl-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.dgm-tl-label {
+  color: var(--text);
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--border));
+  border-radius: 4px;
+  padding: 0.1em 0.45em;
+  font-size: 0.79rem;
+}
+
+.dgm-tl-order {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  border-radius: 3px;
+  padding: 0.1em 0.4em;
+  font-family: 'SFMono-Regular', 'Consolas', monospace;
+}
+
+.dgm-tl-sub {
+  font-size: 0.73rem;
+  color: var(--muted);
+  margin-top: 0.15rem;
+}
+
+/* ── Architecture diagram ── */
+.dgm-arch {
+  margin: 0.8rem 0 1.2rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent) 3%, var(--surface));
+  padding: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.dgm-arch-outer-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.2rem;
+}
+
+.dgm-arch-box {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  padding: 0.8rem 1rem;
+}
+
+.dgm-arch-box-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent2);
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.dgm-arch-item {
+  font-size: 0.78rem;
+  color: var(--muted);
+  padding: 0.18rem 0;
+}
+.dgm-arch-item:not(:last-child) {
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+}
+
+@media (max-width: 768px) {
+  .dgm-flow, .dgm-tl-items { padding: 0.8rem; }
+  .dgm-flow-label code, .dgm-tl-label { font-size: 0.72rem; }
+}

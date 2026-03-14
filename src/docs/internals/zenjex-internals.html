@@ -22,16 +22,97 @@
 InstallGameInstanceRoutine()        - опциональная корутина, запускается после сборки контейнера
 LaunchGame()                        - вызывается после инициализации IInitializable-сервисов</code></pre></div>
 <p class="doc-paragraph">Порядок выполнения внутри <code>Awake</code>:</p>
-<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">ProjectRootInstaller.Awake()
-  ├─ new ContainerBuilder()
-  ├─ InstallBindings(builder)          &lt;- пользовательский код
-  ├─ RootContainer = builder.Build()
-  ├─ OnContainerReady?.Invoke()        &lt;- здесь срабатывает Pass 1 ZenjexRunner
-  └─ StartCoroutine(LateInitRoutine)
-       ├─ yield return InstallGameInstanceRoutine()  &lt;- опциональная асинхронная работа
-       ├─ CallInitializables(RootContainer)          &lt;- IInitializable.Initialize() для каждого зарегистрированного сервиса
-       ├─ LaunchGame()                               &lt;- пользовательский код
-       └─ OnGameLaunched?.Invoke()     &lt;- здесь срабатывает Pass 2 ZenjexRunner</code></pre></div>
+<div class="dgm-flow-title">ProjectRootInstaller.Awake()</div>
+<div class="dgm-flow">
+<div class="dgm-flow-item">
+<div class="dgm-flow-connector">
+<div class="dgm-flow-dot"></div>
+<div class="dgm-flow-line"></div>
+</div>
+<div class="dgm-flow-content">
+<div class="dgm-flow-label"><code>new ContainerBuilder()</code></div>
+</div>
+</div>
+<div class="dgm-flow-item">
+<div class="dgm-flow-connector">
+<div class="dgm-flow-dot"></div>
+<div class="dgm-flow-line"></div>
+</div>
+<div class="dgm-flow-content">
+<div class="dgm-flow-label"><code>InstallBindings(builder)</code></div>
+<div class="dgm-flow-note">пользовательский код</div>
+</div>
+</div>
+<div class="dgm-flow-item">
+<div class="dgm-flow-connector">
+<div class="dgm-flow-dot"></div>
+<div class="dgm-flow-line"></div>
+</div>
+<div class="dgm-flow-content">
+<div class="dgm-flow-label"><code>RootContainer = builder.Build()</code></div>
+</div>
+</div>
+<div class="dgm-flow-item">
+<div class="dgm-flow-connector">
+<div class="dgm-flow-dot"></div>
+<div class="dgm-flow-line"></div>
+</div>
+<div class="dgm-flow-content">
+<div class="dgm-flow-label"><code>OnContainerReady?.Invoke()</code></div>
+<div class="dgm-flow-note">Pass 1 ZenjexRunner</div>
+</div>
+</div>
+<div class="dgm-flow-item">
+<div class="dgm-flow-connector">
+<div class="dgm-flow-dot"></div>
+<div class="dgm-flow-line"></div>
+</div>
+<div class="dgm-flow-content">
+<div class="dgm-flow-label"><code>StartCoroutine(LateInitRoutine)</code></div>
+<div class="dgm-flow-children">
+<div class="dgm-flow-item">
+<div class="dgm-flow-connector">
+<div class="dgm-flow-dot dgm-flow-dot--child"></div>
+<div class="dgm-flow-line"></div>
+</div>
+<div class="dgm-flow-content">
+<div class="dgm-flow-label"><code>InstallGameInstanceRoutine()</code></div>
+<div class="dgm-flow-note">асинхронная работа</div>
+</div>
+</div>
+<div class="dgm-flow-item">
+<div class="dgm-flow-connector">
+<div class="dgm-flow-dot dgm-flow-dot--child"></div>
+<div class="dgm-flow-line"></div>
+</div>
+<div class="dgm-flow-content">
+<div class="dgm-flow-label"><code>CallInitializables(RootContainer)</code></div>
+<div class="dgm-flow-note">IInitializable.Initialize()</div>
+</div>
+</div>
+<div class="dgm-flow-item">
+<div class="dgm-flow-connector">
+<div class="dgm-flow-dot dgm-flow-dot--child"></div>
+<div class="dgm-flow-line"></div>
+</div>
+<div class="dgm-flow-content">
+<div class="dgm-flow-label"><code>LaunchGame()</code></div>
+<div class="dgm-flow-note">пользовательский код</div>
+</div>
+</div>
+<div class="dgm-flow-item">
+<div class="dgm-flow-connector">
+<div class="dgm-flow-dot dgm-flow-dot--child"></div>
+</div>
+<div class="dgm-flow-content">
+<div class="dgm-flow-label"><code>OnGameLaunched?.Invoke()</code></div>
+<div class="dgm-flow-note">Pass 2 ZenjexRunner</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 <p class="doc-paragraph"><code>RootContainer</code> хранится как статическое свойство <code>ProjectRootInstaller</code>. Повторный вызов <code>Awake()</code> защищён guard-проверкой - актуально при отключённом Reload Domain.</p>
 <p class="doc-paragraph"><code>OnContainerReady</code> и <code>OnGameLaunched</code> - две точки синхронизации, через которые <code>ZenjexRunner</code> управляет проходами инъекции.</p>
 <p class="doc-paragraph">На практике биндинги обычно разносятся по нескольким дочерним <code>MonoInstaller</code>-компонентам:</p>
@@ -151,15 +232,69 @@ ZenjexRunner.InjectGameObject(enemy);</code></pre></div>
 <h2 id="sceneinstaller" class="doc-heading doc-heading--2">SceneInstaller</h2>
 <p class="doc-paragraph"><code>SceneInstaller</code> - абстрактный <code>MonoBehaviour</code>, наследующий <code>ZenjexBehaviour</code>, с <code>[DefaultExecutionOrder(-200)]</code>. Аналог <code>SceneContext</code> из Zenject. Размещается в каждой игровой сцене на любом GameObject.</p>
 <p class="doc-paragraph">Создаёт <strong>дочерний контейнер</strong>, наследующий все глобальные биндинги из <code>ProjectRootInstaller.RootContainer</code>, и добавляет к ним локальные биндинги сцены:</p>
-<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">RootContainer  (глобальный, ProjectRootInstaller)
-    └── SceneContainer  (для сцены, SceneInstaller)</code></pre></div>
+<div class="dgm-hierarchy"><div class="dgm-hier-node" style="--depth:0">
+<div class="dgm-hier-box"><code>RootContainer</code>
+<span class="dgm-hier-sub">глобальный · ProjectRootInstaller</span>
+</div>
+<div class="dgm-hier-children">
+<div class="dgm-hier-node" style="--depth:1">
+<div class="dgm-hier-box"><code>SceneContainer</code>
+<span class="dgm-hier-sub">для сцены · SceneInstaller</span>
+</div>
+</div>
+</div>
+</div></div>
 <p class="doc-paragraph">Жизненный цикл внутри <code>OnAwake()</code> (порядок <code>-200</code>, после <code>ProjectRootInstaller</code> с порядком <code>-280</code>):</p>
-<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">SceneInstaller.OnAwake()
-  ├─ RootContext.Runtime.Scope(InstallBindings)  &lt;- создаётся дочерний контейнер
-  ├─ ZenjexSceneContext.Register(scene, container)
-  ├─ CallInitializables(SceneContainer)          &lt;- IInitializable для scene-local сервисов
-  ├─ OnSceneContainerReady?.Invoke(container)
-  └─ OnInstalled()                               &lt;- опциональный override</code></pre></div>
+<div class="dgm-flow-title">SceneInstaller.OnAwake()</div>
+<div class="dgm-flow">
+<div class="dgm-flow-item">
+<div class="dgm-flow-connector">
+<div class="dgm-flow-dot"></div>
+<div class="dgm-flow-line"></div>
+</div>
+<div class="dgm-flow-content">
+<div class="dgm-flow-label"><code>RootContext.Runtime.Scope(InstallBindings)</code></div>
+<div class="dgm-flow-note">создаётся дочерний контейнер</div>
+</div>
+</div>
+<div class="dgm-flow-item">
+<div class="dgm-flow-connector">
+<div class="dgm-flow-dot"></div>
+<div class="dgm-flow-line"></div>
+</div>
+<div class="dgm-flow-content">
+<div class="dgm-flow-label"><code>ZenjexSceneContext.Register(scene, container)</code></div>
+</div>
+</div>
+<div class="dgm-flow-item">
+<div class="dgm-flow-connector">
+<div class="dgm-flow-dot"></div>
+<div class="dgm-flow-line"></div>
+</div>
+<div class="dgm-flow-content">
+<div class="dgm-flow-label"><code>CallInitializables(SceneContainer)</code></div>
+<div class="dgm-flow-note">IInitializable для scene-local сервисов</div>
+</div>
+</div>
+<div class="dgm-flow-item">
+<div class="dgm-flow-connector">
+<div class="dgm-flow-dot"></div>
+<div class="dgm-flow-line"></div>
+</div>
+<div class="dgm-flow-content">
+<div class="dgm-flow-label"><code>OnSceneContainerReady?.Invoke(container)</code></div>
+</div>
+</div>
+<div class="dgm-flow-item">
+<div class="dgm-flow-connector">
+<div class="dgm-flow-dot"></div>
+</div>
+<div class="dgm-flow-content">
+<div class="dgm-flow-label"><code>OnInstalled()</code></div>
+<div class="dgm-flow-note">опциональный override</div>
+</div>
+</div>
+</div>
 <p class="doc-paragraph">Дочерний контейнер уничтожается в <code>OnDestroy()</code> при выгрузке сцены, что автоматически вызывает <code>IDisposable.Dispose()</code> на всех scoped-экземплярах.</p>
 <div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">public class GameplaySceneInstaller : SceneInstaller
 {
@@ -191,47 +326,127 @@ var container = ZenjexSceneContext.Get(scene);
 if (ZenjexSceneContext.HasActiveScene) { ... }</code></pre></div>
 <p class="doc-paragraph">Контейнеры хранятся в <code>Dictionary&lt;int, Container&gt;</code> с ключом <code>Scene.handle</code>. <code>GetActive()</code> возвращает контейнер, зарегистрированный последним загруженным <code>SceneInstaller</code>; <code>Get(scene)</code> позволяет адресовать конкретную сцену напрямую.</p>
 <h2 id="хронология-выполнения" class="doc-heading doc-heading--2">Хронология выполнения</h2>
-<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">Запуск приложения
-│
-├─ [RuntimeInitializeOnLoadMethod: AfterAssembliesLoaded]
-│     UnityInjector.Initialize()
-│
-├─ [RuntimeInitializeOnLoadMethod: BeforeSceneLoad]
-│     ZenjexRunner.Initialize()
-│
-Загрузка сцены
-│
-├─ ContainerScope.Awake()  (порядок: -1 000 000 000)
-│     UnityInjector создаёт SceneContainer как дочерний к RootContainer
-│
-├─ ProjectRootInstaller.Awake()  (порядок: -280)
-│     InstallBindings(builder)
-│     RootContainer = builder.Build()
-│     OnContainerReady.Invoke()
-│        └─ ZenjexRunner Pass 1: инъекция всех [Zenjex]-объектов сцены
-│     StartCoroutine(LateInitRoutine)
-│
-├─ SceneInstaller.OnAwake()  (порядок: -200)  [подкласс ZenjexBehaviour]
-│     ZenjexInjector.Inject(this)        &lt;- заполняются глобальные [Zenjex]-поля
-│     ZenjexRunner.MarkInjected(this)
-│     RootContext.Runtime.Scope(InstallBindings) &lt;- создаётся контейнер сцены
-│     CallInitializables(SceneContainer)
-│     OnSceneContainerReady.Invoke(SceneContainer)
-│
-├─ ZenjexBehaviour.Awake()  (порядок: -100)  [для каждого ZenjexBehaviour в сцене]
-│     ZenjexInjector.Inject(this)
-│     ZenjexRunner.MarkInjected(this)
-│     OnAwake()
-│
-├─ MonoBehaviour.Awake()  (порядок: 0, по умолчанию)
-│     [Zenjex]-поля уже заполнены из Pass 1
-│
-└─ LateInitRoutine (корутина, запускается после yield)
-      InstallGameInstanceRoutine()    &lt;- опциональная асинхронная инициализация
-      CallInitializables(RootContainer) &lt;- IInitializable.Initialize()
-      LaunchGame()                    &lt;- точка входа в игру
-      OnGameLaunched.Invoke()
-         └─ ZenjexRunner Pass 2: повторный обход для биндингов, добавленных в async init</code></pre></div>
+<div class="dgm-timeline">
+<div class="dgm-tl-group">
+<div class="dgm-tl-group-label">Запуск приложения</div>
+<div class="dgm-tl-items">
+<div class="dgm-tl-item">
+<div class="dgm-tl-connector"><div class="dgm-tl-dot"></div><div class="dgm-tl-line"></div></div>
+<div class="dgm-tl-body">
+<div class="dgm-tl-row">
+<code class="dgm-tl-label">RuntimeInitializeOnLoadMethod: AfterAssembliesLoaded</code>
+</div>
+<div class="dgm-tl-sub">UnityInjector.Initialize()</div>
+</div>
+</div>
+<div class="dgm-tl-item">
+<div class="dgm-tl-connector"><div class="dgm-tl-dot"></div><div class="dgm-tl-line"></div></div>
+<div class="dgm-tl-body">
+<div class="dgm-tl-row">
+<code class="dgm-tl-label">RuntimeInitializeOnLoadMethod: BeforeSceneLoad</code>
+</div>
+<div class="dgm-tl-sub">ZenjexRunner.Initialize()</div>
+</div>
+</div>
+</div>
+</div>
+<div class="dgm-tl-group">
+<div class="dgm-tl-group-label">Загрузка сцены</div>
+<div class="dgm-tl-items">
+<div class="dgm-tl-item">
+<div class="dgm-tl-connector"><div class="dgm-tl-dot"></div><div class="dgm-tl-line"></div></div>
+<div class="dgm-tl-body">
+<div class="dgm-tl-row">
+<code class="dgm-tl-label">ContainerScope.Awake()</code>
+<span class="dgm-tl-order">-1 000 000 000</span>
+</div>
+<div class="dgm-tl-sub">UnityInjector создаёт SceneContainer</div>
+</div>
+</div>
+<div class="dgm-tl-item">
+<div class="dgm-tl-connector"><div class="dgm-tl-dot"></div><div class="dgm-tl-line"></div></div>
+<div class="dgm-tl-body">
+<div class="dgm-tl-row">
+<code class="dgm-tl-label">ProjectRootInstaller.Awake()</code>
+<span class="dgm-tl-order">-280</span>
+</div>
+<div class="dgm-tl-sub">Сборка контейнера → OnContainerReady → Pass 1</div>
+</div>
+</div>
+<div class="dgm-tl-item">
+<div class="dgm-tl-connector"><div class="dgm-tl-dot"></div><div class="dgm-tl-line"></div></div>
+<div class="dgm-tl-body">
+<div class="dgm-tl-row">
+<code class="dgm-tl-label">SceneInstaller.OnAwake()</code>
+<span class="dgm-tl-order">-200</span>
+</div>
+<div class="dgm-tl-sub">Создание контейнера сцены → IInitializable</div>
+</div>
+</div>
+<div class="dgm-tl-item">
+<div class="dgm-tl-connector"><div class="dgm-tl-dot"></div><div class="dgm-tl-line"></div></div>
+<div class="dgm-tl-body">
+<div class="dgm-tl-row">
+<code class="dgm-tl-label">ZenjexBehaviour.Awake()</code>
+<span class="dgm-tl-order">-100</span>
+</div>
+<div class="dgm-tl-sub">Inject(this) → OnAwake()</div>
+</div>
+</div>
+<div class="dgm-tl-item">
+<div class="dgm-tl-connector"><div class="dgm-tl-dot"></div><div class="dgm-tl-line"></div></div>
+<div class="dgm-tl-body">
+<div class="dgm-tl-row">
+<code class="dgm-tl-label">MonoBehaviour.Awake()</code>
+<span class="dgm-tl-order">0</span>
+</div>
+<div class="dgm-tl-sub">[Zenjex]-поля уже заполнены из Pass 1</div>
+</div>
+</div>
+</div>
+</div>
+<div class="dgm-tl-group">
+<div class="dgm-tl-group-label">После yield (корутина)</div>
+<div class="dgm-tl-items">
+<div class="dgm-tl-item">
+<div class="dgm-tl-connector"><div class="dgm-tl-dot"></div><div class="dgm-tl-line"></div></div>
+<div class="dgm-tl-body">
+<div class="dgm-tl-row">
+<code class="dgm-tl-label">InstallGameInstanceRoutine()</code>
+</div>
+<div class="dgm-tl-sub">асинхронная инициализация</div>
+</div>
+</div>
+<div class="dgm-tl-item">
+<div class="dgm-tl-connector"><div class="dgm-tl-dot"></div><div class="dgm-tl-line"></div></div>
+<div class="dgm-tl-body">
+<div class="dgm-tl-row">
+<code class="dgm-tl-label">CallInitializables(RootContainer)</code>
+</div>
+<div class="dgm-tl-sub">IInitializable.Initialize()</div>
+</div>
+</div>
+<div class="dgm-tl-item">
+<div class="dgm-tl-connector"><div class="dgm-tl-dot"></div><div class="dgm-tl-line"></div></div>
+<div class="dgm-tl-body">
+<div class="dgm-tl-row">
+<code class="dgm-tl-label">LaunchGame()</code>
+</div>
+<div class="dgm-tl-sub">точка входа в игру</div>
+</div>
+</div>
+<div class="dgm-tl-item">
+<div class="dgm-tl-connector"><div class="dgm-tl-dot"></div><div class="dgm-tl-line"></div></div>
+<div class="dgm-tl-body">
+<div class="dgm-tl-row">
+<code class="dgm-tl-label">OnGameLaunched.Invoke()</code>
+</div>
+<div class="dgm-tl-sub">ZenjexRunner Pass 2</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 <h2 id="сводная-таблица-проходов-инъекции" class="doc-heading doc-heading--2">Сводная таблица проходов инъекции</h2>
 <div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>Проход</th><th>Триггер</th><th>До <code>Awake()</code>?</th><th>Предупреждение ZNX-LATE?</th></tr></thead><tbody><tr><td>Pass 1</td><td><code>OnContainerReady</code> (внутри <code>ProjectRootInstaller.Awake</code> при порядке -280)</td><td>Да</td><td>Нет</td></tr><tr><td>Pass 2</td><td><code>OnGameLaunched</code> (после корутины + <code>IInitializable</code>)</td><td>Нет</td><td>Нет</td></tr><tr><td>Pass 3</td><td><code>SceneManager.sceneLoaded</code> (аддитивные сцены)</td><td>Нет</td><td><strong>Да</strong></td></tr><tr><td>Pass 4</td><td><code>ZenjexRunner.InjectGameObject()</code> (вручную, runtime)</td><td>Нет</td><td>Нет</td></tr><tr><td><code>ZenjexBehaviour</code></td><td>Собственный <code>Awake()</code> при порядке -100</td><td>Да</td><td>Нет</td></tr><tr><td><code>SceneInstaller</code></td><td>Собственный <code>OnAwake()</code> при порядке -200 (подкласс ZenjexBehaviour)</td><td>Да</td><td>Нет</td></tr></tbody></table></div>
 <p class="doc-paragraph">← <a href="Reflex-Internals.ru">Reflex: внутреннее устройство</a> | <a href="Home.ru">Главная</a></p>
@@ -260,16 +475,97 @@ if (ZenjexSceneContext.HasActiveScene) { ... }</code></pre></div>
 InstallGameInstanceRoutine()        - optional coroutine, runs after the container is built
 LaunchGame()                        - called after IInitializable services are initialized</code></pre></div>
 <p class="doc-paragraph">Internal <code>Awake</code> flow:</p>
-<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">ProjectRootInstaller.Awake()
-  ├─ new ContainerBuilder()
-  ├─ InstallBindings(builder)          &lt;- user code
-  ├─ RootContainer = builder.Build()
-  ├─ OnContainerReady?.Invoke()        &lt;- ZenjexRunner Pass 1 fires here
-  └─ StartCoroutine(LateInitRoutine)
-       ├─ yield return InstallGameInstanceRoutine()  &lt;- optional async work
-       ├─ CallInitializables(RootContainer)          &lt;- IInitializable.Initialize() on every registered service
-       ├─ LaunchGame()                               &lt;- user code
-       └─ OnGameLaunched?.Invoke()     &lt;- ZenjexRunner Pass 2 fires here</code></pre></div>
+<div class="dgm-flow-title">ProjectRootInstaller.Awake()</div>
+<div class="dgm-flow">
+<div class="dgm-flow-item">
+<div class="dgm-flow-connector">
+<div class="dgm-flow-dot"></div>
+<div class="dgm-flow-line"></div>
+</div>
+<div class="dgm-flow-content">
+<div class="dgm-flow-label"><code>new ContainerBuilder()</code></div>
+</div>
+</div>
+<div class="dgm-flow-item">
+<div class="dgm-flow-connector">
+<div class="dgm-flow-dot"></div>
+<div class="dgm-flow-line"></div>
+</div>
+<div class="dgm-flow-content">
+<div class="dgm-flow-label"><code>InstallBindings(builder)</code></div>
+<div class="dgm-flow-note">user code</div>
+</div>
+</div>
+<div class="dgm-flow-item">
+<div class="dgm-flow-connector">
+<div class="dgm-flow-dot"></div>
+<div class="dgm-flow-line"></div>
+</div>
+<div class="dgm-flow-content">
+<div class="dgm-flow-label"><code>RootContainer = builder.Build()</code></div>
+</div>
+</div>
+<div class="dgm-flow-item">
+<div class="dgm-flow-connector">
+<div class="dgm-flow-dot"></div>
+<div class="dgm-flow-line"></div>
+</div>
+<div class="dgm-flow-content">
+<div class="dgm-flow-label"><code>OnContainerReady?.Invoke()</code></div>
+<div class="dgm-flow-note">ZenjexRunner Pass 1</div>
+</div>
+</div>
+<div class="dgm-flow-item">
+<div class="dgm-flow-connector">
+<div class="dgm-flow-dot"></div>
+<div class="dgm-flow-line"></div>
+</div>
+<div class="dgm-flow-content">
+<div class="dgm-flow-label"><code>StartCoroutine(LateInitRoutine)</code></div>
+<div class="dgm-flow-children">
+<div class="dgm-flow-item">
+<div class="dgm-flow-connector">
+<div class="dgm-flow-dot dgm-flow-dot--child"></div>
+<div class="dgm-flow-line"></div>
+</div>
+<div class="dgm-flow-content">
+<div class="dgm-flow-label"><code>InstallGameInstanceRoutine()</code></div>
+<div class="dgm-flow-note">optional async work</div>
+</div>
+</div>
+<div class="dgm-flow-item">
+<div class="dgm-flow-connector">
+<div class="dgm-flow-dot dgm-flow-dot--child"></div>
+<div class="dgm-flow-line"></div>
+</div>
+<div class="dgm-flow-content">
+<div class="dgm-flow-label"><code>CallInitializables(RootContainer)</code></div>
+<div class="dgm-flow-note">IInitializable.Initialize()</div>
+</div>
+</div>
+<div class="dgm-flow-item">
+<div class="dgm-flow-connector">
+<div class="dgm-flow-dot dgm-flow-dot--child"></div>
+<div class="dgm-flow-line"></div>
+</div>
+<div class="dgm-flow-content">
+<div class="dgm-flow-label"><code>LaunchGame()</code></div>
+<div class="dgm-flow-note">user code</div>
+</div>
+</div>
+<div class="dgm-flow-item">
+<div class="dgm-flow-connector">
+<div class="dgm-flow-dot dgm-flow-dot--child"></div>
+</div>
+<div class="dgm-flow-content">
+<div class="dgm-flow-label"><code>OnGameLaunched?.Invoke()</code></div>
+<div class="dgm-flow-note">ZenjexRunner Pass 2</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 <p class="doc-paragraph"><code>RootContainer</code> is stored as a static property on <code>ProjectRootInstaller</code>. There is a guard that prevents re-initialization if <code>Awake()</code> gets called again - this can happen when Reload Domain is disabled.</p>
 <p class="doc-paragraph"><code>OnContainerReady</code> and <code>OnGameLaunched</code> are the two synchronization points that <code>ZenjexRunner</code> uses to orchestrate injection passes.</p>
 <p class="doc-paragraph">In practice, bindings are usually split across multiple child <code>MonoInstaller</code> components:</p>
@@ -389,15 +685,69 @@ ZenjexRunner.InjectGameObject(enemy);</code></pre></div>
 <h2 id="sceneinstaller" class="doc-heading doc-heading--2">SceneInstaller</h2>
 <p class="doc-paragraph"><code>SceneInstaller</code> is an abstract <code>MonoBehaviour</code> that extends <code>ZenjexBehaviour</code> and runs at <code>[DefaultExecutionOrder(-200)]</code>. It is the Zenjex equivalent of Zenject&#x27;s <code>SceneContext</code>. Place one per gameplay scene on any GameObject.</p>
 <p class="doc-paragraph">It creates a <strong>child container</strong> that inherits all global bindings from <code>ProjectRootInstaller.RootContainer</code> and adds scene-local bindings on top:</p>
-<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">RootContainer  (global, ProjectRootInstaller)
-    └── SceneContainer  (per-scene, SceneInstaller)</code></pre></div>
+<div class="dgm-hierarchy"><div class="dgm-hier-node" style="--depth:0">
+<div class="dgm-hier-box"><code>RootContainer</code>
+<span class="dgm-hier-sub">global · ProjectRootInstaller</span>
+</div>
+<div class="dgm-hier-children">
+<div class="dgm-hier-node" style="--depth:1">
+<div class="dgm-hier-box"><code>SceneContainer</code>
+<span class="dgm-hier-sub">per-scene · SceneInstaller</span>
+</div>
+</div>
+</div>
+</div></div>
 <p class="doc-paragraph">Lifecycle inside <code>OnAwake()</code> (runs at order <code>-200</code>, after <code>ProjectRootInstaller</code> at <code>-280</code>):</p>
-<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">SceneInstaller.OnAwake()
-  ├─ RootContext.Runtime.Scope(InstallBindings)  &lt;- creates child container
-  ├─ ZenjexSceneContext.Register(scene, container)
-  ├─ CallInitializables(SceneContainer)          &lt;- IInitializable on scene-local services
-  ├─ OnSceneContainerReady?.Invoke(container)
-  └─ OnInstalled()                               &lt;- optional override</code></pre></div>
+<div class="dgm-flow-title">SceneInstaller.OnAwake()</div>
+<div class="dgm-flow">
+<div class="dgm-flow-item">
+<div class="dgm-flow-connector">
+<div class="dgm-flow-dot"></div>
+<div class="dgm-flow-line"></div>
+</div>
+<div class="dgm-flow-content">
+<div class="dgm-flow-label"><code>RootContext.Runtime.Scope(InstallBindings)</code></div>
+<div class="dgm-flow-note">creates child container</div>
+</div>
+</div>
+<div class="dgm-flow-item">
+<div class="dgm-flow-connector">
+<div class="dgm-flow-dot"></div>
+<div class="dgm-flow-line"></div>
+</div>
+<div class="dgm-flow-content">
+<div class="dgm-flow-label"><code>ZenjexSceneContext.Register(scene, container)</code></div>
+</div>
+</div>
+<div class="dgm-flow-item">
+<div class="dgm-flow-connector">
+<div class="dgm-flow-dot"></div>
+<div class="dgm-flow-line"></div>
+</div>
+<div class="dgm-flow-content">
+<div class="dgm-flow-label"><code>CallInitializables(SceneContainer)</code></div>
+<div class="dgm-flow-note">IInitializable on scene-local services</div>
+</div>
+</div>
+<div class="dgm-flow-item">
+<div class="dgm-flow-connector">
+<div class="dgm-flow-dot"></div>
+<div class="dgm-flow-line"></div>
+</div>
+<div class="dgm-flow-content">
+<div class="dgm-flow-label"><code>OnSceneContainerReady?.Invoke(container)</code></div>
+</div>
+</div>
+<div class="dgm-flow-item">
+<div class="dgm-flow-connector">
+<div class="dgm-flow-dot"></div>
+</div>
+<div class="dgm-flow-content">
+<div class="dgm-flow-label"><code>OnInstalled()</code></div>
+<div class="dgm-flow-note">optional override</div>
+</div>
+</div>
+</div>
 <p class="doc-paragraph">The child container is disposed in <code>OnDestroy()</code> when the scene unloads, which triggers <code>IDisposable.Dispose()</code> on all scoped instances.</p>
 <div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">public class GameplaySceneInstaller : SceneInstaller
 {
@@ -429,47 +779,127 @@ var container = ZenjexSceneContext.Get(scene);
 if (ZenjexSceneContext.HasActiveScene) { ... }</code></pre></div>
 <p class="doc-paragraph">Internally, containers are stored in a <code>Dictionary&lt;int, Container&gt;</code> keyed by <code>Scene.handle</code>. <code>GetActive()</code> returns the container from the most recently loaded <code>SceneInstaller</code>; <code>Get(scene)</code> lets you target a specific scene directly.</p>
 <h2 id="execution-timeline" class="doc-heading doc-heading--2">Execution timeline</h2>
-<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">Application start
-│
-├─ [RuntimeInitializeOnLoadMethod: AfterAssembliesLoaded]
-│     UnityInjector.Initialize()
-│
-├─ [RuntimeInitializeOnLoadMethod: BeforeSceneLoad]
-│     ZenjexRunner.Initialize()
-│
-Scene loads
-│
-├─ ContainerScope.Awake()  (order: -1,000,000,000)
-│     UnityInjector creates SceneContainer as child of RootContainer
-│
-├─ ProjectRootInstaller.Awake()  (order: -280)
-│     InstallBindings(builder)
-│     RootContainer = builder.Build()
-│     OnContainerReady.Invoke()
-│        └─ ZenjexRunner Pass 1: injects all [Zenjex] scene objects
-│     StartCoroutine(LateInitRoutine)
-│
-├─ SceneInstaller.OnAwake()  (order: -200)  [ZenjexBehaviour subclass]
-│     ZenjexInjector.Inject(this)        &lt;- global [Zenjex] fields filled
-│     ZenjexRunner.MarkInjected(this)
-│     RootContext.Runtime.Scope(InstallBindings) &lt;- scene container created
-│     CallInitializables(SceneContainer)
-│     OnSceneContainerReady.Invoke(SceneContainer)
-│
-├─ ZenjexBehaviour.Awake()  (order: -100)  [for each ZenjexBehaviour in scene]
-│     ZenjexInjector.Inject(this)
-│     ZenjexRunner.MarkInjected(this)
-│     OnAwake()
-│
-├─ MonoBehaviour.Awake()  (order: 0, default)
-│     [Zenjex] fields already populated from Pass 1
-│
-└─ LateInitRoutine (coroutine, runs after yielding)
-      InstallGameInstanceRoutine()    &lt;- optional async initialization
-      CallInitializables(RootContainer) &lt;- IInitializable.Initialize()
-      LaunchGame()                    &lt;- game entry point
-      OnGameLaunched.Invoke()
-         └─ ZenjexRunner Pass 2: re-scans scene for bindings added during async init</code></pre></div>
+<div class="dgm-timeline">
+<div class="dgm-tl-group">
+<div class="dgm-tl-group-label">Application start</div>
+<div class="dgm-tl-items">
+<div class="dgm-tl-item">
+<div class="dgm-tl-connector"><div class="dgm-tl-dot"></div><div class="dgm-tl-line"></div></div>
+<div class="dgm-tl-body">
+<div class="dgm-tl-row">
+<code class="dgm-tl-label">RuntimeInitializeOnLoadMethod: AfterAssembliesLoaded</code>
+</div>
+<div class="dgm-tl-sub">UnityInjector.Initialize()</div>
+</div>
+</div>
+<div class="dgm-tl-item">
+<div class="dgm-tl-connector"><div class="dgm-tl-dot"></div><div class="dgm-tl-line"></div></div>
+<div class="dgm-tl-body">
+<div class="dgm-tl-row">
+<code class="dgm-tl-label">RuntimeInitializeOnLoadMethod: BeforeSceneLoad</code>
+</div>
+<div class="dgm-tl-sub">ZenjexRunner.Initialize()</div>
+</div>
+</div>
+</div>
+</div>
+<div class="dgm-tl-group">
+<div class="dgm-tl-group-label">Scene loads</div>
+<div class="dgm-tl-items">
+<div class="dgm-tl-item">
+<div class="dgm-tl-connector"><div class="dgm-tl-dot"></div><div class="dgm-tl-line"></div></div>
+<div class="dgm-tl-body">
+<div class="dgm-tl-row">
+<code class="dgm-tl-label">ContainerScope.Awake()</code>
+<span class="dgm-tl-order">-1,000,000,000</span>
+</div>
+<div class="dgm-tl-sub">UnityInjector creates SceneContainer</div>
+</div>
+</div>
+<div class="dgm-tl-item">
+<div class="dgm-tl-connector"><div class="dgm-tl-dot"></div><div class="dgm-tl-line"></div></div>
+<div class="dgm-tl-body">
+<div class="dgm-tl-row">
+<code class="dgm-tl-label">ProjectRootInstaller.Awake()</code>
+<span class="dgm-tl-order">-280</span>
+</div>
+<div class="dgm-tl-sub">Build container → OnContainerReady → Pass 1</div>
+</div>
+</div>
+<div class="dgm-tl-item">
+<div class="dgm-tl-connector"><div class="dgm-tl-dot"></div><div class="dgm-tl-line"></div></div>
+<div class="dgm-tl-body">
+<div class="dgm-tl-row">
+<code class="dgm-tl-label">SceneInstaller.OnAwake()</code>
+<span class="dgm-tl-order">-200</span>
+</div>
+<div class="dgm-tl-sub">Create scene container → scene IInitializables</div>
+</div>
+</div>
+<div class="dgm-tl-item">
+<div class="dgm-tl-connector"><div class="dgm-tl-dot"></div><div class="dgm-tl-line"></div></div>
+<div class="dgm-tl-body">
+<div class="dgm-tl-row">
+<code class="dgm-tl-label">ZenjexBehaviour.Awake()</code>
+<span class="dgm-tl-order">-100</span>
+</div>
+<div class="dgm-tl-sub">Inject(this) → OnAwake()</div>
+</div>
+</div>
+<div class="dgm-tl-item">
+<div class="dgm-tl-connector"><div class="dgm-tl-dot"></div><div class="dgm-tl-line"></div></div>
+<div class="dgm-tl-body">
+<div class="dgm-tl-row">
+<code class="dgm-tl-label">MonoBehaviour.Awake()</code>
+<span class="dgm-tl-order">0</span>
+</div>
+<div class="dgm-tl-sub">[Zenjex] fields populated from Pass 1</div>
+</div>
+</div>
+</div>
+</div>
+<div class="dgm-tl-group">
+<div class="dgm-tl-group-label">After yield (coroutine)</div>
+<div class="dgm-tl-items">
+<div class="dgm-tl-item">
+<div class="dgm-tl-connector"><div class="dgm-tl-dot"></div><div class="dgm-tl-line"></div></div>
+<div class="dgm-tl-body">
+<div class="dgm-tl-row">
+<code class="dgm-tl-label">InstallGameInstanceRoutine()</code>
+</div>
+<div class="dgm-tl-sub">optional async initialization</div>
+</div>
+</div>
+<div class="dgm-tl-item">
+<div class="dgm-tl-connector"><div class="dgm-tl-dot"></div><div class="dgm-tl-line"></div></div>
+<div class="dgm-tl-body">
+<div class="dgm-tl-row">
+<code class="dgm-tl-label">CallInitializables(RootContainer)</code>
+</div>
+<div class="dgm-tl-sub">IInitializable.Initialize()</div>
+</div>
+</div>
+<div class="dgm-tl-item">
+<div class="dgm-tl-connector"><div class="dgm-tl-dot"></div><div class="dgm-tl-line"></div></div>
+<div class="dgm-tl-body">
+<div class="dgm-tl-row">
+<code class="dgm-tl-label">LaunchGame()</code>
+</div>
+<div class="dgm-tl-sub">game entry point</div>
+</div>
+</div>
+<div class="dgm-tl-item">
+<div class="dgm-tl-connector"><div class="dgm-tl-dot"></div><div class="dgm-tl-line"></div></div>
+<div class="dgm-tl-body">
+<div class="dgm-tl-row">
+<code class="dgm-tl-label">OnGameLaunched.Invoke()</code>
+</div>
+<div class="dgm-tl-sub">ZenjexRunner Pass 2</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 <h2 id="injection-pass-summary" class="doc-heading doc-heading--2">Injection pass summary</h2>
 <div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>Pass</th><th>Trigger</th><th>Fires before <code>Awake()</code>?</th><th>ZNX-LATE warning?</th></tr></thead><tbody><tr><td>Pass 1</td><td><code>OnContainerReady</code> (inside <code>ProjectRootInstaller.Awake</code> at -280)</td><td>Yes</td><td>No</td></tr><tr><td>Pass 2</td><td><code>OnGameLaunched</code> (after coroutine + <code>IInitializable</code>)</td><td>No</td><td>No</td></tr><tr><td>Pass 3</td><td><code>SceneManager.sceneLoaded</code> (additive scenes)</td><td>No</td><td><strong>Yes</strong></td></tr><tr><td>Pass 4</td><td><code>ZenjexRunner.InjectGameObject()</code> (manual, runtime)</td><td>No</td><td>No</td></tr><tr><td><code>ZenjexBehaviour</code></td><td>Own <code>Awake()</code> at order -100</td><td>Yes</td><td>No</td></tr><tr><td><code>SceneInstaller</code></td><td>Own <code>OnAwake()</code> at order -200 (ZenjexBehaviour subclass)</td><td>Yes</td><td>No</td></tr></tbody></table></div>
 <p class="doc-paragraph">← <a href="Reflex-Internals">Reflex Internals</a> | <a href="Home">Home</a></p>

@@ -33,9 +33,28 @@
       "text": "High-level overview"
     },
     {
-      "type": "code",
-      "lang": "csharp",
-      "text": "┌──────────────────────────────────────────────────────────┐\n│                      Unity Runtime                       │\n│                                                          │\n│  ┌─────────────────────────────────────────────────────┐ │\n│  │                  Reflex (core DI)                   │ │\n│  │                                                     │ │\n│  │   ReflexSettings ──► RootContainer                  │ │\n│  │                           │                         │ │\n│  │                    SceneContainer (per scene)       │ │\n│  │                     inherits from RootContainer     │ │\n│  └─────────────────────────────────────────────────────┘ │\n│                                                          │\n│  ┌─────────────────────────────────────────────────────┐ │\n│  │              Zenjex (extension layer)               │ │\n│  │                                                     │ │\n│  │  ProjectRootInstaller  ──► RootContext (static)     │ │\n│  │  BindingBuilder (fluent Zenject-style API)          │ │\n│  │  ZenjexRunner  ──► ZenjexInjector  ──► [Zenjex]     │ │\n│  │  SceneInstaller (scene-scoped sub-container)        │ │\n│  │  ZenjexBehaviour (guaranteed pre-Awake injection)   │ │\n│  └─────────────────────────────────────────────────────┘ │\n└──────────────────────────────────────────────────────────┘"
+      "type": "diagram",
+      "kind": "architecture",
+      "outer": "Unity Runtime",
+      "boxes": [
+        {
+          "label": "Reflex (core DI)",
+          "items": [
+            "ReflexSettings ──► RootContainer",
+            "RootContainer ──► SceneContainer (per scene)"
+          ]
+        },
+        {
+          "label": "Zenjex (extension layer)",
+          "items": [
+            "ProjectRootInstaller ──► RootContext (static)",
+            "BindingBuilder (fluent Zenject-style API)",
+            "ZenjexRunner ──► ZenjexInjector ──► [Zenjex]",
+            "SceneInstaller (scene-scoped sub-container)",
+            "ZenjexBehaviour (guaranteed pre-Awake injection)"
+          ]
+        }
+      ]
     },
     {
       "type": "paragraph",
@@ -58,9 +77,23 @@
       ]
     },
     {
-      "type": "code",
-      "lang": "csharp",
-      "text": "RootContainer\n    └── SceneContainer (Scene A)\n    └── SceneContainer (Scene B, additive)"
+      "type": "diagram",
+      "kind": "hierarchy",
+      "nodes": [
+        {
+          "label": "RootContainer",
+          "children": [
+            {
+              "label": "SceneContainer",
+              "sub": "Scene A"
+            },
+            {
+              "label": "SceneContainer",
+              "sub": "Scene B, additive"
+            }
+          ]
+        }
+      ]
     },
     {
       "type": "paragraph",
@@ -309,9 +342,28 @@
       "text": "Общая схема"
     },
     {
-      "type": "code",
-      "lang": "csharp",
-      "text": "┌──────────────────────────────────────────────────────────┐\n│                      Unity Runtime                       │\n│                                                          │\n│  ┌─────────────────────────────────────────────────────┐ │\n│  │                  Reflex (core DI)                   │ │\n│  │                                                     │ │\n│  │   ReflexSettings ──► RootContainer                  │ │\n│  │                           │                         │ │\n│  │                    SceneContainer (на сцену)        │ │\n│  │                     наследует RootContainer         │ │\n│  └─────────────────────────────────────────────────────┘ │\n│                                                          │\n│  ┌─────────────────────────────────────────────────────┐ │\n│  │              Zenjex (extension layer)               │ │\n│  │                                                     │ │\n│  │  ProjectRootInstaller  ──► RootContext (static)     │ │\n│  │  BindingBuilder (fluent Zenject-style API)          │ │\n│  │  ZenjexRunner  ──► ZenjexInjector  ──► [Zenjex]     │ │\n│  │  SceneInstaller (scene-scoped саб-контейнер)        │ │\n│  │  ZenjexBehaviour (инъекция до Awake, гарантированно)│ │\n│  └─────────────────────────────────────────────────────┘ │\n└──────────────────────────────────────────────────────────┘"
+      "type": "diagram",
+      "kind": "architecture",
+      "outer": "Unity Runtime",
+      "boxes": [
+        {
+          "label": "Reflex (core DI)",
+          "items": [
+            "ReflexSettings ──► RootContainer",
+            "RootContainer ──► SceneContainer (на сцену)"
+          ]
+        },
+        {
+          "label": "Zenjex (extension layer)",
+          "items": [
+            "ProjectRootInstaller ──► RootContext (static)",
+            "BindingBuilder (fluent Zenject-style API)",
+            "ZenjexRunner ──► ZenjexInjector ──► [Zenjex]",
+            "SceneInstaller (scene-scoped суб-контейнер)",
+            "ZenjexBehaviour (инъекция до Awake)"
+          ]
+        }
+      ]
     },
     {
       "type": "paragraph",
@@ -334,9 +386,23 @@
       ]
     },
     {
-      "type": "code",
-      "lang": "csharp",
-      "text": "RootContainer\n    └── SceneContainer (Scene A)\n    └── SceneContainer (Scene B, additive)"
+      "type": "diagram",
+      "kind": "hierarchy",
+      "nodes": [
+        {
+          "label": "RootContainer",
+          "children": [
+            {
+              "label": "SceneContainer",
+              "sub": "Scene A"
+            },
+            {
+              "label": "SceneContainer",
+              "sub": "Scene B, additive"
+            }
+          ]
+        }
+      ]
     },
     {
       "type": "paragraph",

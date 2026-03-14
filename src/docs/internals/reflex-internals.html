@@ -13,28 +13,22 @@
 <li class="doc-list-item"><span class="doc-list-item-text"><a href="#containerscope">ContainerScope</a></span></li>
 </ul>
 <h2 id="общая-схема" class="doc-heading doc-heading--2">Общая схема</h2>
-<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">┌──────────────────────────────────────────────────────────┐
-│                      Unity Runtime                       │
-│                                                          │
-│  ┌─────────────────────────────────────────────────────┐ │
-│  │                  Reflex (core DI)                   │ │
-│  │                                                     │ │
-│  │   ReflexSettings ──► RootContainer                  │ │
-│  │                           │                         │ │
-│  │                    SceneContainer (на сцену)        │ │
-│  │                     наследует RootContainer         │ │
-│  └─────────────────────────────────────────────────────┘ │
-│                                                          │
-│  ┌─────────────────────────────────────────────────────┐ │
-│  │              Zenjex (extension layer)               │ │
-│  │                                                     │ │
-│  │  ProjectRootInstaller  ──► RootContext (static)     │ │
-│  │  BindingBuilder (fluent Zenject-style API)          │ │
-│  │  ZenjexRunner  ──► ZenjexInjector  ──► [Zenjex]     │ │
-│  │  SceneInstaller (scene-scoped саб-контейнер)        │ │
-│  │  ZenjexBehaviour (инъекция до Awake, гарантированно)│ │
-│  └─────────────────────────────────────────────────────┘ │
-└──────────────────────────────────────────────────────────┘</code></pre></div>
+<div class="dgm-arch">
+<div class="dgm-arch-outer-label">Unity Runtime</div>
+<div class="dgm-arch-box">
+<div class="dgm-arch-box-label">Reflex (core DI)</div>
+<div class="dgm-arch-item">ReflexSettings ──► RootContainer</div>
+<div class="dgm-arch-item">RootContainer ──► SceneContainer (на сцену)</div>
+</div>
+<div class="dgm-arch-box">
+<div class="dgm-arch-box-label">Zenjex (extension layer)</div>
+<div class="dgm-arch-item">ProjectRootInstaller ──► RootContext (static)</div>
+<div class="dgm-arch-item">BindingBuilder (fluent Zenject-style API)</div>
+<div class="dgm-arch-item">ZenjexRunner ──► ZenjexInjector ──► [Zenjex]</div>
+<div class="dgm-arch-item">SceneInstaller (scene-scoped суб-контейнер)</div>
+<div class="dgm-arch-item">ZenjexBehaviour (инъекция до Awake)</div>
+</div>
+</div>
 <p class="doc-paragraph">Reflex управляет жизненным циклом контейнеров. Zenjex управляет оркестрацией инъекций и предоставляет совместимый с Zenject API поверх него. Слои развязаны: Zenjex обращается к Reflex только через <code>Container</code>, <code>ContainerBuilder</code> и <code>IInstaller</code>.</p>
 <h2 id="иерархия-контейнеров" class="doc-heading doc-heading--2">Иерархия контейнеров</h2>
 <p class="doc-paragraph">Reflex строит <strong>дерево контейнеров «родитель - потомок»</strong>. В типичном проекте два уровня:</p>
@@ -42,9 +36,22 @@
 <li class="doc-list-item"><span class="doc-list-item-text"><strong>RootContainer</strong> - собирается один раз из <code>ReflexSettings.RootScopes</code> до загрузки любой сцены. Хранит биндинги, которые должны жить во всех сценах: глобальные сервисы, конфиги, фабрики. Доступен также как статическое поле <code>Container.RootContainer</code>.</span></li>
 <li class="doc-list-item"><span class="doc-list-item-text"><strong>SceneContainer</strong> - создаётся как дочерняя область <code>RootContainer</code> каждый раз, когда загружается сцена с <code>ContainerScope</code>. Наследует все резолверы родителя, может добавлять и перекрывать локальные биндинги. Уничтожается при выгрузке сцены.</span></li>
 </ul>
-<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">RootContainer
-    └── SceneContainer (Scene A)
-    └── SceneContainer (Scene B, additive)</code></pre></div>
+<div class="dgm-hierarchy"><div class="dgm-hier-node" style="--depth:0">
+<div class="dgm-hier-box"><code>RootContainer</code>
+</div>
+<div class="dgm-hier-children">
+<div class="dgm-hier-node" style="--depth:1">
+<div class="dgm-hier-box"><code>SceneContainer</code>
+<span class="dgm-hier-sub">Scene A</span>
+</div>
+</div>
+<div class="dgm-hier-node" style="--depth:1">
+<div class="dgm-hier-box"><code>SceneContainer</code>
+<span class="dgm-hier-sub">Scene B, additive</span>
+</div>
+</div>
+</div>
+</div></div>
 <p class="doc-paragraph">При резолве тип ищется в собственном словаре <code>ResolversByContract</code>. Резолверы родителя <strong>копируются</strong> в потомка при сборке (<code>ContainerBuilder.Build()</code> делает shallow-copy из <code>Parent.ResolversByContract</code>), поэтому резолв всегда представляет собой один поиск по словарю без обхода родителей в рантайме.</p>
 <h2 id="containerbuilder" class="doc-heading doc-heading--2">ContainerBuilder</h2>
 <p class="doc-paragraph"><code>ContainerBuilder</code> - единственный способ создать <code>Container</code>. Он накапливает объекты <code>Binding</code> - каждый из них связывает <code>IResolver</code> с набором контрактов (типов) - а затем <code>Build()</code> материализует контейнер.</p>
@@ -120,28 +127,22 @@ return lambda.Compile();</code></pre></div>
 <li class="doc-list-item"><span class="doc-list-item-text"><a href="#containerscope">ContainerScope</a></span></li>
 </ul>
 <h2 id="high-level-overview" class="doc-heading doc-heading--2">High-level overview</h2>
-<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">┌──────────────────────────────────────────────────────────┐
-│                      Unity Runtime                       │
-│                                                          │
-│  ┌─────────────────────────────────────────────────────┐ │
-│  │                  Reflex (core DI)                   │ │
-│  │                                                     │ │
-│  │   ReflexSettings ──► RootContainer                  │ │
-│  │                           │                         │ │
-│  │                    SceneContainer (per scene)       │ │
-│  │                     inherits from RootContainer     │ │
-│  └─────────────────────────────────────────────────────┘ │
-│                                                          │
-│  ┌─────────────────────────────────────────────────────┐ │
-│  │              Zenjex (extension layer)               │ │
-│  │                                                     │ │
-│  │  ProjectRootInstaller  ──► RootContext (static)     │ │
-│  │  BindingBuilder (fluent Zenject-style API)          │ │
-│  │  ZenjexRunner  ──► ZenjexInjector  ──► [Zenjex]     │ │
-│  │  SceneInstaller (scene-scoped sub-container)        │ │
-│  │  ZenjexBehaviour (guaranteed pre-Awake injection)   │ │
-│  └─────────────────────────────────────────────────────┘ │
-└──────────────────────────────────────────────────────────┘</code></pre></div>
+<div class="dgm-arch">
+<div class="dgm-arch-outer-label">Unity Runtime</div>
+<div class="dgm-arch-box">
+<div class="dgm-arch-box-label">Reflex (core DI)</div>
+<div class="dgm-arch-item">ReflexSettings ──► RootContainer</div>
+<div class="dgm-arch-item">RootContainer ──► SceneContainer (per scene)</div>
+</div>
+<div class="dgm-arch-box">
+<div class="dgm-arch-box-label">Zenjex (extension layer)</div>
+<div class="dgm-arch-item">ProjectRootInstaller ──► RootContext (static)</div>
+<div class="dgm-arch-item">BindingBuilder (fluent Zenject-style API)</div>
+<div class="dgm-arch-item">ZenjexRunner ──► ZenjexInjector ──► [Zenjex]</div>
+<div class="dgm-arch-item">SceneInstaller (scene-scoped sub-container)</div>
+<div class="dgm-arch-item">ZenjexBehaviour (guaranteed pre-Awake injection)</div>
+</div>
+</div>
 <p class="doc-paragraph">Reflex owns the container lifecycle. Zenjex owns the injection orchestration and exposes a Zenject-compatible API on top. The two layers are decoupled - Zenjex talks to Reflex only through <code>Container</code>, <code>ContainerBuilder</code>, and <code>IInstaller</code>.</p>
 <h2 id="container-hierarchy" class="doc-heading doc-heading--2">Container hierarchy</h2>
 <p class="doc-paragraph">Reflex uses a <strong>parent-child container tree</strong>. A typical setup has two levels:</p>
@@ -149,9 +150,22 @@ return lambda.Compile();</code></pre></div>
 <li class="doc-list-item"><span class="doc-list-item-text"><strong>RootContainer</strong> - built once from <code>ReflexSettings.RootScopes</code> before any scene loads. Holds bindings that need to survive across all scenes: global services, configs, factories. Also stored as the static <code>Container.RootContainer</code>.</span></li>
 <li class="doc-list-item"><span class="doc-list-item-text"><strong>SceneContainer</strong> - created as a child scope of <code>RootContainer</code> each time a scene with a <code>ContainerScope</code> loads. It inherits all resolvers from the parent, can add or override bindings locally, and is disposed when the scene unloads.</span></li>
 </ul>
-<div class="doc-code-wrap"><span class="doc-code-lang">csharp</span><pre><code class="language-csharp">RootContainer
-    └── SceneContainer (Scene A)
-    └── SceneContainer (Scene B, additive)</code></pre></div>
+<div class="dgm-hierarchy"><div class="dgm-hier-node" style="--depth:0">
+<div class="dgm-hier-box"><code>RootContainer</code>
+</div>
+<div class="dgm-hier-children">
+<div class="dgm-hier-node" style="--depth:1">
+<div class="dgm-hier-box"><code>SceneContainer</code>
+<span class="dgm-hier-sub">Scene A</span>
+</div>
+</div>
+<div class="dgm-hier-node" style="--depth:1">
+<div class="dgm-hier-box"><code>SceneContainer</code>
+<span class="dgm-hier-sub">Scene B, additive</span>
+</div>
+</div>
+</div>
+</div></div>
 <p class="doc-paragraph">When resolving a type, a container looks in its own <code>ResolversByContract</code> dictionary. Parent resolvers are <strong>copied</strong> into the child at build time (<code>ContainerBuilder.Build()</code> shallow-copies <code>Parent.ResolversByContract</code>), so resolution is always a single dictionary lookup with no runtime parent traversal.</p>
 <h2 id="containerbuilder" class="doc-heading doc-heading--2">ContainerBuilder</h2>
 <p class="doc-paragraph"><code>ContainerBuilder</code> is the only way to create a <code>Container</code>. It collects <code>Binding</code> objects - each one pairs an <code>IResolver</code> with a set of contracts (types) - then <code>Build()</code> materializes the container.</p>
