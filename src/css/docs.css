@@ -102,7 +102,8 @@
 .doc-table td code {
   white-space: normal;
   display: inline;
-  word-break: break-all;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 [data-theme="light"] .doc-paragraph code,
