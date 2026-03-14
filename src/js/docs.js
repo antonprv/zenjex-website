@@ -168,31 +168,79 @@ function syncLangButtons(lang) {
    fragment injection. Text is already HTML-escaped.
    ════════════════════════════════════════════════════════════ */
 function highlightCsharp(block) {
-  var s = block.innerHTML;
+  var raw = block.innerHTML;
 
-  /* 1. String literals */
-  s = s.replace(/(&quot;(?:[^&]|&(?!quot;))*&quot;)/g,
-      '<span class="hl-s">$1</span>');
+  /* Split into lines, process each line.
+     This avoids multi-step regex collisions where later passes
+     corrupt span tags inserted by earlier passes. */
+  var lines = raw.split('\n');
+  var out   = [];
 
-  /* 2. Line comments  //...  (avoid matching URLs by checking no colon before) */
-  s = s.replace(/((?:^|[^:]))(\/\/[^\n]*)/gm,
-      '$1<span class="hl-c">$2</span>');
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i];
 
-  /* 3. Keywords — only outside existing spans */
+    /* --- Detect and extract a trailing // comment ---
+       Find // that isn't inside &...; entity and isn't ://
+       We work on the raw escaped text so // is literal. */
+    var commentStart = -1;
+    for (var ci = 0; ci < line.length - 1; ci++) {
+      if (line[ci] === '/' && line[ci+1] === '/' && (ci === 0 || line[ci-1] !== ':')) {
+        commentStart = ci;
+        break;
+      }
+    }
+
+    var codePart    = commentStart >= 0 ? line.slice(0, commentStart) : line;
+    var commentPart = commentStart >= 0 ? line.slice(commentStart)    : '';
+
+    /* --- Highlight the code part --- */
+    codePart = highlightCodeLine(codePart);
+
+    /* --- Wrap comment --- */
+    if (commentPart) {
+      commentPart = '<span class="hl-c">' + commentPart + '</span>';
+    }
+
+    out.push(codePart + commentPart);
+  }
+
+  block.innerHTML = out.join('\n');
+}
+
+function highlightCodeLine(s) {
+  /* 1. String literals  &quot;...&quot;  — replace with placeholder */
+  var strings = [];
+  s = s.replace(/(&quot;(?:[^&]|&(?!quot;))*&quot;)/g, function(m) {
+    strings.push(m);
+    return '\x00S' + (strings.length - 1) + '\x00';
+  });
+
+  /* 2. Attributes  [Something]  — placeholder */
+  var attrs = [];
+  s = s.replace(/\[([A-Za-z][A-Za-z0-9_., ]*)\]/g, function(m) {
+    attrs.push(m);
+    return '\x00A' + (attrs.length - 1) + '\x00';
+  });
+
+  /* 3. Keywords */
   var KW = 'public|private|protected|internal|static|abstract|override|virtual|sealed|readonly|const|new|class|interface|namespace|using|return|void|bool|int|float|double|string|var|null|true|false|this|base|typeof|if|else|for|foreach|while|yield|async|await|get|set|in|out|ref|params|where|event|delegate|partial|struct|enum|operator|is|as|try|catch|finally|throw|switch|case|break|continue';
-  s = s.replace(new RegExp('\\b(' + KW + ')\\b', 'g'), function(m, kw) {
-    return '<span class="hl-k">' + kw + '</span>';
+  s = s.replace(new RegExp('\\b(' + KW + ')\\b', 'g'),
+    '<span class="hl-k">$1</span>');
+
+  /* 4. Restore string placeholders BEFORE type pass so placeholders
+        don't get wrapped as PascalCase types */
+  s = s.replace(/\x00S(\d+)\x00/g, function(_, i) {
+    return '<span class="hl-s">' + strings[+i] + '</span>';
   });
 
-  /* 4. PascalCase type names */
-  s = s.replace(/\b([A-Z][A-Za-z0-9_]*)\b/g, function(m, t) {
-    return '<span class="hl-t">' + t + '</span>';
+  /* 5. PascalCase types — only plain words not already inside a span */
+  s = s.replace(/\b([A-Z][A-Za-z0-9_]*)\b(?![^<]*>)/g,
+    '<span class="hl-t">$1</span>');
+
+  /* 6. Restore attribute placeholders */
+  s = s.replace(/\x00A(\d+)\x00/g, function(_, i) {
+    return '<span class="hl-a">' + attrs[+i] + '</span>';
   });
 
-  /* 5. Attributes  [Something] */
-  s = s.replace(/(\[[A-Za-z][A-Za-z0-9_, ]*\])/g, function(m, a) {
-    return '<span class="hl-a">' + a + '</span>';
-  });
-
-  block.innerHTML = s;
+  return s;
 }
