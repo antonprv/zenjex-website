@@ -85,13 +85,7 @@
   /* ── 5. Render sidebar ── */
   renderSidebar(docGroups);
 
-  /* ── 6. Render first page (from hash or first available) ── */
-  var hashId = decodeURIComponent(location.hash.slice(1));
-  var firstPage = docGroups.length && docGroups[0].pages.length ? docGroups[0].pages[0] : null;
-  var target = (hashId && docPages[hashId]) || firstPage;
-  if (target && typeof renderDocPage === 'function') {
-    renderDocPage(target);
-  }
+  /* docs.js polls for window.__cfg.docGroups and renders the first page itself */
 
 })();
 
