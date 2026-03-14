@@ -444,3 +444,192 @@
   border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
 }
 .wiki-body tr:hover td { background: color-mix(in srgb, var(--accent) 4%, transparent); }
+
+
+/* ════════════════════════════════════════════════════════════
+   DOCS — block-based content (mirrors changelog styles)
+   ════════════════════════════════════════════════════════════ */
+
+/* Page title — inherits release-version-tag size but simpler */
+.doc-page-title {
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+}
+
+/* Section cards with doc type use accent dot color */
+.release-section[data-type="doc"] .section-item::before {
+  background: var(--accent);
+}
+
+/* Headings */
+.doc-heading { color: var(--text); margin: 2rem 0 0.6rem; }
+.doc-heading--1 { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+.doc-heading--2 { font-size: 1.2rem; font-weight: 700; padding-top: 1.6rem; border-top: 1px solid var(--border); }
+.doc-heading--3 { font-size: 0.97rem; font-weight: 700; color: var(--accent2); }
+.doc-heading--4 { font-size: 0.88rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* Paragraphs */
+.doc-paragraph {
+  font-size: 0.88rem;
+  line-height: 1.75;
+  color: var(--muted);
+  margin: 0 0 0.9rem;
+}
+.doc-paragraph code {
+  font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', monospace;
+  font-size: 0.82em;
+  color: var(--accent2);
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.05em 0.35em;
+  white-space: nowrap;
+  display: inline-block;
+  vertical-align: baseline;
+  line-height: 1.5;
+}
+
+/* Standalone list */
+.doc-list {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+.doc-list-item {
+  display: block;
+  position: relative;
+  padding: 0.3rem 1rem 0.3rem 2rem;
+  font-size: 0.85rem;
+  line-height: 1.65;
+  color: var(--muted);
+}
+.doc-list-item::before {
+  content: '';
+  position: absolute;
+  left: 0.8rem;
+  top: 0.72em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.6;
+}
+.doc-list-item code {
+  font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', monospace;
+  font-size: 0.82em;
+  color: var(--accent2);
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.05em 0.35em;
+  white-space: nowrap;
+  display: inline-block;
+  vertical-align: baseline;
+  line-height: 1.5;
+}
+
+/* Code block */
+.doc-code-wrap {
+  position: relative;
+  margin: 0.8rem 0 1.2rem;
+}
+.doc-code-lang {
+  display: inline-block;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+  padding: 0.2rem 0.6rem;
+}
+.doc-code-wrap pre {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0 6px 6px 6px;
+  padding: 1rem 1.2rem;
+  overflow-x: auto;
+  margin: 0;
+}
+.doc-code-wrap pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.8rem;
+  font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', monospace;
+  color: var(--text);
+  white-space: pre;
+  display: block;
+  line-height: 1.65;
+}
+.doc-code-wrap:not(:has(.doc-code-lang)) pre {
+  border-radius: 6px;
+}
+
+/* Table */
+.doc-table-wrap {
+  overflow-x: auto;
+  margin: 0.8rem 0 1.2rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.81rem;
+}
+.doc-table th {
+  padding: 0.6rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.doc-table td {
+  padding: 0.5rem 1rem;
+  color: var(--muted);
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+}
+.doc-table tr:last-child td { border-bottom: none; }
+.doc-table tr:hover td { background: color-mix(in srgb, var(--accent) 4%, transparent); }
+.doc-table code {
+  font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', monospace;
+  font-size: 0.82em;
+  color: var(--accent2);
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.05em 0.35em;
+  white-space: nowrap;
+}
+
+/* Note / tip box */
+.doc-note {
+  border-left: 3px solid var(--accent);
+  margin: 1rem 0;
+  padding: 0.65rem 1rem;
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+  border-radius: 0 6px 6px 0;
+  font-size: 0.83rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.doc-note code {
+  font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', monospace;
+  font-size: 0.82em;
+  color: var(--accent2);
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.05em 0.35em;
+  white-space: nowrap;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .doc-code-wrap pre { padding: 0.75rem 0.9rem; }
+  .doc-table th, .doc-table td { padding: 0.4rem 0.7rem; }
+}

@@ -2,6 +2,100 @@
   "id": "overview",
   "titleRu": "Обзор",
   "titleEn": "Overview",
-  "contentEn": "### What is this?\n\nZenjex is a production-ready dependency injection solution for Unity that solves a very specific, very painful problem: **your team uses Zenject/Extenject, you want to move to Unity 6, and you don't want to rewrite your injection layer from scratch or retrain anyone**.\n\nHere's what's in the box:\n\n- **Reflex 14.1.0** - the fastest DI framework for Unity, [benchmarked significantly ahead of Zenject](https://github.com/gustavopsantos/reflex#performance) - ported to **Unity 6.3 LTS** with all compatibility issues fixed\n- **Zenjex Extensions** - a Zenject-style API written on top of Reflex, so the bindings your team already knows (`Bind<T>().To<TImpl>().AsSingle()`) just work\n- **Fixed Reflex Debugger Window** - the editor debugging window is fully repaired for Unity 6.3; the original breaks in this version\n- **DevConsole** - a complete real-world sample project showing the full integration pattern in action\n\n---\n\n### Why should a team care?\n\nIf your project is on an older Unity version and you're planning a migration to Unity 6, the DI framework is one of the first blockers. Extenject is not actively maintained, and its Unity 6 support is fragile. Reflex is maintained, fast, and clean - but switching to it cold means learning a new API, updating every installer, and retooling muscle memory across the whole team.\n\nZenjex eliminates that cost. The binding syntax is intentionally identical to Zenject. The injection attributes, the installer pattern, the way you resolve things - all of it maps to what your team already knows. Underneath, everything runs on Reflex, which means you get the performance benefit for free, without a rewrite.\n\nConcretely:\n- **Drop-in migration path**: if your team uses `Bind<T>().To<TImpl>().AsSingle()` today, that line works unchanged in Zenjex\n- **Faster than Zenject**: Reflex resolves dependencies faster due to expression-tree-based activation and smarter caching - on Mono and especially on IL2CPP\n- **Unity 6 out of the box**: no fighting the editor, no broken debugger window, no hidden runtime crashes from version incompatibilities\n- **No retraining**: the three injection patterns (attribute, base class, manual resolve) are familiar to anyone who has used Zenject or Extenject\n\n---\n\n---\n\n### Requirements\n\n- **Unity 6.3+** - tested on Unity 6.3 LTS, compatible with every Unity version past 6.3\n\n---\n\n*Created by Anton Piruev, 2026. Any direct commercial use of derivative work is strictly prohibited.*\n\n---\n---\n\n---\n\n### Sample projects\n\nThe included **DevConsole** project is a full working implementation: it has a `GameInstaller`, multiple services bound via interface, `[Zenjex]` fields on scene objects, and `RootContext.Resolve<T>()` used in controllers. It's the fastest way to see everything in context.\n\nFor a larger-scale example, **[LoneBrawler](https://github.com/antonprv/LoneBrawler)** is a complete midcore browser/mobile game built with this framework. It shows how Zenjex holds up across a full production codebase - multiple scenes, complex service graphs, real gameplay systems.\n\nIf you want to understand how the framework works internally - how the container hierarchy is structured, how injection passes are timed, how expression-tree activation works - the **[project wiki](../../wiki)** has a full architecture breakdown of both Reflex and the Zenjex layer.\n\n---",
-  "contentRu": "### Что это такое?\n\nZenjex решает одну конкретную проблему: **команда работает на Zenject/Extenject, впереди переезд на Unity 6, и переписывать DI-слой с нуля никто не хочет**.\n\nЧто входит в комплект:\n\n- **Reflex 14.1.0** - самый быстрый DI-фреймворк для Unity, [заметно опережающий Zenject в бенчмарках](https://github.com/gustavopsantos/reflex#performance), портированный на **Unity 6.3 LTS** со всеми правками совместимости\n- **Zenjex Extensions** - Zenject-подобный API поверх Reflex: привычные биндинги (`Bind<T>().To<TImpl>().AsSingle()`) работают без изменений\n- **Исправленное окно отладчика Reflex** - в Unity 6.3 оно сломано в оригинале, здесь починено\n- **DevConsole** - рабочий пример проекта со всей интеграцией\n\n---\n\n### Зачем это нужно команде?\n\nЕсли проект на старой Unity и переезд на шестую версию запланирован, DI-фреймворк - один из первых камней преткновения. Extenject фактически не поддерживается, и его работа с Unity 6 держится на честном слове. Reflex поддерживается, быстрый и чистый - но переехать на него холодным стартом значит изучить новый API, переписать каждый инсталлер и переучить всю команду.\n\nZenjex убирает эту цену. Синтаксис биндингов намеренно совпадает с Zenject: атрибуты, инсталлеры, способ резолвить зависимости - всё то же самое. Под капотом работает Reflex, и прирост производительности достаётся бесплатно.\n\n- **Без переписывания**: `Bind<T>().To<TImpl>().AsSingle()` работает в Zenjex без изменений\n- **Быстрее Zenject**: Reflex резолвит зависимости быстрее за счёт активации через expression tree и умного кэширования - как на Mono, так и особенно на IL2CPP\n- **Unity 6 из коробки**: никаких конфликтов с редактором, никакого сломанного дебаггера, никаких скрытых рантайм-крэшей из-за версионных несовместимостей\n- **Без переобучения**: три паттерна инъекций (атрибут, базовый класс, ручной резолв) знакомы каждому, кто работал с Zenject или Extenject\n\n---\n\n---\n\n### Требования\n\n- **Unity 6.3+** - протестировано на Unity 6.3 LTS, совместимо со всеми версиями Unity начиная с 6.3\n\n---\n\n*Создано Антоном Пируевым, 2026. Любое прямое коммерческое использование производных работ строго запрещено.*\n\n---\n\n### Примеры проектов\n\n**DevConsole** идёт в комплекте - это полноценная реализация с `GameInstaller`, сервисами через интерфейс, `[Zenjex]`-полями в сцене и `RootContext.Resolve<T>()` в контроллерах. Самый быстрый способ увидеть всё вместе.\n\nДля масштаба - **[LoneBrawler](https://github.com/antonprv/LoneBrawler)**, полноценная мидкор-игра для браузера и мобильных, собранная на этом фреймворке. Показывает, как Zenjex работает в реальной продакшн-кодовой базе: несколько сцен, сложные графы сервисов, живые геймплейные системы.\n\nРазбор внутреннего устройства - как выстроена иерархия контейнеров, как расставлены injection-пассы, как работает активация через expression tree - в **[вики проекта](../../wiki)**.\n\n---"
+  "en": [
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What is this?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Zenjex is a production-ready dependency injection solution for Unity that solves a very specific, very painful problem: **your team uses Zenject/Extenject, you want to move to Unity 6, and you don't want to rewrite your injection layer from scratch or retrain anyone**."
+    },
+    {
+      "type": "paragraph",
+      "text": "Here's what's in the box:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "**Reflex 14.1.0** - the fastest DI framework for Unity, [benchmarked significantly ahead of Zenject](https://github.com/gustavopsantos/reflex#performance) - ported to **Unity 6.3 LTS** with all compatibility issues fixed",
+        "**Zenjex Extensions** - a Zenject-style API written on top of Reflex, so the bindings your team already knows (`Bind<T>().To<TImpl>().AsSingle()`) just work",
+        "**Fixed Reflex Debugger Window** - the editor debugging window is fully repaired for Unity 6.3; the original breaks in this version",
+        "**DevConsole** - a complete real-world sample project showing the full integration pattern in action"
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Why should a team care?"
+    },
+    {
+      "type": "paragraph",
+      "text": "If your project is on an older Unity version and you're planning a migration to Unity 6, the DI framework is one of the first blockers. Extenject is not actively maintained, and its Unity 6 support is fragile. Reflex is maintained, fast, and clean - but switching to it cold means learning a new API, updating every installer, and retooling muscle memory across the whole team."
+    },
+    {
+      "type": "paragraph",
+      "text": "Zenjex eliminates that cost. The binding syntax is intentionally identical to Zenject. The injection attributes, the installer pattern, the way you resolve things - all of it maps to what your team already knows. Underneath, everything runs on Reflex, which means you get the performance benefit for free, without a rewrite."
+    },
+    {
+      "type": "paragraph",
+      "text": "Concretely:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "**Drop-in migration path**: if your team uses `Bind<T>().To<TImpl>().AsSingle()` today, that line works unchanged in Zenjex",
+        "**Faster than Zenject**: Reflex resolves dependencies faster due to expression-tree-based activation and smarter caching - on Mono and especially on IL2CPP",
+        "**Unity 6 out of the box**: no fighting the editor, no broken debugger window, no hidden runtime crashes from version incompatibilities",
+        "**No retraining**: the three injection patterns (attribute, base class, manual resolve) are familiar to anyone who has used Zenject or Extenject"
+      ]
+    }
+  ],
+  "ru": [
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Что это такое?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Zenjex решает одну конкретную проблему: **команда работает на Zenject/Extenject, впереди переезд на Unity 6, и переписывать DI-слой с нуля никто не хочет**."
+    },
+    {
+      "type": "paragraph",
+      "text": "Что входит в комплект:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "**Reflex 14.1.0** - самый быстрый DI-фреймворк для Unity, [заметно опережающий Zenject в бенчмарках](https://github.com/gustavopsantos/reflex#performance), портированный на **Unity 6.3 LTS** со всеми правками совместимости",
+        "**Zenjex Extensions** - Zenject-подобный API поверх Reflex: привычные биндинги (`Bind<T>().To<TImpl>().AsSingle()`) работают без изменений",
+        "**Исправленное окно отладчика Reflex** - в Unity 6.3 оно сломано в оригинале, здесь починено",
+        "**DevConsole** - рабочий пример проекта со всей интеграцией"
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Зачем это нужно команде?"
+    },
+    {
+      "type": "paragraph",
+      "text": "Если проект на старой Unity и переезд на шестую версию запланирован, DI-фреймворк - один из первых камней преткновения. Extenject фактически не поддерживается, и его работа с Unity 6 держится на честном слове. Reflex поддерживается, быстрый и чистый - но переехать на него холодным стартом значит изучить новый API, переписать каждый инсталлер и переучить всю команду."
+    },
+    {
+      "type": "paragraph",
+      "text": "Zenjex убирает эту цену. Синтаксис биндингов намеренно совпадает с Zenject: атрибуты, инсталлеры, способ резолвить зависимости - всё то же самое. Под капотом работает Reflex, и прирост производительности достаётся бесплатно."
+    },
+    {
+      "type": "list",
+      "items": [
+        "**Без переписывания**: `Bind<T>().To<TImpl>().AsSingle()` работает в Zenjex без изменений",
+        "**Быстрее Zenject**: Reflex резолвит зависимости быстрее за счёт активации через expression tree и умного кэширования - как на Mono, так и особенно на IL2CPP",
+        "**Unity 6 из коробки**: никаких конфликтов с редактором, никакого сломанного дебаггера, никаких скрытых рантайм-крэшей из-за версионных несовместимостей",
+        "**Без переобучения**: три паттерна инъекций (атрибут, базовый класс, ручной резолв) знакомы каждому, кто работал с Zenject или Extenject"
+      ]
+    }
+  ]
 }

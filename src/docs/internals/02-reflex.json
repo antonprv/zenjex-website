@@ -2,6 +2,556 @@
   "id": "reflex-internals",
   "titleRu": "Reflex: устройство",
   "titleEn": "Reflex Internals",
-  "contentEn": "# Reflex Internals\n\n\n## Table of Contents\n\n- [High-level overview](#high-level-overview)\n- [Container hierarchy](#container-hierarchy)\n- [ContainerBuilder](#containerbuilder)\n- [Resolvers and lifetimes](#resolvers-and-lifetimes)\n- [Object activation](#object-activation)\n- [Reflection cache](#reflection-cache)\n- [Attribute injection pipeline](#attribute-injection-pipeline)\n- [Unity bootstrap - UnityInjector](#unity-bootstrap---unityinjector)\n- [ContainerScope](#containerscope)\n\n---\n\n## High-level overview\n\n```\n┌──────────────────────────────────────────────────────────┐\n│                      Unity Runtime                       │\n│                                                          │\n│  ┌─────────────────────────────────────────────────────┐ │\n│  │                  Reflex (core DI)                   │ │\n│  │                                                     │ │\n│  │   ReflexSettings ──► RootContainer                  │ │\n│  │                           │                         │ │\n│  │                    SceneContainer (per scene)       │ │\n│  │                     inherits from RootContainer     │ │\n│  └─────────────────────────────────────────────────────┘ │\n│                                                          │\n│  ┌─────────────────────────────────────────────────────┐ │\n│  │              Zenjex (extension layer)               │ │\n│  │                                                     │ │\n│  │  ProjectRootInstaller  ──► RootContext (static)     │ │\n│  │  BindingBuilder (fluent Zenject-style API)          │ │\n│  │  ZenjexRunner  ──► ZenjexInjector  ──► [Zenjex]     │ │\n│  │  SceneInstaller (scene-scoped sub-container)        │ │\n│  │  ZenjexBehaviour (guaranteed pre-Awake injection)   │ │\n│  └─────────────────────────────────────────────────────┘ │\n└──────────────────────────────────────────────────────────┘\n```\n\nReflex owns the container lifecycle. Zenjex owns the injection orchestration and exposes a Zenject-compatible API on top. The two layers are decoupled - Zenjex talks to Reflex only through `Container`, `ContainerBuilder`, and `IInstaller`.\n\n---\n\n## Container hierarchy\n\nReflex uses a **parent-child container tree**. A typical setup has two levels:\n\n- **RootContainer** - built once from `ReflexSettings.RootScopes` before any scene loads. Holds bindings that need to survive across all scenes: global services, configs, factories. Also stored as the static `Container.RootContainer`.\n- **SceneContainer** - created as a child scope of `RootContainer` each time a scene with a `ContainerScope` loads. It inherits all resolvers from the parent, can add or override bindings locally, and is disposed when the scene unloads.\n\n```\nRootContainer\n    └── SceneContainer (Scene A)\n    └── SceneContainer (Scene B, additive)\n```\n\nWhen resolving a type, a container looks in its own `ResolversByContract` dictionary. Parent resolvers are **copied** into the child at build time (`ContainerBuilder.Build()` shallow-copies `Parent.ResolversByContract`), so resolution is always a single dictionary lookup with no runtime parent traversal.\n\n---\n\n## ContainerBuilder\n\n`ContainerBuilder` is the only way to create a `Container`. It collects `Binding` objects - each one pairs an `IResolver` with a set of contracts (types) - then `Build()` materializes the container.\n\nKey steps in `Build()`:\n\n1. Parent resolvers are shallow-copied into the new container's dictionary first, so child bindings can shadow them.\n2. Each resolver's `DeclaringContainer` is set to the new container. This is what keeps singleton instances scoped to the container that declared them, not the one that resolved them.\n3. Inherited `Scoped + Eager` bindings from the parent are resolved immediately against the new child container, creating fresh scoped instances.\n4. Self-owned `Singleton/Scoped + Eager` bindings are resolved immediately as well. Everything else is lazy by default.\n\n`ContainerBuilder` also has two static extension hooks for tooling: `OnRootContainerBuilding` and `OnSceneContainerBuilding`, both invoked by `UnityInjector` during container creation.\n\n---\n\n## Resolvers and lifetimes\n\nEvery binding maps to exactly one `IResolver`. The resolver decides whether to create a new instance or return a cached one. There are seven types:\n\n| Resolver | Lifetime | Behaviour |\n|---|---|---|\n| `SingletonValueResolver` | Singleton | Wraps a pre-existing instance, always returns it |\n| `SingletonTypeResolver` | Singleton | Creates the instance on first resolve, caches it on `DeclaringContainer` |\n| `TransientTypeResolver` | Transient | Creates a new instance on every resolve |\n| `ScopedTypeResolver` | Scoped | Creates one instance per container scope |\n| `SingletonFactoryResolver` | Singleton | Calls a factory delegate once, caches the result |\n| `TransientFactoryResolver` | Transient | Calls the factory on every resolve |\n| `ScopedFactoryResolver` | Scoped | Calls the factory once per scope |\n\n`Transient + Eager` is forbidden at the assertion level - an eagerly created transient would be constructed and immediately become unreachable, which makes no sense.\n\n---\n\n## Object activation\n\nWhen a type resolver needs to construct a new instance, it calls `Container.Construct(type)`, which delegates to `ConstructorInjector` and then `AttributeInjector`.\n\nConstructor selection priority:\n1. A constructor marked `[ReflexConstructor]`, if one exists.\n2. The constructor with the most parameters otherwise.\n\nOn the hot path, Reflex does **not** use `Activator.CreateInstance` or bare `ConstructorInfo.Invoke`. Instead, it compiles a typed delegate at registration time using **`System.Linq.Expressions`**:\n\n```csharp\n// MonoActivatorFactory (Mono / Editor)\nvar lambda = Expression.Lambda<ObjectActivator>(\n    Expression.Convert(Expression.New(constructor, argumentsExpressions), typeof(object)),\n    param);\nreturn lambda.Compile();\n```\n\nThe compiled delegate is cached in `TypeConstructionInfoCache` keyed by `Type.TypeHandle.Value` (a raw `IntPtr`), so subsequent lookups are a single dictionary read with no reflection overhead.\n\nOn **IL2CPP** (AOT platforms), `Expression.Compile()` is unavailable. `IL2CPPActivatorFactory` falls back to `FormatterServices.GetUninitializedObject` + `ConstructorInfo.Invoke` and skips the expression tree entirely, but still caches the construction info to avoid repeated reflection scans. `ActivatorFactoryManager` picks the right factory at startup based on the scripting backend.\n\n---\n\n## Reflection cache\n\nTwo caches prevent repeated reflection scans:\n\n**`TypeConstructionInfoCache`** - stores `TypeConstructionInfo` per type, keyed by `TypeHandle.Value`. Each entry holds the compiled `ObjectActivator` delegate and a `MemberParamInfo[]` describing constructor parameter types and default values. Built lazily on the first `Construct()` call per type.\n\n**`TypeInfoCache`** - stores `TypeAttributeInfo` per type: lists of fields, properties, and methods carrying `[Inject]`. Built lazily on the first `AttributeInjector.Inject()` call. Uses pooled `List<T>` instances during the scanning pass to keep allocations down.\n\nNeither cache ever invalidates - Unity does not hot-reload types at runtime.\n\n---\n\n## Attribute injection pipeline\n\nAfter construction, `AttributeInjector.Inject(instance, container)` runs a second pass for `[Inject]`-marked members.\n\nIf the type implements `IAttributeInjectionContract`, the call dispatches directly to a source-generated `ReflexInject(container)` method - a zero-reflection fast path, opt-in via `[SourceGeneratorInjectable]`. The dispatch is inlined with `AggressiveInlining`. Otherwise the injector reads from `TypeInfoCache` and calls:\n\n- `FieldInjector` - sets fields via `FieldInfo.SetValue`\n- `PropertyInjector` - sets properties via `PropertyInfo.SetValue`\n- `MethodInjector` - calls the method with resolved arguments\n\n---\n\n## Unity bootstrap - UnityInjector\n\n`UnityInjector` is the entry point that connects Reflex to the Unity player loop. It hooks in via `[RuntimeInitializeOnLoadMethod(AfterAssembliesLoaded)]`, which fires before any scene loads. The assembly carries `[AlwaysLinkAssembly]` to ensure this runs even if the assembly would otherwise be stripped.\n\nStartup sequence:\n1. Static state is reset - this matters when **Reload Domain** is disabled in Editor settings. The reset is wrapped in `#if UNITY_EDITOR` so it does not run in builds.\n2. `OnSceneLoaded`, `SceneManager.sceneUnloaded`, and `Application.quitting` are subscribed.\n3. On the first scene load: if `Container.RootContainer` is null, it is built from all active `RootScopes` in `ReflexSettings`, then a `SceneContainer` is created as a child scope.\n4. On scene unload: the corresponding `SceneContainer` is disposed and removed from `ContainersPerScene`.\n5. On quit: `RootContainer` is disposed and all static state and event subscriptions are cleaned up.\n\n`ContainersPerScene` is a `Dictionary<Scene, Container>` used to look up the right container during injection. If a scene has two `ContainerScope` components, `SceneHasMultipleSceneScopesException` is thrown.\n\n---\n\n## ContainerScope\n\n`ContainerScope` is a `MonoBehaviour` with execution order `-1,000,000,000` - the lowest possible value, so it always runs before everything else. Its `Awake()` calls `UnityInjector.OnSceneLoaded.Invoke(scene, this)`, which triggers container creation and scene injection before any other `Awake()` in the scene. Note that `Awake()` is only invoked for `ContainerScope` instances placed in scenes - root scopes listed in `ReflexSettings` are never instantiated by Unity.\n\n`ContainerScope.InstallBindings(builder)` collects all `IInstaller` components on itself and its children via `GetComponentsInChildren<IInstaller>()` using a pooled `List<IInstaller>`, then calls `InstallBindings` on each one. This is how a `GameInstaller` (or any number of installers) gets picked up automatically.\n\n`GameObjectSelfInjector` is a companion `MonoBehaviour` (execution order `SceneContainerScopeExecutionOrder + 100`) that injects a single GameObject from the scene container. It supports three strategies: `Single` (this component only), `Object` (all components on the GameObject), and `Recursive` (the full hierarchy). Use it for objects not covered by scene-wide injection.\n\n---\n\n← [Home](Home) | [Zenjex Internals](Zenjex-Internals) →",
-  "contentRu": "# Reflex: внутреннее устройство\n\n\n## Содержание\n\n- [Общая схема](#общая-схема)\n- [Иерархия контейнеров](#иерархия-контейнеров)\n- [ContainerBuilder](#containerbuilder)\n- [Резолверы и лайфтаймы](#резолверы-и-лайфтаймы)\n- [Активация объектов](#активация-объектов)\n- [Кэш рефлексии](#кэш-рефлексии)\n- [Пайплайн инъекции по атрибутам](#пайплайн-инъекции-по-атрибутам)\n- [Bootstrap в Unity - UnityInjector](#bootstrap-в-unity---unityinjector)\n- [ContainerScope](#containerscope)\n\n---\n\n## Общая схема\n\n```\n┌──────────────────────────────────────────────────────────┐\n│                      Unity Runtime                       │\n│                                                          │\n│  ┌─────────────────────────────────────────────────────┐ │\n│  │                  Reflex (core DI)                   │ │\n│  │                                                     │ │\n│  │   ReflexSettings ──► RootContainer                  │ │\n│  │                           │                         │ │\n│  │                    SceneContainer (на сцену)        │ │\n│  │                     наследует RootContainer         │ │\n│  └─────────────────────────────────────────────────────┘ │\n│                                                          │\n│  ┌─────────────────────────────────────────────────────┐ │\n│  │              Zenjex (extension layer)               │ │\n│  │                                                     │ │\n│  │  ProjectRootInstaller  ──► RootContext (static)     │ │\n│  │  BindingBuilder (fluent Zenject-style API)          │ │\n│  │  ZenjexRunner  ──► ZenjexInjector  ──► [Zenjex]     │ │\n│  │  SceneInstaller (scene-scoped саб-контейнер)        │ │\n│  │  ZenjexBehaviour (инъекция до Awake, гарантированно)│ │\n│  └─────────────────────────────────────────────────────┘ │\n└──────────────────────────────────────────────────────────┘\n```\n\nReflex управляет жизненным циклом контейнеров. Zenjex управляет оркестрацией инъекций и предоставляет совместимый с Zenject API поверх него. Слои развязаны: Zenjex обращается к Reflex только через `Container`, `ContainerBuilder` и `IInstaller`.\n\n---\n\n## Иерархия контейнеров\n\nReflex строит **дерево контейнеров «родитель - потомок»**. В типичном проекте два уровня:\n\n- **RootContainer** - собирается один раз из `ReflexSettings.RootScopes` до загрузки любой сцены. Хранит биндинги, которые должны жить во всех сценах: глобальные сервисы, конфиги, фабрики. Доступен также как статическое поле `Container.RootContainer`.\n- **SceneContainer** - создаётся как дочерняя область `RootContainer` каждый раз, когда загружается сцена с `ContainerScope`. Наследует все резолверы родителя, может добавлять и перекрывать локальные биндинги. Уничтожается при выгрузке сцены.\n\n```\nRootContainer\n    └── SceneContainer (Scene A)\n    └── SceneContainer (Scene B, additive)\n```\n\nПри резолве тип ищется в собственном словаре `ResolversByContract`. Резолверы родителя **копируются** в потомка при сборке (`ContainerBuilder.Build()` делает shallow-copy из `Parent.ResolversByContract`), поэтому резолв всегда представляет собой один поиск по словарю без обхода родителей в рантайме.\n\n---\n\n## ContainerBuilder\n\n`ContainerBuilder` - единственный способ создать `Container`. Он накапливает объекты `Binding` - каждый из них связывает `IResolver` с набором контрактов (типов) - а затем `Build()` материализует контейнер.\n\nКлючевые шаги `Build()`:\n\n1. Резолверы родителя сначала копируются в словарь нового контейнера, поэтому дочерние биндинги могут их перекрыть.\n2. Поле `DeclaringContainer` каждого резолвера устанавливается в новый контейнер. Именно это обеспечивает привязку singleton-экземпляров к контейнеру, который их объявил, а не к тому, который запросил.\n3. Унаследованные от родителя биндинги `Scoped + Eager` немедленно резолвятся в новом дочернем контейнере, создавая свежие scoped-экземпляры.\n4. Собственные биндинги `Singleton/Scoped + Eager` тоже резолвятся немедленно. Всё остальное - ленивое по умолчанию.\n\nУ `ContainerBuilder` также есть два статических хука для инструментария: `OnRootContainerBuilding` и `OnSceneContainerBuilding`, которые `UnityInjector` вызывает при создании контейнеров.\n\n---\n\n## Резолверы и лайфтаймы\n\nКаждый биндинг сопоставляется ровно с одним `IResolver`. Резолвер решает, создавать ли новый экземпляр или вернуть кэшированный. Существует семь типов:\n\n| Резолвер | Лайфтайм | Поведение |\n|---|---|---|\n| `SingletonValueResolver` | Singleton | Оборачивает готовый экземпляр, всегда возвращает его |\n| `SingletonTypeResolver` | Singleton | Создаёт экземпляр при первом резолве, кэширует в `DeclaringContainer` |\n| `TransientTypeResolver` | Transient | Создаёт новый экземпляр при каждом резолве |\n| `ScopedTypeResolver` | Scoped | Один экземпляр на область контейнера |\n| `SingletonFactoryResolver` | Singleton | Вызывает фабричный делегат один раз, кэширует результат |\n| `TransientFactoryResolver` | Transient | Вызывает фабрику при каждом резолве |\n| `ScopedFactoryResolver` | Scoped | Вызывает фабрику один раз на область |\n\n`Transient + Eager` запрещён на уровне assert - eagerly-созданный transient будет создан и сразу станет недостижимым, что не имеет смысла.\n\n---\n\n## Активация объектов\n\nКогда резолверу типа нужно создать новый экземпляр, он вызывает `Container.Construct(type)`, который делегирует работу сначала `ConstructorInjector`, а затем `AttributeInjector`.\n\nПриоритет при выборе конструктора:\n1. Конструктор с атрибутом `[ReflexConstructor]`, если он есть.\n2. Иначе - конструктор с наибольшим числом параметров.\n\nНа горячем пути Reflex **не использует** `Activator.CreateInstance` или `ConstructorInfo.Invoke` напрямую. Вместо этого при регистрации компилируется типизированный делегат через **`System.Linq.Expressions`**:\n\n```csharp\n// MonoActivatorFactory (Mono / Editor)\nvar lambda = Expression.Lambda<ObjectActivator>(\n    Expression.Convert(Expression.New(constructor, argumentsExpressions), typeof(object)),\n    param);\nreturn lambda.Compile();\n```\n\nСкомпилированный делегат кэшируется в `TypeConstructionInfoCache` с ключом `Type.TypeHandle.Value` (сырой `IntPtr`), так что последующие обращения - это один поиск по словарю без накладных расходов на рефлексию.\n\nНа **IL2CPP** (AOT-платформы) `Expression.Compile()` недоступен. `IL2CPPActivatorFactory` откатывается к `FormatterServices.GetUninitializedObject` + `ConstructorInfo.Invoke` и полностью обходится без expression tree, но всё равно кэширует информацию о конструкции, чтобы не сканировать рефлексию повторно. `ActivatorFactoryManager` выбирает нужную фабрику при старте на основе scripting backend.\n\n---\n\n## Кэш рефлексии\n\nДва кэша исключают повторное сканирование рефлексией:\n\n**`TypeConstructionInfoCache`** - хранит `TypeConstructionInfo` на тип с ключом `TypeHandle.Value`. Каждая запись содержит скомпилированный делегат `ObjectActivator` и массив `MemberParamInfo[]` с описанием типов параметров конструктора и их значений по умолчанию. Строится лениво при первом вызове `Construct()` для данного типа.\n\n**`TypeInfoCache`** - хранит `TypeAttributeInfo` на тип: списки полей, свойств и методов с атрибутом `[Inject]`. Строится лениво при первом вызове `AttributeInjector.Inject()`. Во время сканирования использует pooled-экземпляры `List<T>`, чтобы снизить аллокации.\n\nНи один из кэшей никогда не инвалидируется - Unity не перезагружает типы в рантайме.\n\n---\n\n## Пайплайн инъекции по атрибутам\n\nПосле создания объекта `AttributeInjector.Inject(instance, container)` выполняет второй проход по членам с атрибутом `[Inject]`.\n\nЕсли тип реализует `IAttributeInjectionContract`, вызов диспатчится напрямую в source-generated метод `ReflexInject(container)` - это нулевой по рефлексии быстрый путь, включаемый через `[SourceGeneratorInjectable]`. Диспатч инлайнится с `AggressiveInlining`. В противном случае инжектор читает из `TypeInfoCache` и вызывает:\n\n- `FieldInjector` - задаёт поля через `FieldInfo.SetValue`\n- `PropertyInjector` - задаёт свойства через `PropertyInfo.SetValue`\n- `MethodInjector` - вызывает метод с резолвнутыми аргументами\n\n---\n\n## Bootstrap в Unity - UnityInjector\n\n`UnityInjector` связывает Reflex с player loop Unity. Подключается через `[RuntimeInitializeOnLoadMethod(AfterAssembliesLoaded)]`, который срабатывает до загрузки любой сцены. Сборка помечена `[AlwaysLinkAssembly]`, чтобы код выполнился даже если сборка иначе была бы stripped.\n\nПоследовательность запуска:\n1. Статическое состояние сбрасывается - это важно при отключённом **Reload Domain** в настройках редактора. Сброс обёрнут в `#if UNITY_EDITOR` и не выполняется в сборках.\n2. Подписка на `OnSceneLoaded`, `SceneManager.sceneUnloaded` и `Application.quitting`.\n3. При загрузке первой сцены: если `Container.RootContainer` равен null, он собирается из всех активных `RootScopes` в `ReflexSettings`, затем создаётся `SceneContainer` как дочерняя область.\n4. При выгрузке сцены: соответствующий `SceneContainer` уничтожается и удаляется из `ContainersPerScene`.\n5. При выходе из приложения: `RootContainer` уничтожается, всё статическое состояние и подписки на события очищаются.\n\n`ContainersPerScene` - `Dictionary<Scene, Container>` для поиска нужного контейнера во время инъекции. Если в сцене окажется два компонента `ContainerScope`, будет брошен `SceneHasMultipleSceneScopesException`.\n\n---\n\n## ContainerScope\n\n`ContainerScope` - `MonoBehaviour` с порядком выполнения `-1 000 000 000`, то есть гарантированно запускается раньше всего остального. Его `Awake()` вызывает `UnityInjector.OnSceneLoaded.Invoke(scene, this)`, что запускает создание контейнера и инъекцию по сцене до того, как в ней сработает любой другой `Awake()`. Важно: `Awake()` вызывается только для `ContainerScope`-экземпляров, размещённых в сценах - root scopes из `ReflexSettings` Unity никогда не инстанцирует.\n\n`ContainerScope.InstallBindings(builder)` собирает все компоненты `IInstaller` на себе и дочерних объектах через `GetComponentsInChildren<IInstaller>()` с pooled `List<IInstaller>`, затем вызывает на каждом `InstallBindings`. Именно так `GameInstaller` (или любое количество инсталлеров) подхватывается автоматически.\n\n`GameObjectSelfInjector` - вспомогательный `MonoBehaviour` (порядок `SceneContainerScopeExecutionOrder + 100`), который инъецирует один конкретный GameObject из контейнера сцены. Поддерживает три стратегии: `Single` (только данный компонент), `Object` (все компоненты на GameObject) и `Recursive` (полная иерархия). Нужен для объектов, которые не покрываются сценарным обходом.\n\n---\n\n← [Главная](Home.ru) | [Zenjex: внутреннее устройство](Zenjex-Internals.ru) →"
+  "en": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Reflex Internals"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Table of Contents"
+    },
+    {
+      "type": "list",
+      "items": [
+        "[High-level overview](#high-level-overview)",
+        "[Container hierarchy](#container-hierarchy)",
+        "[ContainerBuilder](#containerbuilder)",
+        "[Resolvers and lifetimes](#resolvers-and-lifetimes)",
+        "[Object activation](#object-activation)",
+        "[Reflection cache](#reflection-cache)",
+        "[Attribute injection pipeline](#attribute-injection-pipeline)",
+        "[Unity bootstrap - UnityInjector](#unity-bootstrap---unityinjector)",
+        "[ContainerScope](#containerscope)"
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "High-level overview"
+    },
+    {
+      "type": "code",
+      "lang": "csharp",
+      "text": "┌──────────────────────────────────────────────────────────┐\n│                      Unity Runtime                       │\n│                                                          │\n│  ┌─────────────────────────────────────────────────────┐ │\n│  │                  Reflex (core DI)                   │ │\n│  │                                                     │ │\n│  │   ReflexSettings ──► RootContainer                  │ │\n│  │                           │                         │ │\n│  │                    SceneContainer (per scene)       │ │\n│  │                     inherits from RootContainer     │ │\n│  └─────────────────────────────────────────────────────┘ │\n│                                                          │\n│  ┌─────────────────────────────────────────────────────┐ │\n│  │              Zenjex (extension layer)               │ │\n│  │                                                     │ │\n│  │  ProjectRootInstaller  ──► RootContext (static)     │ │\n│  │  BindingBuilder (fluent Zenject-style API)          │ │\n│  │  ZenjexRunner  ──► ZenjexInjector  ──► [Zenjex]     │ │\n│  │  SceneInstaller (scene-scoped sub-container)        │ │\n│  │  ZenjexBehaviour (guaranteed pre-Awake injection)   │ │\n│  └─────────────────────────────────────────────────────┘ │\n└──────────────────────────────────────────────────────────┘"
+    },
+    {
+      "type": "paragraph",
+      "text": "Reflex owns the container lifecycle. Zenjex owns the injection orchestration and exposes a Zenject-compatible API on top. The two layers are decoupled - Zenjex talks to Reflex only through `Container`, `ContainerBuilder`, and `IInstaller`."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Container hierarchy"
+    },
+    {
+      "type": "paragraph",
+      "text": "Reflex uses a **parent-child container tree**. A typical setup has two levels:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "**RootContainer** - built once from `ReflexSettings.RootScopes` before any scene loads. Holds bindings that need to survive across all scenes: global services, configs, factories. Also stored as the static `Container.RootContainer`.",
+        "**SceneContainer** - created as a child scope of `RootContainer` each time a scene with a `ContainerScope` loads. It inherits all resolvers from the parent, can add or override bindings locally, and is disposed when the scene unloads."
+      ]
+    },
+    {
+      "type": "code",
+      "lang": "csharp",
+      "text": "RootContainer\n    └── SceneContainer (Scene A)\n    └── SceneContainer (Scene B, additive)"
+    },
+    {
+      "type": "paragraph",
+      "text": "When resolving a type, a container looks in its own `ResolversByContract` dictionary. Parent resolvers are **copied** into the child at build time (`ContainerBuilder.Build()` shallow-copies `Parent.ResolversByContract`), so resolution is always a single dictionary lookup with no runtime parent traversal."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "ContainerBuilder"
+    },
+    {
+      "type": "paragraph",
+      "text": "`ContainerBuilder` is the only way to create a `Container`. It collects `Binding` objects - each one pairs an `IResolver` with a set of contracts (types) - then `Build()` materializes the container."
+    },
+    {
+      "type": "paragraph",
+      "text": "Key steps in `Build()`:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Parent resolvers are shallow-copied into the new container's dictionary first, so child bindings can shadow them.",
+        "Each resolver's `DeclaringContainer` is set to the new container. This is what keeps singleton instances scoped to the container that declared them, not the one that resolved them.",
+        "Inherited `Scoped + Eager` bindings from the parent are resolved immediately against the new child container, creating fresh scoped instances.",
+        "Self-owned `Singleton/Scoped + Eager` bindings are resolved immediately as well. Everything else is lazy by default."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "`ContainerBuilder` also has two static extension hooks for tooling: `OnRootContainerBuilding` and `OnSceneContainerBuilding`, both invoked by `UnityInjector` during container creation."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Resolvers and lifetimes"
+    },
+    {
+      "type": "paragraph",
+      "text": "Every binding maps to exactly one `IResolver`. The resolver decides whether to create a new instance or return a cached one. There are seven types:"
+    },
+    {
+      "type": "table",
+      "head": [
+        "Resolver",
+        "Lifetime",
+        "Behaviour"
+      ],
+      "rows": [
+        [
+          "`SingletonValueResolver`",
+          "Singleton",
+          "Wraps a pre-existing instance, always returns it"
+        ],
+        [
+          "`SingletonTypeResolver`",
+          "Singleton",
+          "Creates the instance on first resolve, caches it on `DeclaringContainer`"
+        ],
+        [
+          "`TransientTypeResolver`",
+          "Transient",
+          "Creates a new instance on every resolve"
+        ],
+        [
+          "`ScopedTypeResolver`",
+          "Scoped",
+          "Creates one instance per container scope"
+        ],
+        [
+          "`SingletonFactoryResolver`",
+          "Singleton",
+          "Calls a factory delegate once, caches the result"
+        ],
+        [
+          "`TransientFactoryResolver`",
+          "Transient",
+          "Calls the factory on every resolve"
+        ],
+        [
+          "`ScopedFactoryResolver`",
+          "Scoped",
+          "Calls the factory once per scope"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "`Transient + Eager` is forbidden at the assertion level - an eagerly created transient would be constructed and immediately become unreachable, which makes no sense."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Object activation"
+    },
+    {
+      "type": "paragraph",
+      "text": "When a type resolver needs to construct a new instance, it calls `Container.Construct(type)`, which delegates to `ConstructorInjector` and then `AttributeInjector`."
+    },
+    {
+      "type": "paragraph",
+      "text": "Constructor selection priority:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "A constructor marked `[ReflexConstructor]`, if one exists.",
+        "The constructor with the most parameters otherwise."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "On the hot path, Reflex does **not** use `Activator.CreateInstance` or bare `ConstructorInfo.Invoke`. Instead, it compiles a typed delegate at registration time using **`System.Linq.Expressions`**:"
+    },
+    {
+      "type": "code",
+      "lang": "csharp",
+      "text": "// MonoActivatorFactory (Mono / Editor)\nvar lambda = Expression.Lambda<ObjectActivator>(\n    Expression.Convert(Expression.New(constructor, argumentsExpressions), typeof(object)),\n    param);\nreturn lambda.Compile();"
+    },
+    {
+      "type": "paragraph",
+      "text": "The compiled delegate is cached in `TypeConstructionInfoCache` keyed by `Type.TypeHandle.Value` (a raw `IntPtr`), so subsequent lookups are a single dictionary read with no reflection overhead."
+    },
+    {
+      "type": "paragraph",
+      "text": "On **IL2CPP** (AOT platforms), `Expression.Compile()` is unavailable. `IL2CPPActivatorFactory` falls back to `FormatterServices.GetUninitializedObject` + `ConstructorInfo.Invoke` and skips the expression tree entirely, but still caches the construction info to avoid repeated reflection scans. `ActivatorFactoryManager` picks the right factory at startup based on the scripting backend."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Reflection cache"
+    },
+    {
+      "type": "paragraph",
+      "text": "Two caches prevent repeated reflection scans:"
+    },
+    {
+      "type": "paragraph",
+      "text": "**`TypeConstructionInfoCache`** - stores `TypeConstructionInfo` per type, keyed by `TypeHandle.Value`. Each entry holds the compiled `ObjectActivator` delegate and a `MemberParamInfo[]` describing constructor parameter types and default values. Built lazily on the first `Construct()` call per type."
+    },
+    {
+      "type": "paragraph",
+      "text": "**`TypeInfoCache`** - stores `TypeAttributeInfo` per type: lists of fields, properties, and methods carrying `[Inject]`. Built lazily on the first `AttributeInjector.Inject()` call. Uses pooled `List<T>` instances during the scanning pass to keep allocations down."
+    },
+    {
+      "type": "paragraph",
+      "text": "Neither cache ever invalidates - Unity does not hot-reload types at runtime."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Attribute injection pipeline"
+    },
+    {
+      "type": "paragraph",
+      "text": "After construction, `AttributeInjector.Inject(instance, container)` runs a second pass for `[Inject]`-marked members."
+    },
+    {
+      "type": "paragraph",
+      "text": "If the type implements `IAttributeInjectionContract`, the call dispatches directly to a source-generated `ReflexInject(container)` method - a zero-reflection fast path, opt-in via `[SourceGeneratorInjectable]`. The dispatch is inlined with `AggressiveInlining`. Otherwise the injector reads from `TypeInfoCache` and calls:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "`FieldInjector` - sets fields via `FieldInfo.SetValue`",
+        "`PropertyInjector` - sets properties via `PropertyInfo.SetValue`",
+        "`MethodInjector` - calls the method with resolved arguments"
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Unity bootstrap - UnityInjector"
+    },
+    {
+      "type": "paragraph",
+      "text": "`UnityInjector` is the entry point that connects Reflex to the Unity player loop. It hooks in via `[RuntimeInitializeOnLoadMethod(AfterAssembliesLoaded)]`, which fires before any scene loads. The assembly carries `[AlwaysLinkAssembly]` to ensure this runs even if the assembly would otherwise be stripped."
+    },
+    {
+      "type": "paragraph",
+      "text": "Startup sequence:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Static state is reset - this matters when **Reload Domain** is disabled in Editor settings. The reset is wrapped in `#if UNITY_EDITOR` so it does not run in builds.",
+        "`OnSceneLoaded`, `SceneManager.sceneUnloaded`, and `Application.quitting` are subscribed.",
+        "On the first scene load: if `Container.RootContainer` is null, it is built from all active `RootScopes` in `ReflexSettings`, then a `SceneContainer` is created as a child scope.",
+        "On scene unload: the corresponding `SceneContainer` is disposed and removed from `ContainersPerScene`.",
+        "On quit: `RootContainer` is disposed and all static state and event subscriptions are cleaned up."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "`ContainersPerScene` is a `Dictionary<Scene, Container>` used to look up the right container during injection. If a scene has two `ContainerScope` components, `SceneHasMultipleSceneScopesException` is thrown."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "ContainerScope"
+    },
+    {
+      "type": "paragraph",
+      "text": "`ContainerScope` is a `MonoBehaviour` with execution order `-1,000,000,000` - the lowest possible value, so it always runs before everything else. Its `Awake()` calls `UnityInjector.OnSceneLoaded.Invoke(scene, this)`, which triggers container creation and scene injection before any other `Awake()` in the scene. Note that `Awake()` is only invoked for `ContainerScope` instances placed in scenes - root scopes listed in `ReflexSettings` are never instantiated by Unity."
+    },
+    {
+      "type": "paragraph",
+      "text": "`ContainerScope.InstallBindings(builder)` collects all `IInstaller` components on itself and its children via `GetComponentsInChildren<IInstaller>()` using a pooled `List<IInstaller>`, then calls `InstallBindings` on each one. This is how a `GameInstaller` (or any number of installers) gets picked up automatically."
+    },
+    {
+      "type": "paragraph",
+      "text": "`GameObjectSelfInjector` is a companion `MonoBehaviour` (execution order `SceneContainerScopeExecutionOrder + 100`) that injects a single GameObject from the scene container. It supports three strategies: `Single` (this component only), `Object` (all components on the GameObject), and `Recursive` (the full hierarchy). Use it for objects not covered by scene-wide injection."
+    },
+    {
+      "type": "paragraph",
+      "text": "← [Home](Home) | [Zenjex Internals](Zenjex-Internals) →"
+    }
+  ],
+  "ru": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Reflex: внутреннее устройство"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Содержание"
+    },
+    {
+      "type": "list",
+      "items": [
+        "[Общая схема](#общая-схема)",
+        "[Иерархия контейнеров](#иерархия-контейнеров)",
+        "[ContainerBuilder](#containerbuilder)",
+        "[Резолверы и лайфтаймы](#резолверы-и-лайфтаймы)",
+        "[Активация объектов](#активация-объектов)",
+        "[Кэш рефлексии](#кэш-рефлексии)",
+        "[Пайплайн инъекции по атрибутам](#пайплайн-инъекции-по-атрибутам)",
+        "[Bootstrap в Unity - UnityInjector](#bootstrap-в-unity---unityinjector)",
+        "[ContainerScope](#containerscope)"
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Общая схема"
+    },
+    {
+      "type": "code",
+      "lang": "csharp",
+      "text": "┌──────────────────────────────────────────────────────────┐\n│                      Unity Runtime                       │\n│                                                          │\n│  ┌─────────────────────────────────────────────────────┐ │\n│  │                  Reflex (core DI)                   │ │\n│  │                                                     │ │\n│  │   ReflexSettings ──► RootContainer                  │ │\n│  │                           │                         │ │\n│  │                    SceneContainer (на сцену)        │ │\n│  │                     наследует RootContainer         │ │\n│  └─────────────────────────────────────────────────────┘ │\n│                                                          │\n│  ┌─────────────────────────────────────────────────────┐ │\n│  │              Zenjex (extension layer)               │ │\n│  │                                                     │ │\n│  │  ProjectRootInstaller  ──► RootContext (static)     │ │\n│  │  BindingBuilder (fluent Zenject-style API)          │ │\n│  │  ZenjexRunner  ──► ZenjexInjector  ──► [Zenjex]     │ │\n│  │  SceneInstaller (scene-scoped саб-контейнер)        │ │\n│  │  ZenjexBehaviour (инъекция до Awake, гарантированно)│ │\n│  └─────────────────────────────────────────────────────┘ │\n└──────────────────────────────────────────────────────────┘"
+    },
+    {
+      "type": "paragraph",
+      "text": "Reflex управляет жизненным циклом контейнеров. Zenjex управляет оркестрацией инъекций и предоставляет совместимый с Zenject API поверх него. Слои развязаны: Zenjex обращается к Reflex только через `Container`, `ContainerBuilder` и `IInstaller`."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Иерархия контейнеров"
+    },
+    {
+      "type": "paragraph",
+      "text": "Reflex строит **дерево контейнеров «родитель - потомок»**. В типичном проекте два уровня:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "**RootContainer** - собирается один раз из `ReflexSettings.RootScopes` до загрузки любой сцены. Хранит биндинги, которые должны жить во всех сценах: глобальные сервисы, конфиги, фабрики. Доступен также как статическое поле `Container.RootContainer`.",
+        "**SceneContainer** - создаётся как дочерняя область `RootContainer` каждый раз, когда загружается сцена с `ContainerScope`. Наследует все резолверы родителя, может добавлять и перекрывать локальные биндинги. Уничтожается при выгрузке сцены."
+      ]
+    },
+    {
+      "type": "code",
+      "lang": "csharp",
+      "text": "RootContainer\n    └── SceneContainer (Scene A)\n    └── SceneContainer (Scene B, additive)"
+    },
+    {
+      "type": "paragraph",
+      "text": "При резолве тип ищется в собственном словаре `ResolversByContract`. Резолверы родителя **копируются** в потомка при сборке (`ContainerBuilder.Build()` делает shallow-copy из `Parent.ResolversByContract`), поэтому резолв всегда представляет собой один поиск по словарю без обхода родителей в рантайме."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "ContainerBuilder"
+    },
+    {
+      "type": "paragraph",
+      "text": "`ContainerBuilder` - единственный способ создать `Container`. Он накапливает объекты `Binding` - каждый из них связывает `IResolver` с набором контрактов (типов) - а затем `Build()` материализует контейнер."
+    },
+    {
+      "type": "paragraph",
+      "text": "Ключевые шаги `Build()`:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Резолверы родителя сначала копируются в словарь нового контейнера, поэтому дочерние биндинги могут их перекрыть.",
+        "Поле `DeclaringContainer` каждого резолвера устанавливается в новый контейнер. Именно это обеспечивает привязку singleton-экземпляров к контейнеру, который их объявил, а не к тому, который запросил.",
+        "Унаследованные от родителя биндинги `Scoped + Eager` немедленно резолвятся в новом дочернем контейнере, создавая свежие scoped-экземпляры.",
+        "Собственные биндинги `Singleton/Scoped + Eager` тоже резолвятся немедленно. Всё остальное - ленивое по умолчанию."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "У `ContainerBuilder` также есть два статических хука для инструментария: `OnRootContainerBuilding` и `OnSceneContainerBuilding`, которые `UnityInjector` вызывает при создании контейнеров."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Резолверы и лайфтаймы"
+    },
+    {
+      "type": "paragraph",
+      "text": "Каждый биндинг сопоставляется ровно с одним `IResolver`. Резолвер решает, создавать ли новый экземпляр или вернуть кэшированный. Существует семь типов:"
+    },
+    {
+      "type": "table",
+      "head": [
+        "Резолвер",
+        "Лайфтайм",
+        "Поведение"
+      ],
+      "rows": [
+        [
+          "`SingletonValueResolver`",
+          "Singleton",
+          "Оборачивает готовый экземпляр, всегда возвращает его"
+        ],
+        [
+          "`SingletonTypeResolver`",
+          "Singleton",
+          "Создаёт экземпляр при первом резолве, кэширует в `DeclaringContainer`"
+        ],
+        [
+          "`TransientTypeResolver`",
+          "Transient",
+          "Создаёт новый экземпляр при каждом резолве"
+        ],
+        [
+          "`ScopedTypeResolver`",
+          "Scoped",
+          "Один экземпляр на область контейнера"
+        ],
+        [
+          "`SingletonFactoryResolver`",
+          "Singleton",
+          "Вызывает фабричный делегат один раз, кэширует результат"
+        ],
+        [
+          "`TransientFactoryResolver`",
+          "Transient",
+          "Вызывает фабрику при каждом резолве"
+        ],
+        [
+          "`ScopedFactoryResolver`",
+          "Scoped",
+          "Вызывает фабрику один раз на область"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "`Transient + Eager` запрещён на уровне assert - eagerly-созданный transient будет создан и сразу станет недостижимым, что не имеет смысла."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Активация объектов"
+    },
+    {
+      "type": "paragraph",
+      "text": "Когда резолверу типа нужно создать новый экземпляр, он вызывает `Container.Construct(type)`, который делегирует работу сначала `ConstructorInjector`, а затем `AttributeInjector`."
+    },
+    {
+      "type": "paragraph",
+      "text": "Приоритет при выборе конструктора:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Конструктор с атрибутом `[ReflexConstructor]`, если он есть.",
+        "Иначе - конструктор с наибольшим числом параметров."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "На горячем пути Reflex **не использует** `Activator.CreateInstance` или `ConstructorInfo.Invoke` напрямую. Вместо этого при регистрации компилируется типизированный делегат через **`System.Linq.Expressions`**:"
+    },
+    {
+      "type": "code",
+      "lang": "csharp",
+      "text": "// MonoActivatorFactory (Mono / Editor)\nvar lambda = Expression.Lambda<ObjectActivator>(\n    Expression.Convert(Expression.New(constructor, argumentsExpressions), typeof(object)),\n    param);\nreturn lambda.Compile();"
+    },
+    {
+      "type": "paragraph",
+      "text": "Скомпилированный делегат кэшируется в `TypeConstructionInfoCache` с ключом `Type.TypeHandle.Value` (сырой `IntPtr`), так что последующие обращения - это один поиск по словарю без накладных расходов на рефлексию."
+    },
+    {
+      "type": "paragraph",
+      "text": "На **IL2CPP** (AOT-платформы) `Expression.Compile()` недоступен. `IL2CPPActivatorFactory` откатывается к `FormatterServices.GetUninitializedObject` + `ConstructorInfo.Invoke` и полностью обходится без expression tree, но всё равно кэширует информацию о конструкции, чтобы не сканировать рефлексию повторно. `ActivatorFactoryManager` выбирает нужную фабрику при старте на основе scripting backend."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Кэш рефлексии"
+    },
+    {
+      "type": "paragraph",
+      "text": "Два кэша исключают повторное сканирование рефлексией:"
+    },
+    {
+      "type": "paragraph",
+      "text": "**`TypeConstructionInfoCache`** - хранит `TypeConstructionInfo` на тип с ключом `TypeHandle.Value`. Каждая запись содержит скомпилированный делегат `ObjectActivator` и массив `MemberParamInfo[]` с описанием типов параметров конструктора и их значений по умолчанию. Строится лениво при первом вызове `Construct()` для данного типа."
+    },
+    {
+      "type": "paragraph",
+      "text": "**`TypeInfoCache`** - хранит `TypeAttributeInfo` на тип: списки полей, свойств и методов с атрибутом `[Inject]`. Строится лениво при первом вызове `AttributeInjector.Inject()`. Во время сканирования использует pooled-экземпляры `List<T>`, чтобы снизить аллокации."
+    },
+    {
+      "type": "paragraph",
+      "text": "Ни один из кэшей никогда не инвалидируется - Unity не перезагружает типы в рантайме."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Пайплайн инъекции по атрибутам"
+    },
+    {
+      "type": "paragraph",
+      "text": "После создания объекта `AttributeInjector.Inject(instance, container)` выполняет второй проход по членам с атрибутом `[Inject]`."
+    },
+    {
+      "type": "paragraph",
+      "text": "Если тип реализует `IAttributeInjectionContract`, вызов диспатчится напрямую в source-generated метод `ReflexInject(container)` - это нулевой по рефлексии быстрый путь, включаемый через `[SourceGeneratorInjectable]`. Диспатч инлайнится с `AggressiveInlining`. В противном случае инжектор читает из `TypeInfoCache` и вызывает:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "`FieldInjector` - задаёт поля через `FieldInfo.SetValue`",
+        "`PropertyInjector` - задаёт свойства через `PropertyInfo.SetValue`",
+        "`MethodInjector` - вызывает метод с резолвнутыми аргументами"
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Bootstrap в Unity - UnityInjector"
+    },
+    {
+      "type": "paragraph",
+      "text": "`UnityInjector` связывает Reflex с player loop Unity. Подключается через `[RuntimeInitializeOnLoadMethod(AfterAssembliesLoaded)]`, который срабатывает до загрузки любой сцены. Сборка помечена `[AlwaysLinkAssembly]`, чтобы код выполнился даже если сборка иначе была бы stripped."
+    },
+    {
+      "type": "paragraph",
+      "text": "Последовательность запуска:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Статическое состояние сбрасывается - это важно при отключённом **Reload Domain** в настройках редактора. Сброс обёрнут в `#if UNITY_EDITOR` и не выполняется в сборках.",
+        "Подписка на `OnSceneLoaded`, `SceneManager.sceneUnloaded` и `Application.quitting`.",
+        "При загрузке первой сцены: если `Container.RootContainer` равен null, он собирается из всех активных `RootScopes` в `ReflexSettings`, затем создаётся `SceneContainer` как дочерняя область.",
+        "При выгрузке сцены: соответствующий `SceneContainer` уничтожается и удаляется из `ContainersPerScene`.",
+        "При выходе из приложения: `RootContainer` уничтожается, всё статическое состояние и подписки на события очищаются."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "`ContainersPerScene` - `Dictionary<Scene, Container>` для поиска нужного контейнера во время инъекции. Если в сцене окажется два компонента `ContainerScope`, будет брошен `SceneHasMultipleSceneScopesException`."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "ContainerScope"
+    },
+    {
+      "type": "paragraph",
+      "text": "`ContainerScope` - `MonoBehaviour` с порядком выполнения `-1 000 000 000`, то есть гарантированно запускается раньше всего остального. Его `Awake()` вызывает `UnityInjector.OnSceneLoaded.Invoke(scene, this)`, что запускает создание контейнера и инъекцию по сцене до того, как в ней сработает любой другой `Awake()`. Важно: `Awake()` вызывается только для `ContainerScope`-экземпляров, размещённых в сценах - root scopes из `ReflexSettings` Unity никогда не инстанцирует."
+    },
+    {
+      "type": "paragraph",
+      "text": "`ContainerScope.InstallBindings(builder)` собирает все компоненты `IInstaller` на себе и дочерних объектах через `GetComponentsInChildren<IInstaller>()` с pooled `List<IInstaller>`, затем вызывает на каждом `InstallBindings`. Именно так `GameInstaller` (или любое количество инсталлеров) подхватывается автоматически."
+    },
+    {
+      "type": "paragraph",
+      "text": "`GameObjectSelfInjector` - вспомогательный `MonoBehaviour` (порядок `SceneContainerScopeExecutionOrder + 100`), который инъецирует один конкретный GameObject из контейнера сцены. Поддерживает три стратегии: `Single` (только данный компонент), `Object` (все компоненты на GameObject) и `Recursive` (полная иерархия). Нужен для объектов, которые не покрываются сценарным обходом."
+    },
+    {
+      "type": "paragraph",
+      "text": "← [Главная](Home.ru) | [Zenjex: внутреннее устройство](Zenjex-Internals.ru) →"
+    }
+  ]
 }

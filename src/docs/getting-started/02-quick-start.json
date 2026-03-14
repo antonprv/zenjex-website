@@ -2,6 +2,162 @@
   "id": "quick-start",
   "titleRu": "Быстрый старт",
   "titleEn": "Quick Start",
-  "contentEn": "### Integration guide\n\n#### Step 1 - Copy the Zenjex folder into your project\n\nDrop the entire `Zenjex` folder into your project's `Assets`. That's it - no package manager, no git submodule. The folder contains both Reflex and the Zenjex extension layer, each with its own `.asmdef`, and Unity will pick them up automatically.\n\n> **Unity version**: the included Reflex build targets Unity 6.3 LTS. It will not work correctly on older versions without reverting the Unity 6-specific fixes.\n\n#### Step 2 - Create a class inheriting from `ProjectRootInstaller`\n\n`ProjectRootInstaller` is the global composition root - the Zenjex equivalent of Zenject's `ProjectContext + MonoInstaller`. Create one concrete subclass, add it as a component to a **persistent GameObject** in your bootstrap scene, and implement the three abstract members.\n\n```csharp\nusing System.Collections;\nusing Reflex.Core;\nusing Zenjex.Extensions.Core;\n\n[DefaultExecutionOrder(-250)]\npublic class GameInstaller : ProjectRootInstaller\n{\n    public override void InstallBindings(ContainerBuilder builder)\n    {\n        // Register all global services here - see Step 4\n    }\n\n    // Async setup between InstallBindings and LaunchGame.\n    // Yield Addressables, register runtime-only bindings, etc.\n    // If unused, just leave the yield return null.\n    public override IEnumerator InstallGameInstanceRoutine()\n    {\n        yield return null;\n    }\n\n    // Called after InstallGameInstanceRoutine() completes and all IInitializables are initialized.\n    // Use to kick off your game's entry point - for example, starting a StateMachine,\n    // loading the first scene, or launching a GameInstance.\n    // If you use IInitializable for your GSM entry point, leave this empty.\n    public override void LaunchGame()\n    {\n        // _gameInstance.Launch();\n    }\n}\n```\n\n`ProjectRootInstaller` runs at execution order `-280`, which guarantees the container is fully built before any other `Awake()` in the scene fires.\n\nFor larger projects, organise bindings into multiple child `MonoInstaller` components and delegate to them from the root installer:\n\n```csharp\npublic class AppInstaller : ProjectRootInstaller\n{\n    [SerializeField] private InfrastructureInstaller _infra;\n    [SerializeField] private GameplayInstaller       _gameplay;\n\n    public override void InstallBindings(ContainerBuilder builder)\n    {\n        _infra.InstallBindings(builder);\n        _gameplay.InstallBindings(builder);\n    }\n\n    public override IEnumerator InstallGameInstanceRoutine()\n    {\n        yield return _infra.LoadAddressablesRoutine();\n    }\n\n    public override void LaunchGame() { }\n}\n```\n\n#### Step 3 - Add a `SceneInstaller` to every gameplay scene\n\nFor each scene that has scene-local services, create a class inheriting from `SceneInstaller` and add it to any GameObject in that scene. `SceneInstaller` creates a **child container** that inherits all global bindings from `RootContainer` and adds scene-local bindings on top.\n\nThe child container is disposed automatically when the scene unloads. All scene-local `IInitializable` and `IDisposable` services are lifecycle-managed by the installer.\n\n`SceneInstaller` runs at execution order `-200` - after `ProjectRootInstaller` (`-280`), but before any regular `Awake()` (`0`).\n\n```csharp\nusing Reflex.Core;\nusing Zenjex.Extensions.SceneContext;\n\npublic class GameplaySceneInstaller : SceneInstaller\n{\n    [SerializeField] private LevelProgressWatcher _levelProgressWatcher;\n\n    public override void InstallBindings(ContainerBuilder builder)\n    {\n        // Scene-local bindings - only visible within this scene's container\n        builder.BindInstance(_levelProgressWatcher).AsSingle();\n\n        // Scoped binding from the global installer gets a fresh instance\n        // here, with access to both global services and the local watcher above\n        builder.Bind<LevelProgressServiceResolver>()\n               .BindInterfacesAndSelf()\n               .CopyIntoDirectSubContainers()\n               .NonLazy();\n    }\n\n    // Optional: called once after the scene container is ready\n    protected override void OnInstalled() { }\n}\n```\n\nTo resolve from the active scene container anywhere in code, use `ZenjexSceneContext`:\n\n```csharp\n// From any global service or GSM state:\nvar sceneContainer = ZenjexSceneContext.GetActive();\nvar watcher = sceneContainer.Resolve<LevelProgressWatcher>();\n\n// Or directly:\nZenjexSceneContext.Resolve<LevelProgressWatcher>();\n```\n\n`ZenjexSceneContext.HasActiveScene` lets you check whether a scene container is currently registered before calling it.\n\n> Scenes that have no scene-local services do not need a `SceneInstaller` - global bindings from `RootContainer` are always available via `RootContext.Resolve<T>()`.\n\n#### Step 4 - Bind your dependencies inside `InstallBindings`\n\nUse the Zenject-style fluent API to register everything the container needs.\n\n**Basic bindings**\n\n```csharp\npublic override void InstallBindings(ContainerBuilder builder)\n{\n    // Bind interface to implementation, lazy singleton\n    builder.Bind<IInputService>().To<InputService>().AsSingle();\n\n    // Bind concrete type directly\n    builder.Bind<AnalyticsManager>().AsSingle();\n\n    // Bind a pre-existing instance (always registers as singleton)\n    builder.Bind<IConfig>().FromInstance(myConfigAsset).AsSingle();\n\n    // Shorthand for the above - identical result\n    builder.BindInstance(myConfigAsset).AsSingle();\n\n    // Bind to all implemented interfaces at once\n    builder.Bind<PlayerController>().BindInterfacesAndSelf().AsSingle();\n\n    // Bind to interfaces only (without the concrete type)\n    builder.Bind<AudioService>().BindInterfaces().AsSingle();\n\n    // Transient - new instance on every resolve\n    builder.Bind<IEnemyFactory>().To<EnemyFactory>().AsTransient();\n\n    // Eager singleton - created immediately when the container is built\n    // Zenject: .AsSingle().NonLazy()  ->  Zenjex: .NonLazy()\n    builder.Bind<IGameStateMachine>().To<GameStateMachine>().BindInterfacesAndSelf().NonLazy();\n}\n```\n\n**Prefab-based bindings**\n\n```csharp\n// Instantiate a prefab at resolve-time and extract a component from it.\n// Always singleton + lazy - prefab is spawned once, on first resolve.\nbuilder.Bind<ICurtainService>()\n       .To<CurtainService>()\n       .FromComponentInNewPrefab(curtainPrefab)\n       .WithGameObjectName(\"Curtain\")         // renames the root GameObject\n       .UnderTransformGroup(\"Infrastructure\") // places it under a named group at scene root\n       .BindInterfacesAndSelf()\n       .NonLazy();\n\n// Or place under a specific Transform instead of a named group:\nbuilder.Bind<IHUDService>()\n       .To<HUDService>()\n       .FromComponentInNewPrefab(hudPrefab)\n       .UnderTransform(uiRootTransform)\n       .AsSingle();\n\n// Find an existing component in the scene hierarchy:\nbuilder.Bind<IPlayerCamera>()\n       .To<PlayerCamera>()\n       .FromComponentInHierarchy()  // includeInactive: true by default\n       .AsSingle();\n```\n\n**Constructor arguments**\n\n```csharp\n// Mix runtime-created objects with container-managed services.\n// Provided values are matched to constructor parameters by type.\n// Unmatched parameters are resolved from the container as usual.\nvar playerInput = Instantiate(playerInputPrefab).GetComponent<PlayerInput>();\n\nbuilder.Bind<IInputService>()\n       .To<InputService>()\n       .WithArguments(playerInput, cinemachineInputProvider)\n       .AsSingle();\n\n// InputService constructor:\n// public InputService(PlayerInput pi, CinemachineInputProvider cip, ILoggingService log)\n// pi, cip <- WithArguments  |  log <- container\n```\n\n**Scoped bindings**\n\n```csharp\n// Scoped: fresh instance per SceneInstaller sub-container.\n// The scoped object gets both global and scene-local dependencies in its constructor.\nbuilder.Bind<LevelProgressServiceResolver>()\n       .BindInterfacesAndSelf()\n       .CopyIntoDirectSubContainers()\n       .NonLazy();\n\n// Equivalent shorthand terminator:\nbuilder.Bind<LevelProgressServiceResolver>()\n       .BindInterfacesAndSelf()\n       .AsScoped();\n```\n\n---",
-  "contentRu": "### Интеграция\n\n#### Шаг 1 - Скопируйте папку Zenjex в проект\n\nПапку `Zenjex` целиком в `Assets` - и всё. Никакого пакетного менеджера, никаких git-сабмодулей. Внутри лежат Reflex и Zenjex extension layer, каждый со своим `.asmdef`, Unity подхватит их сам.\n\n> **Версия Unity**: сборка Reflex нацелена на Unity 6.3 LTS. На более старых версиях без отката Unity 6-специфичных правок она корректно работать не будет.\n\n#### Шаг 2 - Создайте класс-наследник `ProjectRootInstaller`\n\n`ProjectRootInstaller` - глобальный composition root, аналог `ProjectContext + MonoInstaller` из Zenject. Создайте один конкретный подкласс, повесьте его на **персистентный GameObject** в загрузочной сцене и реализуйте три абстрактных метода.\n\n```csharp\nusing System.Collections;\nusing Reflex.Core;\nusing Zenjex.Extensions.Core;\n\n[DefaultExecutionOrder(-250)]\npublic class GameInstaller : ProjectRootInstaller\n{\n    public override void InstallBindings(ContainerBuilder builder)\n    {\n        // Регистрация всех глобальных сервисов - см. Шаг 4\n    }\n\n    // Асинхронная настройка между InstallBindings и LaunchGame.\n    // Сюда идут загрузка Addressables, рантайм-биндинги и т.д.\n    // Если не нужно - просто оставьте yield return null.\n    public override IEnumerator InstallGameInstanceRoutine()\n    {\n        yield return null;\n    }\n\n    // Вызывается после InstallGameInstanceRoutine() и инициализации всех IInitializable.\n    // Отсюда стартует точка входа игры - например, запуск StateMachine,\n    // загрузка первой сцены или запуск GameInstance.\n    // Если точка входа реализована через IInitializable, оставьте пустым.\n    public override void LaunchGame()\n    {\n        // _gameInstance.Launch();\n    }\n}\n```\n\n`ProjectRootInstaller` запускается с порядком `-280`: к тому моменту, как сработает чей-либо `Awake()` в сцене, контейнер уже собран.\n\nНа больших проектах удобно вынести биндинги в несколько дочерних `MonoInstaller`-компонентов и вызывать их из рутового инсталлера:\n\n```csharp\npublic class AppInstaller : ProjectRootInstaller\n{\n    [SerializeField] private InfrastructureInstaller _infra;\n    [SerializeField] private GameplayInstaller       _gameplay;\n\n    public override void InstallBindings(ContainerBuilder builder)\n    {\n        _infra.InstallBindings(builder);\n        _gameplay.InstallBindings(builder);\n    }\n\n    public override IEnumerator InstallGameInstanceRoutine()\n    {\n        yield return _infra.LoadAddressablesRoutine();\n    }\n\n    public override void LaunchGame() { }\n}\n```\n\n#### Шаг 3 - Добавьте `SceneInstaller` в каждую геймплейную сцену\n\nДля сцен с локальными сервисами создайте класс-наследник `SceneInstaller` на любом GameObject в сцене. Он создаёт **дочерний контейнер**: наследует всё из `RootContainer` и добавляет сверху то, что нужно только этой сцене. При выгрузке сцены контейнер диспозится сам - `IDisposable` получат Dispose, `IInitializable` вызовутся при создании.\n\nПорядок `-200`: после `ProjectRootInstaller` (`-280`), но до любого обычного `Awake()` (`0`).\n\n```csharp\nusing Reflex.Core;\nusing Zenjex.Extensions.SceneContext;\n\npublic class GameplaySceneInstaller : SceneInstaller\n{\n    [SerializeField] private LevelProgressWatcher _levelProgressWatcher;\n\n    public override void InstallBindings(ContainerBuilder builder)\n    {\n        // Локальные биндинги - видны только внутри контейнера этой сцены\n        builder.BindInstance(_levelProgressWatcher).AsSingle();\n\n        // Scoped-биндинг из глобального инсталлера получит здесь новый экземпляр,\n        // у которого есть доступ как к глобальным сервисам, так и к локальному watcher'у выше\n        builder.Bind<LevelProgressServiceResolver>()\n               .BindInterfacesAndSelf()\n               .CopyIntoDirectSubContainers()\n               .NonLazy();\n    }\n\n    // Опционально: вызывается один раз после того, как контейнер сцены готов\n    protected override void OnInstalled() { }\n}\n```\n\nДостать что-нибудь из контейнера активной сцены можно через `ZenjexSceneContext`:\n\n```csharp\n// Из любого глобального сервиса или состояния GSM:\nvar sceneContainer = ZenjexSceneContext.GetActive();\nvar watcher = sceneContainer.Resolve<LevelProgressWatcher>();\n\n// Или напрямую:\nZenjexSceneContext.Resolve<LevelProgressWatcher>();\n```\n\n`ZenjexSceneContext.HasActiveScene` - проверить, зарегистрирован ли контейнер сцены, прежде чем к нему обращаться.\n\n> Если в сцене нет локальных сервисов, `SceneInstaller` не нужен - глобальные биндинги из `RootContainer` всегда доступны через `RootContext.Resolve<T>()`.\n\n#### Шаг 4 - Зарегистрируйте зависимости в `InstallBindings`\n\nFluent API в стиле Zenject - синтаксис тот же, что раньше.\n\n**Базовые биндинги**\n\n```csharp\npublic override void InstallBindings(ContainerBuilder builder)\n{\n    // Интерфейс к реализации, ленивый синглтон\n    builder.Bind<IInputService>().To<InputService>().AsSingle();\n\n    // Конкретный тип напрямую\n    builder.Bind<AnalyticsManager>().AsSingle();\n\n    // Готовый экземпляр (всегда регистрируется как синглтон)\n    builder.Bind<IConfig>().FromInstance(myConfigAsset).AsSingle();\n\n    // Сокращённая запись для того же самого\n    builder.BindInstance(myConfigAsset).AsSingle();\n\n    // Зарегистрировать под всеми интерфейсами и под самим типом\n    builder.Bind<PlayerController>().BindInterfacesAndSelf().AsSingle();\n\n    // Только под интерфейсами, без конкретного типа\n    builder.Bind<AudioService>().BindInterfaces().AsSingle();\n\n    // Transient - новый экземпляр на каждый резолв\n    builder.Bind<IEnemyFactory>().To<EnemyFactory>().AsTransient();\n\n    // Eager singleton - создаётся сразу при сборке контейнера\n    // В Zenject: .AsSingle().NonLazy()  ->  в Zenjex: .NonLazy()\n    builder.Bind<IGameStateMachine>().To<GameStateMachine>().BindInterfacesAndSelf().NonLazy();\n}\n```\n\n**Биндинги на основе префаба**\n\n```csharp\n// Инстанциировать префаб при первом резолве и достать из него компонент.\n// Всегда singleton + lazy - префаб спавнится один раз, при первом обращении.\nbuilder.Bind<ICurtainService>()\n       .To<CurtainService>()\n       .FromComponentInNewPrefab(curtainPrefab)\n       .WithGameObjectName(\"Curtain\")         // переименовывает корневой GameObject\n       .UnderTransformGroup(\"Infrastructure\") // помещает под именованную группу в корне сцены\n       .BindInterfacesAndSelf()\n       .NonLazy();\n\n// Или разместить под конкретным Transform вместо именованной группы:\nbuilder.Bind<IHUDService>()\n       .To<HUDService>()\n       .FromComponentInNewPrefab(hudPrefab)\n       .UnderTransform(uiRootTransform)\n       .AsSingle();\n\n// Найти существующий компонент в иерархии сцены:\nbuilder.Bind<IPlayerCamera>()\n       .To<PlayerCamera>()\n       .FromComponentInHierarchy()  // includeInactive: true по умолчанию\n       .AsSingle();\n```\n\n**Аргументы конструктора**\n\n```csharp\n// Смешать рантайм-объекты с сервисами из контейнера.\n// Переданные значения сопоставляются с параметрами конструктора по типу.\n// Остальные параметры резолвятся из контейнера как обычно.\nvar playerInput = Instantiate(playerInputPrefab).GetComponent<PlayerInput>();\n\nbuilder.Bind<IInputService>()\n       .To<InputService>()\n       .WithArguments(playerInput, cinemachineInputProvider)\n       .AsSingle();\n\n// Конструктор InputService:\n// public InputService(PlayerInput pi, CinemachineInputProvider cip, ILoggingService log)\n// pi, cip <- WithArguments  |  log <- контейнер\n```\n\n**Scoped-биндинги**\n\n```csharp\n// Scoped: новый экземпляр в каждом дочернем контейнере SceneInstaller'а.\n// Scoped-объект получает в конструкторе как глобальные, так и локальные зависимости.\nbuilder.Bind<LevelProgressServiceResolver>()\n       .BindInterfacesAndSelf()\n       .CopyIntoDirectSubContainers()\n       .NonLazy();\n\n// Эквивалентная сокращённая запись:\nbuilder.Bind<LevelProgressServiceResolver>()\n       .BindInterfacesAndSelf()\n       .AsScoped();\n```\n\n---"
+  "en": [
+    {
+      "type": "heading",
+      "level": 4,
+      "text": "Step 1 - Copy the Zenjex folder into your project"
+    },
+    {
+      "type": "paragraph",
+      "text": "Drop the entire `Zenjex` folder into your project's `Assets`. That's it - no package manager, no git submodule. The folder contains both Reflex and the Zenjex extension layer, each with its own `.asmdef`, and Unity will pick them up automatically."
+    },
+    {
+      "type": "note",
+      "text": "**Unity version**: the included Reflex build targets Unity 6.3 LTS. It will not work correctly on older versions without reverting the Unity 6-specific fixes."
+    },
+    {
+      "type": "heading",
+      "level": 4,
+      "text": "Step 2 - Create a class inheriting from `ProjectRootInstaller`"
+    },
+    {
+      "type": "paragraph",
+      "text": "`ProjectRootInstaller` is the global composition root - the Zenjex equivalent of Zenject's `ProjectContext + MonoInstaller`. Create one concrete subclass, add it as a component to a **persistent GameObject** in your bootstrap scene, and implement the three abstract members."
+    },
+    {
+      "type": "code",
+      "lang": "csharp",
+      "text": "using System.Collections;\nusing Reflex.Core;\nusing Zenjex.Extensions.Core;\n\n[DefaultExecutionOrder(-250)]\npublic class GameInstaller : ProjectRootInstaller\n{\n    public override void InstallBindings(ContainerBuilder builder)\n    {\n        // Register all global services here - see Step 4\n    }\n\n    // Async setup between InstallBindings and LaunchGame.\n    // Yield Addressables, register runtime-only bindings, etc.\n    // If unused, just leave the yield return null.\n    public override IEnumerator InstallGameInstanceRoutine()\n    {\n        yield return null;\n    }\n\n    // Called after InstallGameInstanceRoutine() completes and all IInitializables are initialized.\n    // Use to kick off your game's entry point - for example, starting a StateMachine,\n    // loading the first scene, or launching a GameInstance.\n    // If you use IInitializable for your GSM entry point, leave this empty.\n    public override void LaunchGame()\n    {\n        // _gameInstance.Launch();\n    }\n}"
+    },
+    {
+      "type": "paragraph",
+      "text": "`ProjectRootInstaller` runs at execution order `-280`, which guarantees the container is fully built before any other `Awake()` in the scene fires."
+    },
+    {
+      "type": "paragraph",
+      "text": "For larger projects, organise bindings into multiple child `MonoInstaller` components and delegate to them from the root installer:"
+    },
+    {
+      "type": "code",
+      "lang": "csharp",
+      "text": "public class AppInstaller : ProjectRootInstaller\n{\n    [SerializeField] private InfrastructureInstaller _infra;\n    [SerializeField] private GameplayInstaller       _gameplay;\n\n    public override void InstallBindings(ContainerBuilder builder)\n    {\n        _infra.InstallBindings(builder);\n        _gameplay.InstallBindings(builder);\n    }\n\n    public override IEnumerator InstallGameInstanceRoutine()\n    {\n        yield return _infra.LoadAddressablesRoutine();\n    }\n\n    public override void LaunchGame() { }\n}"
+    },
+    {
+      "type": "heading",
+      "level": 4,
+      "text": "Step 3 - Add a `SceneInstaller` to every gameplay scene"
+    },
+    {
+      "type": "paragraph",
+      "text": "For each scene that has scene-local services, create a class inheriting from `SceneInstaller` and add it to any GameObject in that scene. `SceneInstaller` creates a **child container** that inherits all global bindings from `RootContainer` and adds scene-local bindings on top."
+    },
+    {
+      "type": "paragraph",
+      "text": "The child container is disposed automatically when the scene unloads. All scene-local `IInitializable` and `IDisposable` services are lifecycle-managed by the installer."
+    },
+    {
+      "type": "paragraph",
+      "text": "`SceneInstaller` runs at execution order `-200` - after `ProjectRootInstaller` (`-280`), but before any regular `Awake()` (`0`)."
+    },
+    {
+      "type": "code",
+      "lang": "csharp",
+      "text": "using Reflex.Core;\nusing Zenjex.Extensions.SceneContext;\n\npublic class GameplaySceneInstaller : SceneInstaller\n{\n    [SerializeField] private LevelProgressWatcher _levelProgressWatcher;\n\n    public override void InstallBindings(ContainerBuilder builder)\n    {\n        // Scene-local bindings - only visible within this scene's container\n        builder.BindInstance(_levelProgressWatcher).AsSingle();\n\n        // Scoped binding from the global installer gets a fresh instance\n        // here, with access to both global services and the local watcher above\n        builder.Bind<LevelProgressServiceResolver>()\n               .BindInterfacesAndSelf()\n               .CopyIntoDirectSubContainers()\n               .NonLazy();\n    }\n\n    // Optional: called once after the scene container is ready\n    protected override void OnInstalled() { }\n}"
+    },
+    {
+      "type": "paragraph",
+      "text": "To resolve from the active scene container anywhere in code, use `ZenjexSceneContext`:"
+    },
+    {
+      "type": "code",
+      "lang": "csharp",
+      "text": "// From any global service or GSM state:\nvar sceneContainer = ZenjexSceneContext.GetActive();\nvar watcher = sceneContainer.Resolve<LevelProgressWatcher>();\n\n// Or directly:\nZenjexSceneContext.Resolve<LevelProgressWatcher>();"
+    },
+    {
+      "type": "paragraph",
+      "text": "`ZenjexSceneContext.HasActiveScene` lets you check whether a scene container is currently registered before calling it."
+    },
+    {
+      "type": "note",
+      "text": "Scenes that have no scene-local services do not need a `SceneInstaller` - global bindings from `RootContainer` are always available via `RootContext.Resolve<T>()`."
+    }
+  ],
+  "ru": [
+    {
+      "type": "heading",
+      "level": 4,
+      "text": "Шаг 1 - Скопируйте папку Zenjex в проект"
+    },
+    {
+      "type": "paragraph",
+      "text": "Папку `Zenjex` целиком в `Assets` - и всё. Никакого пакетного менеджера, никаких git-сабмодулей. Внутри лежат Reflex и Zenjex extension layer, каждый со своим `.asmdef`, Unity подхватит их сам."
+    },
+    {
+      "type": "note",
+      "text": "**Версия Unity**: сборка Reflex нацелена на Unity 6.3 LTS. На более старых версиях без отката Unity 6-специфичных правок она корректно работать не будет."
+    },
+    {
+      "type": "heading",
+      "level": 4,
+      "text": "Шаг 2 - Создайте класс-наследник `ProjectRootInstaller`"
+    },
+    {
+      "type": "paragraph",
+      "text": "`ProjectRootInstaller` - глобальный composition root, аналог `ProjectContext + MonoInstaller` из Zenject. Создайте один конкретный подкласс, повесьте его на **персистентный GameObject** в загрузочной сцене и реализуйте три абстрактных метода."
+    },
+    {
+      "type": "code",
+      "lang": "csharp",
+      "text": "using System.Collections;\nusing Reflex.Core;\nusing Zenjex.Extensions.Core;\n\n[DefaultExecutionOrder(-250)]\npublic class GameInstaller : ProjectRootInstaller\n{\n    public override void InstallBindings(ContainerBuilder builder)\n    {\n        // Регистрация всех глобальных сервисов - см. Шаг 4\n    }\n\n    // Асинхронная настройка между InstallBindings и LaunchGame.\n    // Сюда идут загрузка Addressables, рантайм-биндинги и т.д.\n    // Если не нужно - просто оставьте yield return null.\n    public override IEnumerator InstallGameInstanceRoutine()\n    {\n        yield return null;\n    }\n\n    // Вызывается после InstallGameInstanceRoutine() и инициализации всех IInitializable.\n    // Отсюда стартует точка входа игры - например, запуск StateMachine,\n    // загрузка первой сцены или запуск GameInstance.\n    // Если точка входа реализована через IInitializable, оставьте пустым.\n    public override void LaunchGame()\n    {\n        // _gameInstance.Launch();\n    }\n}"
+    },
+    {
+      "type": "paragraph",
+      "text": "`ProjectRootInstaller` запускается с порядком `-280`: к тому моменту, как сработает чей-либо `Awake()` в сцене, контейнер уже собран."
+    },
+    {
+      "type": "paragraph",
+      "text": "На больших проектах удобно вынести биндинги в несколько дочерних `MonoInstaller`-компонентов и вызывать их из рутового инсталлера:"
+    },
+    {
+      "type": "code",
+      "lang": "csharp",
+      "text": "public class AppInstaller : ProjectRootInstaller\n{\n    [SerializeField] private InfrastructureInstaller _infra;\n    [SerializeField] private GameplayInstaller       _gameplay;\n\n    public override void InstallBindings(ContainerBuilder builder)\n    {\n        _infra.InstallBindings(builder);\n        _gameplay.InstallBindings(builder);\n    }\n\n    public override IEnumerator InstallGameInstanceRoutine()\n    {\n        yield return _infra.LoadAddressablesRoutine();\n    }\n\n    public override void LaunchGame() { }\n}"
+    },
+    {
+      "type": "heading",
+      "level": 4,
+      "text": "Шаг 3 - Добавьте `SceneInstaller` в каждую геймплейную сцену"
+    },
+    {
+      "type": "paragraph",
+      "text": "Для сцен с локальными сервисами создайте класс-наследник `SceneInstaller` на любом GameObject в сцене. Он создаёт **дочерний контейнер**: наследует всё из `RootContainer` и добавляет сверху то, что нужно только этой сцене. При выгрузке сцены контейнер диспозится сам - `IDisposable` получат Dispose, `IInitializable` вызовутся при создании."
+    },
+    {
+      "type": "paragraph",
+      "text": "Порядок `-200`: после `ProjectRootInstaller` (`-280`), но до любого обычного `Awake()` (`0`)."
+    },
+    {
+      "type": "code",
+      "lang": "csharp",
+      "text": "using Reflex.Core;\nusing Zenjex.Extensions.SceneContext;\n\npublic class GameplaySceneInstaller : SceneInstaller\n{\n    [SerializeField] private LevelProgressWatcher _levelProgressWatcher;\n\n    public override void InstallBindings(ContainerBuilder builder)\n    {\n        // Локальные биндинги - видны только внутри контейнера этой сцены\n        builder.BindInstance(_levelProgressWatcher).AsSingle();\n\n        // Scoped-биндинг из глобального инсталлера получит здесь новый экземпляр,\n        // у которого есть доступ как к глобальным сервисам, так и к локальному watcher'у выше\n        builder.Bind<LevelProgressServiceResolver>()\n               .BindInterfacesAndSelf()\n               .CopyIntoDirectSubContainers()\n               .NonLazy();\n    }\n\n    // Опционально: вызывается один раз после того, как контейнер сцены готов\n    protected override void OnInstalled() { }\n}"
+    },
+    {
+      "type": "paragraph",
+      "text": "Достать что-нибудь из контейнера активной сцены можно через `ZenjexSceneContext`:"
+    },
+    {
+      "type": "code",
+      "lang": "csharp",
+      "text": "// Из любого глобального сервиса или состояния GSM:\nvar sceneContainer = ZenjexSceneContext.GetActive();\nvar watcher = sceneContainer.Resolve<LevelProgressWatcher>();\n\n// Или напрямую:\nZenjexSceneContext.Resolve<LevelProgressWatcher>();"
+    },
+    {
+      "type": "paragraph",
+      "text": "`ZenjexSceneContext.HasActiveScene` - проверить, зарегистрирован ли контейнер сцены, прежде чем к нему обращаться."
+    },
+    {
+      "type": "note",
+      "text": "Если в сцене нет локальных сервисов, `SceneInstaller` не нужен - глобальные биндинги из `RootContainer` всегда доступны через `RootContext.Resolve<T>()`."
+    }
+  ]
 }
