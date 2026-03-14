@@ -119,21 +119,30 @@ function buildNav(page) {
   const nav = document.createElement('div');
   nav.className = 'doc-page-nav';
 
-  const makeLink = (p, labelRu, labelEn) => {
-    if (!p) return document.createElement('div');
-    const a = document.createElement('button');
-    a.className = 'doc-nav-link';
-    a.innerHTML = `<span class="t" data-ru="${labelRu}" data-en="${labelEn}">${labelRu}</span><span class="doc-nav-title">${lang === 'ru' ? p.titleRu : p.titleEn}</span>`;
-    a.addEventListener('click', () => {
-      activateSidebarItem(p.id);
-      renderDocPage(p);
-    });
-    return a;
+  const lang = window.getCurrentLang?.() || 'ru';
+
+  const makeLink = (p, labelRu, labelEn, alignRight) => {
+    if (!p) return null;
+    const btn = document.createElement('button');
+    btn.className = 'doc-nav-link' + (alignRight ? ' doc-nav-link--next' : '');
+    const label = document.createElement('span');
+    label.className = 't';
+    label.setAttribute('data-ru', labelRu);
+    label.setAttribute('data-en', labelEn);
+    label.textContent = labelRu;
+    const title = document.createElement('span');
+    title.className = 'doc-nav-title';
+    title.textContent = lang === 'ru' ? p.titleRu : p.titleEn;
+    btn.appendChild(label);
+    btn.appendChild(title);
+    btn.addEventListener('click', () => { activateSidebarItem(p.id); renderDocPage(p); });
+    return btn;
   };
 
-  const lang = window.getCurrentLang?.() || 'ru';
-  nav.appendChild(makeLink(prev, '← Назад', '← Previous'));
-  nav.appendChild(makeLink(next, 'Далее →',  'Next →'));
+  const prevBtn = makeLink(prev, '← Назад',  '← Previous', false);
+  const nextBtn = makeLink(next, 'Далее →',  'Next →',     true);
+  if (prevBtn) nav.appendChild(prevBtn);
+  if (nextBtn) nav.appendChild(nextBtn);
   return nav;
 }
 

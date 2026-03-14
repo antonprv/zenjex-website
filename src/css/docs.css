@@ -349,9 +349,10 @@
   border-color: var(--accent);
   background: var(--glow);
 }
-.doc-nav-link:last-child {
+.doc-nav-link--next {
   margin-left: auto;
   text-align: right;
+  align-items: flex-end;
 }
 
 /* Label ("← Назад" / "Далее →") */
@@ -378,12 +379,22 @@
 
 /* Fragment wrapper — small top padding so first heading isn't flush to top */
 .doc-fragment {
-  padding-top: 0.2rem;
+  padding-top: 0;
 }
 
-.doc-fragment .doc-heading--2:first-child,
-.doc-fragment .doc-heading--3:first-child {
+/* First heading inside doc-body has no top margin/border/padding */
+.doc-body > .doc-heading--2:first-child,
+.doc-body > .doc-heading--3:first-child,
+.doc-body > .doc-heading--4:first-child,
+.doc-body > h2:first-child,
+.doc-body > h3:first-child,
+.doc-body > h4:first-child {
   margin-top: 0;
   padding-top: 0;
   border-top: none;
+}
+
+/* Also kill top margin on doc-body itself */
+.doc-body {
+  margin-top: 0;
 }
