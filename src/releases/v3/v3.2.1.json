@@ -1,0 +1,24 @@
+{
+  "version": "v3.2.1",
+  "date": "2026-03-25",
+  "ru": [
+    {
+      "type": "changed",
+      "title": "ZenjexRunner & ZenjexSceneContext — перенос на API Unity 6.4",
+      "items": [
+        "`GetInstanceID()` заменён на `GetEntityId()` - Unity 6.4 вводит новый тип `EntityId` вместо `int` для идентификации объектов. `HashSet<int> _injected` заменён на `HashSet<EntityId>`.",
+        "`scene.handle` как `int` заменён на `scene.handle.GetRawData()` - тип `Scene.handle` изменился с `int` на `SceneHandle`. `Dictionary<int, Container>` и sentinel-значение `-1` заменены на `Dictionary<ulong, Container>` и `0`."
+      ]
+    }
+  ],
+  "en": [
+    {
+      "type": "changed",
+      "title": "ZenjexRunner & ZenjexSceneContext - Unity 6.4 API migration",
+      "items": [
+        "`GetInstanceID()` replaced with `GetEntityId()` - Unity 6.4 introduces `EntityId` as the new object identity type instead of `int`. `HashSet<int> _injected` updated to `HashSet<EntityId>`.",
+        "`scene.handle` as `int` replaced with `scene.handle.GetRawData()` - `Scene.handle` type changed from `int` to `SceneHandle`. `Dictionary<int, Container>` and sentinel value `-1` updated to `Dictionary<ulong, Container>` and `0`."
+      ]
+    }
+  ]
+}
